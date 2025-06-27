@@ -10,7 +10,10 @@ import { useState } from "react";
 export const ClientStatus: React.FC = () => {
   const transportState = useRTVIClientTransportState();
 
-  const agentConnecting = transportState === "connecting";
+  const agentConnecting =
+    transportState === "connecting" ||
+    transportState === "connected" ||
+    transportState === "ready";
 
   const [isBotConnected, setIsBotConnected] = useState(false);
 
@@ -37,10 +40,12 @@ export const ClientStatus: React.FC = () => {
             {transportState}
           </span>
         ),
-        Agent: agentConnecting ? (
+        Agent: isBotConnected ? (
+          <span className="vkui:text-emerald-500 vkui:uppercase">
+            Connected
+          </span>
+        ) : agentConnecting ? (
           <span className="vkui:uppercase">Connecting...</span>
-        ) : isBotConnected ? (
-          <span className="vkui:text-emerald-500 vkui:uppercase">Connected</span>
         ) : (
           "---"
         ),
