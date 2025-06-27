@@ -258,7 +258,7 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
           <div className="vkui:grid vkui:grid-cols-[min-content_min-content_1fr] vkui:gap-x-4 vkui:gap-y-2 vkui:items-center vkui:font-mono vkui:text-xs">
             {filteredEvents.map((eventData, index) => (
               <Fragment key={index}>
-                <div className="vkui:text-xs vkui:text-muted-foreground">
+                <div className="vkui:text-xs vkui:text-muted-foreground vkui:text-nowrap">
                   {eventData.time}
                 </div>
                 <div className="vkui:font-semibold">{eventData.event}</div>
