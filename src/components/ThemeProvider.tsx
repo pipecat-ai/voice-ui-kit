@@ -28,22 +28,35 @@ export function ThemeProvider({
   storageKey = "voice-ui-kit-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Initialize from localStorage or fall back to defaultTheme
+    if (typeof window !== "undefined") {
+      const storedTheme = localStorage.getItem(storageKey) as Theme;
+      return storedTheme || defaultTheme;
+    }
+    return defaultTheme;
+  });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const storedTheme = localStorage.getItem(storageKey) as Theme;
-    if (storedTheme) {
-      setTheme(storedTheme);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    // Only store in localStorage if theme is not system, otherwise remove it
+    if (theme !== "system") {
+      localStorage.setItem(storageKey, theme);
+    } else {
+      localStorage.removeItem(storageKey);
     }
-  }, [storageKey]);
+  }, [mounted, storageKey, theme]);
 
   useEffect(() => {
     if (!mounted) return;
 
     const root = window.document.documentElement;
-
     root.classList.remove("vkui:light", "vkui:dark");
 
     if (theme === "system") {
@@ -59,25 +72,29 @@ export function ThemeProvider({
     root.classList.add(`vkui:${theme}`);
   }, [theme, mounted]);
 
+  // Update theme when defaultTheme changes (if needed)
+  useEffect(() => {
+    if (!mounted) return;
+    // Check if localStorage has a value before updating from defaultTheme
+    const storedTheme = localStorage.getItem(storageKey);
+    if (!storedTheme) {
+      setTheme(defaultTheme);
+    }
+  }, [defaultTheme, mounted, storageKey]);
+
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      if (mounted) {
-        localStorage.setItem(storageKey, theme);
-      }
-      setTheme(theme);
+    setTheme: (newTheme: Theme) => {
+      setTheme(newTheme);
     },
     resolvedTheme:
       theme === "system"
-        ? typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? typeof window !== "undefined" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
           ? "dark"
           : "light"
         : theme,
   };
-
-  useEffect(() => {
-    value.setTheme(defaultTheme);
-  }, [defaultTheme]);
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
