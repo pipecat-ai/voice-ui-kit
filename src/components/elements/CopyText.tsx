@@ -33,7 +33,12 @@ export const CopyText: React.FC<CopyTextProps> = ({
   };
 
   return (
-    <div className={cn("vkui:flex vkui:items-center vkui:overflow-hidden vkui:w-full", className)}>
+    <div
+      className={cn(
+        "vkui:flex vkui:items-center vkui:overflow-hidden vkui:w-full",
+        className,
+      )}
+    >
       <span className="vkui:truncate vkui:min-w-0">{text}</span>
       <TooltipProvider>
         <Tooltip>

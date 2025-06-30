@@ -40,7 +40,9 @@ export const ClientStatus: React.FC = () => {
         Agent: agentConnecting ? (
           <span className="vkui:uppercase">Connecting...</span>
         ) : isBotConnected ? (
-          <span className="vkui:text-emerald-500 vkui:uppercase">Connected</span>
+          <span className="vkui:text-emerald-500 vkui:uppercase">
+            Connected
+          </span>
         ) : (
           "---"
         ),

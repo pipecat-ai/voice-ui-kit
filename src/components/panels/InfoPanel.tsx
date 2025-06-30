@@ -36,7 +36,10 @@ export const InfoPanel: React.FC<Props> = ({
       </PanelContent>
       {!noDevices && (
         <>
-          <PanelHeader className="vkui:border-t vkui:border-t-border" variant="inline">
+          <PanelHeader
+            className="vkui:border-t vkui:border-t-border"
+            variant="inline"
+          >
             <PanelTitle>Devices</PanelTitle>
           </PanelHeader>
           <PanelContent>
@@ -46,7 +49,10 @@ export const InfoPanel: React.FC<Props> = ({
           </PanelContent>
         </>
       )}
-      <PanelHeader className="vkui:border-t vkui:border-t-border" variant="inline">
+      <PanelHeader
+        className="vkui:border-t vkui:border-t-border"
+        variant="inline"
+      >
         <PanelTitle>Session</PanelTitle>
       </PanelHeader>
       <PanelContent>

@@ -20,7 +20,10 @@ export const ConversationPanel: React.FC<Props> = ({
         <PanelHeader>
           <TabsList>
             {!noConversation && (
-              <TabsTrigger className="vkui:text-mono-upper" value="conversation">
+              <TabsTrigger
+                className="vkui:text-mono-upper"
+                value="conversation"
+              >
                 <MessagesSquareIcon size={16} />
                 Conversation
               </TabsTrigger>

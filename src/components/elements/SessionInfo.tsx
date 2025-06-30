@@ -26,7 +26,11 @@ export const SessionInfo: React.FC<{
       data={{
         Transport: transportTypeName,
         "Session ID": sessionId ? (
-          <CopyText className="vkui:justify-end" iconSize={12} text={sessionId} />
+          <CopyText
+            className="vkui:justify-end"
+            iconSize={12}
+            text={sessionId}
+          />
         ) : (
           "---"
         ),

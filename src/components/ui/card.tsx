@@ -19,7 +19,10 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-header"
-      className={cn("vkui:flex vkui:gap-2 vkui:md:gap-3 vkui:p-2 vkui:md:p-3", className)}
+      className={cn(
+        "vkui:flex vkui:gap-2 vkui:md:gap-3 vkui:p-2 vkui:md:p-3",
+        className,
+      )}
       {...props}
     />
   );
@@ -72,7 +75,10 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("vkui:flex vkui:gap-2 vkui:md:gap-3 vkui:p-2 vkui:md:p-3", className)}
+      className={cn(
+        "vkui:flex vkui:gap-2 vkui:md:gap-3 vkui:p-2 vkui:md:p-3",
+        className,
+      )}
       {...props}
     />
   );

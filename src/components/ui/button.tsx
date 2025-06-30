@@ -10,7 +10,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "vkui:bg-primary vkui:text-primary-foreground vkui:hover:bg-primary/90",
+        default:
+          "vkui:bg-primary vkui:text-primary-foreground vkui:hover:bg-primary/90",
         destructive:
           "vkui:bg-destructive vkui:text-white vkui:hover:bg-destructive/90 vkui:focus-visible:ring-destructive/20 vkui:dark:focus-visible:ring-destructive/40 vkui:dark:bg-destructive/60",
         outline:

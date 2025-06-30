@@ -60,15 +60,21 @@ export const Conversation: React.FC = () => {
 
   if (messages.length > 0) {
     return (
-      <div ref={scrollRef} className="vkui:h-full vkui:overflow-y-auto vkui:p-4">
+      <div
+        ref={scrollRef}
+        className="vkui:h-full vkui:overflow-y-auto vkui:p-4"
+      >
         <div className="vkui:grid vkui:grid-cols-[min-content_1fr] vkui:gap-x-4 vkui:gap-y-2">
           {messages.map((message, index) => (
             <Fragment key={index}>
               <div
-                className={cn("vkui:font-semibold vkui:font-mono vkui:text-xs vkui:leading-6", {
-                  "vkui:text-blue-500": message.role === "user",
-                  "vkui:text-purple-500": message.role === "assistant",
-                })}
+                className={cn(
+                  "vkui:font-semibold vkui:font-mono vkui:text-xs vkui:leading-6",
+                  {
+                    "vkui:text-blue-500": message.role === "user",
+                    "vkui:text-purple-500": message.role === "assistant",
+                  },
+                )}
               >
                 {message.role}
               </div>

@@ -21,7 +21,8 @@ const PanelHeaderVariants = cva("vkui:@container/panel-header", {
     variant: {
       default:
         "vkui:border-b vkui:flex vkui:items-center vkui:justify-center vkui:text-card-foreground vkui:p-2 vkui:@xs/panel:p-3 vkui:@md/panel:p-4",
-      inline: "vkui:items-start vkui:text-foreground vkui:p-2 vkui:@xs/panel:p-3 vkui:@md/panel:p-4",
+      inline:
+        "vkui:items-start vkui:text-foreground vkui:p-2 vkui:@xs/panel:p-3 vkui:@md/panel:p-4",
     },
   },
   defaultVariants: {
@@ -83,7 +84,10 @@ function PanelActions({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="panel-actions"
-      className={cn("vkui:flex vkui:items-center vkui:gap-1 vkui:@xs/panel:gap-2", className)}
+      className={cn(
+        "vkui:flex vkui:items-center vkui:gap-1 vkui:@xs/panel:gap-2",
+        className,
+      )}
       {...props}
     />
   );

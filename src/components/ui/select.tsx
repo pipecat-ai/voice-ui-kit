@@ -16,7 +16,8 @@ const selectTriggerVariants = cva(
   {
     variants: {
       size: {
-        default: "vkui:h-8 vkui:pl-3 vkui:pr-2.5 vkui:py-2 vkui:gap-2 vkui:[&_svg]:size-3.5",
+        default:
+          "vkui:h-8 vkui:pl-3 vkui:pr-2.5 vkui:py-2 vkui:gap-2 vkui:[&_svg]:size-3.5",
         sm: "vkui:h-7 vkui:pl-3 vkui:pr-2.5 vkui:py-1.5 vkui:gap-2 vkui:[&_svg]:size-3.5",
         lg: "vkui:h-10 vkui:px-3.5 vkui:py-2.5 vkui:gap-3 vkui:[&_svg]:size-4",
       },
@@ -56,7 +57,11 @@ function SelectTrigger({
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
-      className={cn(selectTriggerVariants({ size }), "vkui:truncate", className)}
+      className={cn(
+        selectTriggerVariants({ size }),
+        "vkui:truncate",
+        className,
+      )}
       {...props}
     >
       <span className="vkui:truncate vkui:flex-1 vkui:min-w-0">{children}</span>
@@ -143,7 +148,10 @@ function SelectSeparator({
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
-      className={cn("vkui:bg-border vkui:pointer-events-none vkui:-mx-1 vkui:my-1 vkui:h-px", className)}
+      className={cn(
+        "vkui:bg-border vkui:pointer-events-none vkui:-mx-1 vkui:my-1 vkui:h-px",
+        className,
+      )}
       {...props}
     />
   );

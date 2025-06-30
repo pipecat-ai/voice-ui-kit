@@ -275,7 +275,9 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = ({
               color={resolvedTheme === "dark" ? "#ffffff" : "#171717"}
             />
           )}
-          <strong className="vkui:hidden vkui:sm:block vkui:text-center">{title}</strong>
+          <strong className="vkui:hidden vkui:sm:block vkui:text-center">
+            {title}
+          </strong>
           <div className="vkui:flex vkui:items-center vkui:justify-end vkui:gap-4">
             {!noThemeSwitch && <ThemeModeToggle />}
             <ConnectButton
@@ -303,7 +305,8 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = ({
                       {!noBotAudio && (
                         <BotAudioPanel
                           className={cn({
-                            "vkui:max-h-[calc(50%-4px)] vkui:mt-auto": !noBotVideo,
+                            "vkui:max-h-[calc(50%-4px)] vkui:mt-auto":
+                              !noBotVideo,
                           })}
                           collapsed={isBotAreaCollapsed}
                         />
@@ -311,7 +314,8 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = ({
                       {!noBotVideo && (
                         <BotVideoPanel
                           className={cn({
-                            "vkui:max-h-[calc(50%-4px)] vkui:mb-auto": !noBotAudio,
+                            "vkui:max-h-[calc(50%-4px)] vkui:mb-auto":
+                              !noBotAudio,
                           })}
                           collapsed={isBotAreaCollapsed}
                         />
@@ -439,7 +443,10 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = ({
                 />
               </TabsContent>
             )}
-            <TabsContent value="info" className="vkui:flex-1 vkui:overflow-auto vkui:p-2">
+            <TabsContent
+              value="info"
+              className="vkui:flex-1 vkui:overflow-auto vkui:p-2"
+            >
               <InfoPanel
                 noAudioOutput={noAudioOutput}
                 noUserAudio={noUserAudio}
@@ -448,7 +455,10 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = ({
                 sessionId={sessionId}
               />
             </TabsContent>
-            <TabsContent value="events" className="vkui:flex-1 vkui:overflow-auto">
+            <TabsContent
+              value="events"
+              className="vkui:flex-1 vkui:overflow-auto"
+            >
               <EventsPanel />
             </TabsContent>
           </div>

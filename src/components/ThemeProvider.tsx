@@ -69,7 +69,8 @@ export function ThemeProvider({
     },
     resolvedTheme:
       theme === "system"
-        ? typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? typeof window !== "undefined" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
           ? "dark"
           : "light"
         : theme,
