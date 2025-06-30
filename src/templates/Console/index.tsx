@@ -43,8 +43,7 @@ import {
 import { RTVIClientAudio, RTVIClientProvider } from "@pipecat-ai/client-react";
 import { DailyTransport } from "@pipecat-ai/daily-transport";
 import { SmallWebRTCTransport } from "@pipecat-ai/small-webrtc-transport";
-import deepEqual from "fast-deep-equal";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface ConsoleTemplateProps {
   /**
@@ -148,93 +147,93 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = ({
   const [rtviClient, setRtviClient] = useState<RTVIClient | null>(null);
   const [isClientReady, setIsClientReady] = useState(false);
 
-  const clientRef = useRef<RTVIClient | null>(null);
-  const previousClientOptions = useRef<Partial<RTVIClientOptions>>({});
-
   const { resolvedTheme } = useTheme();
 
-  useEffect(() => {
-    if (!deepEqual(previousClientOptions.current, clientOptions)) {
-      clientRef.current = null;
-    }
-    previousClientOptions.current = clientOptions;
-  }, [clientOptions]);
+  useEffect(
+    function initClient() {
+      // Only run on client side
+      if (typeof window === "undefined") return;
 
-  useEffect(() => {
-    // Only run on client side
-    if (typeof window === "undefined") return;
-
-    if (clientRef.current) {
-      setRtviClient(clientRef.current);
-      setIsClientReady(true);
-      return;
-    }
-
-    let transport: DailyTransport | SmallWebRTCTransport;
-    switch (transportType) {
-      case "smallwebrtc":
-        transport = new SmallWebRTCTransport();
-        if (audioCodec) {
-          transport.setAudioCodec(audioCodec);
-        }
-        if (videoCodec) {
-          transport.setVideoCodec(videoCodec);
-        }
-        break;
-      case "daily":
-      default:
-        transport = new DailyTransport();
-        transport.dailyCallClient.on("meeting-session-updated", (event) => {
-          setSessionId(event.meetingSession.id);
-        });
-        break;
-    }
-    const client = new RTVIClient({
-      enableCam: !noUserVideo,
-      enableMic: !noUserAudio,
-      customConnectHandler: (async (_params, timeout) => {
-        if (transportType === "smallwebrtc") {
-          return Promise.resolve();
-        }
-        try {
-          const response = await onConnect();
-          clearTimeout(timeout);
-          if (response.ok) {
-            return response.json();
+      let transport: DailyTransport | SmallWebRTCTransport;
+      switch (transportType) {
+        case "smallwebrtc":
+          transport = new SmallWebRTCTransport();
+          break;
+        case "daily":
+        default:
+          transport = new DailyTransport();
+          transport.dailyCallClient.on("meeting-session-updated", (event) => {
+            setSessionId(event.meetingSession.id);
+          });
+          break;
+      }
+      const client = new RTVIClient({
+        enableCam: !noUserVideo,
+        enableMic: !noUserAudio,
+        customConnectHandler: (async (_params, timeout) => {
+          if (transportType === "smallwebrtc") {
+            return Promise.resolve();
           }
-          return Promise.reject(
-            new Error(`Connection failed: ${response.status}`),
-          );
-        } catch (err) {
-          return Promise.reject(err);
-        }
-      }) as (
-        params: RTVIClientParams,
-        timeout: NodeJS.Timeout | undefined,
-        abortController: AbortController,
-      ) => Promise<void>,
-      ...clientOptions,
-      params: {
-        ...(clientOptions.params ?? defaultParams),
-      },
-      transport: (clientOptions?.transport as Transport) ?? transport,
-      callbacks: {
-        onParticipantJoined: (participant) => {
-          setParticipantId(participant.id || "");
-          clientOptions?.callbacks?.onParticipantJoined?.(participant);
+          try {
+            const response = await onConnect();
+            clearTimeout(timeout);
+            if (response.ok) {
+              return response.json();
+            }
+            return Promise.reject(
+              new Error(`Connection failed: ${response.status}`),
+            );
+          } catch (err) {
+            return Promise.reject(err);
+          }
+        }) as (
+          params: RTVIClientParams,
+          timeout: NodeJS.Timeout | undefined,
+          abortController: AbortController,
+        ) => Promise<void>,
+        ...clientOptions,
+        params: {
+          ...(clientOptions.params ?? defaultParams),
         },
-        onTrackStarted(track, participant) {
-          if (participant?.id && participant.local)
-            setParticipantId(participant.id);
-          clientOptions?.callbacks?.onTrackStarted?.(track, participant);
+        transport: (clientOptions?.transport as Transport) ?? transport,
+        callbacks: {
+          onParticipantJoined: (participant) => {
+            setParticipantId(participant.id || "");
+            clientOptions?.callbacks?.onParticipantJoined?.(participant);
+          },
+          onTrackStarted(track, participant) {
+            if (participant?.id && participant.local)
+              setParticipantId(participant.id);
+            clientOptions?.callbacks?.onTrackStarted?.(track, participant);
+          },
         },
-      },
-    });
-    client.initDevices();
-    clientRef.current = client;
-    setRtviClient(client);
-    setIsClientReady(true);
-  }, [audioCodec, clientOptions, onConnect, transportType, videoCodec]);
+      });
+      client.initDevices();
+      setRtviClient(client);
+      setIsClientReady(true);
+      return () => {
+        /**
+         * Disconnect client when component unmounts or options change.
+         */
+        client.disconnect();
+      };
+    },
+    [clientOptions, noUserAudio, noUserVideo, onConnect, transportType],
+  );
+
+  useEffect(
+    function updateSmallWebRTCCodecs() {
+      if (!rtviClient || transportType !== "smallwebrtc") return;
+      const transport = rtviClient.transport as SmallWebRTCTransport;
+      if (audioCodec) {
+        transport.setAudioCodec(audioCodec);
+      }
+      if (videoCodec) {
+        transport.setVideoCodec(videoCodec);
+      }
+    },
+    [audioCodec, rtviClient, videoCodec, transportType],
+  );
 
   const handleConnect = async () => {
     if (!rtviClient) return;
