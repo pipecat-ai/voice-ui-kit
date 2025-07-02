@@ -1,10 +1,10 @@
+import DataList from "@/components/elements/DataList";
+import { cn } from "@/lib/utils";
+import { RTVIEvent } from "@pipecat-ai/client-js";
 import {
   useRTVIClientEvent,
   useRTVIClientTransportState,
 } from "@pipecat-ai/client-react";
-import DataList from "@/components/elements/DataList";
-import { cn } from "@/lib/utils";
-import { RTVIEvent } from "@pipecat-ai/client-js";
 import { useState } from "react";
 
 export const ClientStatus: React.FC = () => {
