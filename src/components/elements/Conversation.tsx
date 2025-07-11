@@ -4,7 +4,22 @@ import useConversation from "@/hooks/useConversation";
 import { cn } from "@/lib/utils";
 import Thinking from "@/components/elements/Thinking";
 
-export const Conversation: React.FC = () => {
+interface Props {
+  classNames?: {
+    container?: string;
+    message?: string;
+    messageContent?: string;
+    role?: string;
+    time?: string;
+    thinking?: string;
+  };
+  noAutoscroll?: boolean;
+}
+
+export const Conversation: React.FC<Props> = ({
+  classNames = {},
+  noAutoscroll = false,
+}) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isScrolledToBottom = useRef(true);
 
@@ -22,22 +37,24 @@ export const Conversation: React.FC = () => {
 
   // Check scroll position before messages update
   const updateScrollState = useCallback(() => {
-    if (!scrollRef.current) return;
+    if (!scrollRef.current || noAutoscroll) return;
     isScrolledToBottom.current =
       Math.ceil(scrollRef.current.scrollHeight - scrollRef.current.scrollTop) <=
       Math.ceil(scrollRef.current.clientHeight);
-  }, []);
+  }, [noAutoscroll]);
 
   const { messages } = useConversation({
     onMessageAdded: () => {
+      if (noAutoscroll) return;
       maybeScrollToBottom();
     },
   });
 
   useEffect(() => {
+    if (noAutoscroll) return;
     // Scroll to bottom when messages change
     maybeScrollToBottom();
-  }, [messages, maybeScrollToBottom]);
+  }, [messages, maybeScrollToBottom, noAutoscroll]);
 
   // Update scroll state when user scrolls
   useEffect(() => {
@@ -62,9 +79,17 @@ export const Conversation: React.FC = () => {
     return (
       <div
         ref={scrollRef}
-        className="vkui:h-full vkui:overflow-y-auto vkui:p-4"
+        className={cn(
+          "vkui:h-full vkui:overflow-y-auto vkui:p-4",
+          classNames.container,
+        )}
       >
-        <div className="vkui:grid vkui:grid-cols-[min-content_1fr] vkui:gap-x-4 vkui:gap-y-2">
+        <div
+          className={cn(
+            "vkui:grid vkui:grid-cols-[min-content_1fr] vkui:gap-x-4 vkui:gap-y-2",
+            classNames.message,
+          )}
+        >
           {messages.map((message, index) => (
             <Fragment key={index}>
               <div
@@ -74,13 +99,26 @@ export const Conversation: React.FC = () => {
                     "vkui:text-blue-500": message.role === "user",
                     "vkui:text-purple-500": message.role === "assistant",
                   },
+                  classNames.role,
                 )}
               >
                 {message.role}
               </div>
-              <div className="vkui:flex vkui:flex-col vkui:gap-2">
-                {message.content || <Thinking />}
-                <div className="vkui:self-end vkui:text-xs vkui:text-gray-500 vkui:mb-1">
+              <div
+                className={cn(
+                  "vkui:flex vkui:flex-col vkui:gap-2",
+                  classNames.messageContent,
+                )}
+              >
+                {message.content || (
+                  <Thinking className={classNames.thinking} />
+                )}
+                <div
+                  className={cn(
+                    "vkui:self-end vkui:text-xs vkui:text-gray-500 vkui:mb-1",
+                    classNames.time,
+                  )}
+                >
                   {new Date(message.createdAt).toLocaleTimeString()}
                 </div>
               </div>
@@ -93,7 +131,12 @@ export const Conversation: React.FC = () => {
 
   if (isConnecting) {
     return (
-      <div className="vkui:flex vkui:items-center vkui:justify-center vkui:h-full">
+      <div
+        className={cn(
+          "vkui:flex vkui:items-center vkui:justify-center vkui:h-full",
+          classNames.container,
+        )}
+      >
         <div className="vkui:text-muted-foreground vkui:text-sm">
           Connecting to agent...
         </div>
@@ -103,7 +146,12 @@ export const Conversation: React.FC = () => {
 
   if (!isConnected) {
     return (
-      <div className="vkui:flex vkui:items-center vkui:justify-center vkui:h-full">
+      <div
+        className={cn(
+          "vkui:flex vkui:items-center vkui:justify-center vkui:h-full",
+          classNames.container,
+        )}
+      >
         <div className="vkui:text-center vkui:p-4">
           <div className="vkui:text-muted-foreground vkui:mb-2">
             Not connected to agent
@@ -117,7 +165,12 @@ export const Conversation: React.FC = () => {
   }
 
   return (
-    <div className="vkui:flex vkui:items-center vkui:justify-center vkui:h-full">
+    <div
+      className={cn(
+        "vkui:flex vkui:items-center vkui:justify-center vkui:h-full",
+        classNames.container,
+      )}
+    >
       <div className="vkui:text-muted-foreground vkui:text-sm">
         Waiting for messages...
       </div>

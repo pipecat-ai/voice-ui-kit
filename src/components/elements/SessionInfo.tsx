@@ -3,10 +3,23 @@ import DataList from "@/components/elements/DataList";
 import Daily from "@daily-co/daily-js";
 import { usePipecatClient } from "@pipecat-ai/client-react";
 
-export const SessionInfo: React.FC<{
-  sessionId?: string;
+interface Props {
+  noTransportType?: boolean;
+  noSessionId?: boolean;
+  noParticipantId?: boolean;
+  noRTVIVersion?: boolean;
   participantId?: string;
-}> = ({ sessionId, participantId }) => {
+  sessionId?: string;
+}
+
+export const SessionInfo: React.FC<Props> = ({
+  noTransportType = false,
+  noSessionId = false,
+  noParticipantId = false,
+  noRTVIVersion = false,
+  sessionId,
+  participantId,
+}) => {
   const client = usePipecatClient();
 
   let transportTypeName = "Unknown";
@@ -20,31 +33,36 @@ export const SessionInfo: React.FC<{
     transportTypeName = "Small WebRTC";
   }
 
+  const data: React.ComponentProps<typeof DataList>["data"] = {};
+  if (!noTransportType) {
+    data["Transport"] = transportTypeName;
+  }
+  if (!noSessionId) {
+    data["Session ID"] = sessionId ? (
+      <CopyText className="vkui:justify-end" iconSize={12} text={sessionId} />
+    ) : (
+      "---"
+    );
+  }
+  if (!noParticipantId) {
+    data["Participant ID"] = participantId ? (
+      <CopyText
+        className="vkui:justify-end"
+        iconSize={12}
+        text={participantId}
+      />
+    ) : (
+      "---"
+    );
+  }
+  if (!noRTVIVersion) {
+    data["RTVI"] = client?.version || "---";
+  }
+
   return (
     <DataList
-      className="vkui:w-full vkui:overflow-hidden"
-      data={{
-        Transport: transportTypeName,
-        "Session ID": sessionId ? (
-          <CopyText
-            className="vkui:justify-end"
-            iconSize={12}
-            text={sessionId}
-          />
-        ) : (
-          "---"
-        ),
-        "Participant ID": participantId ? (
-          <CopyText
-            className="vkui:justify-end"
-            iconSize={12}
-            text={participantId}
-          />
-        ) : (
-          "---"
-        ),
-        RTVI: client?.version || "---",
-      }}
+      classNames={{ container: "vkui:w-full vkui:overflow-hidden" }}
+      data={data}
     />
   );
 };

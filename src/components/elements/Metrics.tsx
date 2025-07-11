@@ -16,6 +16,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
+import { cn } from "../../lib/utils";
 
 // Register Chart.js components
 ChartJS.register(
@@ -48,7 +49,34 @@ interface TokenMetrics {
   total_tokens: number;
 }
 
-export const Metrics: React.FC = () => {
+interface Props {
+  chartOptions?: ChartOptions<"line">;
+  classNames?: {
+    container?: string;
+    heading?: string;
+    metricsContainer?: string;
+    metricsCard?: string;
+    metricsTitle?: string;
+    metricsChart?: string;
+    tokenContainer?: string;
+    tokenCard?: string;
+    tokenType?: string;
+    tokenValue?: string;
+  };
+  ignoreProcessorNames?: string[];
+  noPromptTokens?: boolean;
+  noCompletionTokens?: boolean;
+  noTotalTokens?: boolean;
+}
+
+export const Metrics: React.FC<Props> = ({
+  chartOptions = {},
+  classNames = {},
+  ignoreProcessorNames = [],
+  noPromptTokens = false,
+  noCompletionTokens = false,
+  noTotalTokens = false,
+}) => {
   const [metrics, setMetrics] = useState<MetricsState>({});
   const [tokenMetrics, setTokenMetrics] = useState<Partial<TokenMetrics>>({});
 
@@ -73,6 +101,10 @@ export const Metrics: React.FC = () => {
 
         (data.processing ?? []).forEach((item: ProcessingMetric) => {
           const { processor, value } = item;
+
+          if (ignoreProcessorNames.includes(processor)) {
+            return; // Skip ignored processors
+          }
 
           if (!newMetrics[processor]) {
             newMetrics[processor] = [];
@@ -99,9 +131,13 @@ export const Metrics: React.FC = () => {
 
       setTokenMetrics((prev) => ({
         completion_tokens:
-          prev.completion_tokens + (tokenData.completion_tokens || 0),
-        prompt_tokens: prev.prompt_tokens + (tokenData.prompt_tokens || 0),
-        total_tokens: prev.total_tokens + (tokenData.total_tokens || 0),
+          prev.completion_tokens +
+          (noCompletionTokens ? 0 : tokenData.completion_tokens || 0),
+        prompt_tokens:
+          prev.prompt_tokens +
+          (noPromptTokens ? 0 : tokenData.prompt_tokens || 0),
+        total_tokens:
+          prev.total_tokens + (noTotalTokens ? 0 : tokenData.total_tokens || 0),
       }));
     }
   });
@@ -133,7 +169,7 @@ export const Metrics: React.FC = () => {
     return `hsla(${h}, 70%, 50%, ${alpha})`;
   };
 
-  const chartOptions: ChartOptions<"line"> = {
+  const lineChartOptions: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
@@ -165,6 +201,7 @@ export const Metrics: React.FC = () => {
         },
       },
     },
+    ...chartOptions,
   };
 
   const isConnecting =
@@ -175,54 +212,101 @@ export const Metrics: React.FC = () => {
   const hasTokenMetrics = Object.keys(tokenMetrics).length > 0;
   const hasMetrics = Object.keys(metrics).length > 0;
 
+  const tokenCardClassName = cn(
+    "vkui:bg-card vkui:rounded-md vkui:p-3 vkui:shadow-sm",
+    classNames.tokenCard,
+  );
+  const tokenTypeClassName = cn(
+    "vkui:text-sm vkui:text-muted-foreground",
+    classNames.tokenType,
+  );
+  const tokenValueClassName = cn(
+    "vkui:text-2xl vkui:font-medium",
+    classNames.tokenValue,
+  );
+
   if (hasMetrics || hasTokenMetrics) {
     return (
-      <div className="vkui:@container/metrics vkui:grid vkui:gap-6 vkui:items-start vkui:p-4 vkui:max-h-full vkui:overflow-auto">
+      <div
+        className={cn(
+          "vkui:@container/metrics vkui:grid vkui:gap-6 vkui:items-start vkui:p-4 vkui:max-h-full vkui:overflow-auto",
+          classNames.container,
+        )}
+      >
         {hasTokenMetrics && (
           <>
-            <h2 className="vkui:text-xl vkui:font-semibold">Token Usage</h2>
-            <div className="vkui:grid vkui:grid-cols-1 vkui:@xl/metrics:grid-cols-2 vkui:@3xl/metrics:grid-cols-3 vkui:gap-4">
-              <div className="vkui:bg-card vkui:rounded-md vkui:p-3 vkui:shadow-sm">
-                <div className="vkui:text-sm vkui:text-muted-foreground">
-                  Prompt Tokens
+            <h2
+              className={cn(
+                "vkui:text-xl vkui:font-semibold",
+                classNames.heading,
+              )}
+            >
+              Token Usage
+            </h2>
+            <div
+              className={cn(
+                "vkui:grid vkui:grid-cols-1 vkui:@xl/metrics:grid-cols-2 vkui:@3xl/metrics:grid-cols-3 vkui:gap-4",
+                classNames.tokenContainer,
+              )}
+            >
+              {!noPromptTokens && (
+                <div className={tokenCardClassName}>
+                  <div className={tokenTypeClassName}>Prompt Tokens</div>
+                  <div className={tokenValueClassName}>
+                    {tokenMetrics.prompt_tokens}
+                  </div>
                 </div>
-                <div className="vkui:text-2xl vkui:font-medium">
-                  {tokenMetrics.prompt_tokens}
+              )}
+              {!noCompletionTokens && (
+                <div className={tokenCardClassName}>
+                  <div className={tokenTypeClassName}>Completion Tokens</div>
+                  <div className={tokenValueClassName}>
+                    {tokenMetrics.completion_tokens}
+                  </div>
                 </div>
-              </div>
-              <div className="vkui:bg-card vkui:rounded-md vkui:p-3 vkui:shadow-sm">
-                <div className="vkui:text-sm vkui:text-muted-foreground">
-                  Completion Tokens
+              )}
+              {!noTotalTokens && (
+                <div className={tokenCardClassName}>
+                  <div className={tokenTypeClassName}>Total Tokens</div>
+                  <div className={tokenValueClassName}>
+                    {tokenMetrics.total_tokens}
+                  </div>
                 </div>
-                <div className="vkui:text-2xl vkui:font-medium">
-                  {tokenMetrics.completion_tokens}
-                </div>
-              </div>
-              <div className="vkui:bg-card vkui:rounded-md vkui:p-3 vkui:shadow-sm">
-                <div className="vkui:text-sm vkui:text-muted-foreground">
-                  Total Tokens
-                </div>
-                <div className="vkui:text-2xl vkui:font-medium">
-                  {tokenMetrics.total_tokens}
-                </div>
-              </div>
+              )}
             </div>
           </>
         )}
         {hasMetrics && (
           <>
-            <h2 className="vkui:text-xl vkui:font-semibold">TTFB Metrics</h2>
-            <div className="vkui:grid vkui:grid-cols-1 vkui:@xl/metrics:grid-cols-2 vkui:@3xl/metrics:grid-cols-3 vkui:gap-4">
+            <h2
+              className={cn(
+                "vkui:text-xl vkui:font-semibold",
+                classNames.heading,
+              )}
+            >
+              TTFB Metrics
+            </h2>
+            <div
+              className={cn(
+                "vkui:grid vkui:grid-cols-1 vkui:@xl/metrics:grid-cols-2 vkui:@3xl/metrics:grid-cols-3 vkui:gap-4",
+                classNames.metricsContainer,
+              )}
+            >
               {Object.entries(metrics).map(([processorName, data]) => (
                 <div
                   key={processorName}
-                  className="vkui:bg-card vkui:border vkui:rounded-lg vkui:shadow-sm vkui:p-3 vkui:h-60"
+                  className={cn(
+                    "vkui:bg-card vkui:border vkui:rounded-lg vkui:shadow-sm vkui:p-3 vkui:h-60",
+                    classNames.metricsCard,
+                  )}
                 >
-                  <h3 className="vkui:mb-2">{processorName}</h3>
-                  <div className="vkui:h-44">
+                  <h3 className={cn("vkui:mb-2", classNames.metricsTitle)}>
+                    {processorName}
+                  </h3>
+                  <div className={cn("vkui:h-44", classNames.metricsChart)}>
                     <Line
                       data={generateChartData(processorName, data)}
-                      options={chartOptions}
+                      options={lineChartOptions}
                     />
                   </div>
                 </div>
@@ -236,22 +320,28 @@ export const Metrics: React.FC = () => {
 
   if (isConnecting) {
     return (
-      <div className="vkui:flex vkui:items-center vkui:justify-center vkui:h-full">
-        <div className="vkui:text-muted-foreground vkui:text-sm">
-          Connecting to agent...
-        </div>
+      <div
+        className={cn(
+          "vkui:flex vkui:items-center vkui:justify-center vkui:h-full vkui:text-muted-foreground vkui:text-sm",
+          classNames.container,
+        )}
+      >
+        Connecting to agent...
       </div>
     );
   }
 
   if (!isConnected) {
     return (
-      <div className="vkui:flex vkui:items-center vkui:justify-center vkui:h-full">
-        <div className="vkui:text-center vkui:p-4">
-          <div className="vkui:text-muted-foreground vkui:mb-2">
-            Not connected to agent
-          </div>
-          <p className="vkui:text-sm vkui:text-muted-foreground vkui:max-w-md">
+      <div
+        className={cn(
+          "vkui:flex vkui:items-center vkui:justify-center vkui:h-full vkui:text-muted-foreground vkui:text-center",
+          classNames.container,
+        )}
+      >
+        <div className="vkui:p-4">
+          <div className="vkui:mb-2">Not connected to agent</div>
+          <p className="vkui:text-sm vkui:max-w-md">
             Connect to an agent to view metrics in real-time.
           </p>
         </div>
@@ -260,10 +350,13 @@ export const Metrics: React.FC = () => {
   }
 
   return (
-    <div className="vkui:flex vkui:items-center vkui:justify-center vkui:h-full">
-      <div className="vkui:text-muted-foreground vkui:text-sm">
-        Waiting for metrics data...
-      </div>
+    <div
+      className={cn(
+        "vkui:flex vkui:items-center vkui:justify-center vkui:h-full vkui:text-muted-foreground vkui:text-sm",
+        classNames.container,
+      )}
+    >
+      Waiting for metrics data...
     </div>
   );
 };
