@@ -24,7 +24,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, "src/index.ts"),
-        metrics: path.resolve(__dirname, "src/metrics/index.ts"),
+        metrics: path.resolve(__dirname, "src/components/metrics/index.ts"),
         webgl: path.resolve(__dirname, "src/visualizers/webgl/index.ts"),
       },
       formats: ["es", "cjs"],

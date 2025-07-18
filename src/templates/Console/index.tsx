@@ -5,7 +5,7 @@ import { ClientStatus } from "@/components/elements/ClientStatus";
 import ConnectButton from "@/components/elements/ConnectButton";
 import PipecatLogo from "@/components/elements/PipecatLogo";
 import { SessionInfo } from "@/components/elements/SessionInfo";
-import UserAudio from "@/components/elements/UserAudio";
+import UserAudio from "@/components/elements/UserAudioControl";
 import UserVideo from "@/components/elements/UserVideo";
 import { BotAudioPanel } from "@/components/panels/BotAudioPanel";
 import { BotVideoPanel } from "@/components/panels/BotVideoPanel";

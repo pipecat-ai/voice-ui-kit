@@ -1,6 +1,7 @@
 export * from "./button";
 export * from "./buttongroup";
 export * from "./card";
+export * from "./container";
 export * from "./dropdown-menu";
 export * from "./input";
 export * from "./layout";

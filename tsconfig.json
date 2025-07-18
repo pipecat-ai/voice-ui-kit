@@ -25,5 +25,5 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.stories.*", "**/*.test.*"]
+  "exclude": ["node_modules", "**/*.test.*"]
 }

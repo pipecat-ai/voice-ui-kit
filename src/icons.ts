@@ -14,6 +14,7 @@ import {
   Info,
   LineChart,
   Loader2,
+  LogOut,
   MessagesSquare,
   Mic,
   MicOff,
@@ -57,3 +58,4 @@ export const VideoIcon = Video;
 export const BotIcon = Bot;
 export const ChevronsLeftRightEllipsisIcon = ChevronsLeftRightEllipsis;
 export const InfoIcon = Info;
+export const LogoutIcon = LogOut;

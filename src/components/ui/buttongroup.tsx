@@ -2,14 +2,14 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const buttonGroupVariants = cva(
-  "vkui:flex vkui:items-center vkui:*:rounded-none",
+  "vkui:flex vkui:items-center vkui:button-group",
   {
     variants: {
       orientation: {
         horizontal:
-          "vkui:flex-row vkui:*:first:rounded-s-md vkui:*:last:rounded-e-md vkui:*:-ml-[1px] vkui:*:first:ml-0",
+          "vkui:flex-row vkui:*:first:rounded-e-none vkui:*:last:rounded-s-none vkui:*:-ml-[1px] vkui:*:first:ml-0",
         vertical:
-          "vkui:flex-col vkui:*:first:rounded-t-md vkui:*:last:rounded-b-md vkui:*:-mt-[1px] vkui:*:first:mt-0",
+          "vkui:flex-col vkui:*:first:rounded-b-none vkui:*:last:rounded-t-none vkui:*:-mt-[1px] vkui:*:first:mt-0 vkui:*:self-stretch",
       },
     },
     defaultVariants: {

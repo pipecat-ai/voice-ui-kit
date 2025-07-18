@@ -37,6 +37,11 @@
   --color-mute: oklch(63.7% 0.237 25.331);
   --color-mute-foreground: oklch(97% 0.05 25.331);
 
+  /* VKUI */
+  --color-active: oklch(69.6% 0.17 162.48);
+  --color-active-foreground: oklch(97.9% 0.021 166.113);
+  --color-inactive: oklch(63.7% 0.237 25.331);
+  --color-inactive-foreground: oklch(97.1% 0.013 17.38);
   --color-chart-1: oklch(0.646 0.222 41.116);
   --color-chart-2: oklch(0.6 0.118 184.704);
   --color-chart-3: oklch(0.398 0.07 227.392);
@@ -66,7 +71,14 @@
   --vkui-color-subtle: oklch(44.2% 0.017 285.786);
   --vkui-color-mute: oklch(57.7% 0.245 27.325);
   --vkui-color-mute-foreground: oklch(97% 0.05 27.325);
+  --vkui-color-active: oklch(79.2% 0.209 151.711);
+  --vkui-color-active-foreground: oklch(98.2% 0.018 155.826);
 
+  /* VKUI */
+  --color-active: oklch(79.2% 0.209 151.711);
+  --color-active-foreground: oklch(98.2% 0.018 155.826);
+  --color-inactive: oklch(63.7% 0.237 25.331);
+  --color-inactive-foreground: oklch(97.1% 0.013 17.38);
   --vkui-color-chart-1: oklch(0.488 0.243 264.376);
   --vkui-color-chart-2: oklch(0.696 0.17 162.48);
   --vkui-color-chart-3: oklch(0.769 0.188 70.08);
@@ -96,5 +108,13 @@
     line-height: var(--tw-leading, var(--vkui-text-xs--line-height));
     letter-spacing: var(--vkui-tracking-wider);
     line-height: 1;
+  }
+
+  .vkui\:button-group.vkui\:flex-row > *:not(:first-child):not(:last-child) {
+    border-radius: 0 !important;
+  }
+
+  .vkui\:button-group.vkui\:flex-col > *:not(:first-child):not(:last-child) {
+    border-radius: 0 !important;
   }
 }

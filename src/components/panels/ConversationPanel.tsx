@@ -1,8 +1,8 @@
 import Conversation from "@/components/elements/Conversation";
+import { Metrics } from "@/components/metrics";
 import { Panel, PanelContent, PanelHeader } from "@/components/ui/panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChartIcon, MessagesSquareIcon } from "@/icons";
-import { Metrics } from "@/metrics";
 
 interface Props {
   noConversation?: boolean;

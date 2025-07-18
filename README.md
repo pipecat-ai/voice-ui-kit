@@ -1,6 +1,8 @@
 # Pipecat Voice UI Kit
+![NPM Version](https://img.shields.io/npm/v/@pipecat-ai/voice-ui-kit)
 
-[Documentations](./docs) | [Examples](./examples) | [Quickstart](#Quickstart)
+<img width="100%" src="docs/image.png" />
+
 
 Components, hooks and template apps for building React voice AI applications quickly. Designed to support and accelerate [Pipecat AI](https://github.com/pipecat-ai/pipecat) development.
 

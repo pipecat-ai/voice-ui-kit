@@ -5,9 +5,9 @@ import "./theme.css";
 export const Provider: GlobalProvider = ({ children, globalState }) => {
   useEffect(() => {
     if (globalState.theme === "dark") {
-      document.documentElement.classList.add("dark");
+      document.documentElement.classList.add("vkui:dark");
     } else {
-      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.remove("vkui:dark");
     }
   }, [globalState.theme]);
   return <div className="p-4">{children}</div>;

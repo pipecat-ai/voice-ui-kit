@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/buttongroup";
+import type { ButtonSize, ButtonVariant } from "@/components/ui/buttonVariants";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -9,16 +10,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon, MicIcon, MicOffIcon } from "@/icons";
+import { cn } from "@/lib/utils";
 import {
+  type OptionalMediaDeviceInfo,
   PipecatClientMicToggle,
   usePipecatClient,
   usePipecatClientMediaDevices,
   VoiceVisualizer,
 } from "@pipecat-ai/client-react";
 import { useEffect } from "react";
-import { cn } from "../../lib/utils";
 
 interface Props {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   buttonProps?: Partial<React.ComponentProps<typeof Button>>;
   classNames?: {
     container?: string;
@@ -32,42 +36,43 @@ interface Props {
   noDevicePicker?: boolean;
   noVisualizer?: boolean;
   visualizerProps?: Partial<React.ComponentProps<typeof VoiceVisualizer>>;
+  noAudioText?: string | null;
 }
 
-const UserAudio: React.FC<Props> = ({
-  buttonProps = {},
+interface ComponentProps extends Props {
+  isMicEnabled?: boolean;
+  availableMics: MediaDeviceInfo[];
+  selectedMic: OptionalMediaDeviceInfo;
+  updateMic: (deviceId: string) => void;
+}
+
+export const UserAudioComponent: React.FC<ComponentProps> = ({
+  variant = "secondary",
+  size = "default",
   classNames = {},
+  buttonProps = {},
   dropdownButtonProps = {},
   noDevicePicker = false,
   noVisualizer = false,
   visualizerProps = {},
+  isMicEnabled = false,
+  availableMics,
+  selectedMic,
+  updateMic,
+  noAudioText = "Audio disabled",
 }) => {
-  const client = usePipecatClient();
-  const { availableMics, selectedMic, updateMic } =
-    usePipecatClientMediaDevices();
-
-  // @ts-expect-error _options is protected, but can be totally accessed in JS
-  const hasAudio = client?._options?.enableMic;
-
-  useEffect(() => {
-    if (!client) return;
-
-    if (["idle", "disconnected"].includes(client.state)) {
-      client.initDevices();
-    }
-  }, [client]);
-
-  if (!hasAudio) {
+  if (!isMicEnabled) {
     return (
-      <div
-        className={cn(
-          "vkui:flex vkui:items-center vkui:gap-2 vkui:bg-muted vkui:rounded-md vkui:p-2 vkui:text-muted-foreground vkui:font-mono vkui:text-sm",
-          classNames.container,
-        )}
+      <Button
+        variant={variant}
+        size={size}
+        {...buttonProps}
+        disabled
+        className={cn(classNames.container)}
       >
-        <MicOffIcon size={16} />
-        Audio disabled
-      </div>
+        <MicOffIcon />
+        {noAudioText}
+      </Button>
     );
   }
 
@@ -84,10 +89,11 @@ const UserAudio: React.FC<Props> = ({
                 "vkui:flex-1 vkui:justify-start",
                 classNames.button,
               )}
-              variant="secondary"
+              variant={isMicEnabled ? variant : "inactive"}
+              size={size}
               {...buttonProps}
             >
-              {isMicEnabled ? <MicIcon size={16} /> : <MicOffIcon size={16} />}
+              {isMicEnabled ? <MicIcon /> : <MicOffIcon />}
               {!noVisualizer && (
                 <VoiceVisualizer
                   participantType="local"
@@ -112,7 +118,9 @@ const UserAudio: React.FC<Props> = ({
                   "vkui:border-s vkui:border-border vkui:p-2! vkui:flex-none",
                   classNames.dropdownMenuTrigger,
                 )}
-                variant="secondary"
+                variant={variant}
+                size={size}
+                isIcon
                 {...dropdownButtonProps}
               >
                 <ChevronDownIcon size={16} />
@@ -140,4 +148,30 @@ const UserAudio: React.FC<Props> = ({
   );
 };
 
-export default UserAudio;
+export const UserAudioControl: React.FC<Props> = ({ ...props }) => {
+  const client = usePipecatClient();
+  const { availableMics, selectedMic, updateMic } =
+    usePipecatClientMediaDevices();
+
+  const hasAudio = client?.isMicEnabled;
+
+  useEffect(() => {
+    if (!client) return;
+
+    if (["idle", "disconnected"].includes(client.state)) {
+      client.initDevices();
+    }
+  }, [client]);
+
+  return (
+    <UserAudioComponent
+      isMicEnabled={hasAudio}
+      availableMics={availableMics}
+      selectedMic={selectedMic}
+      updateMic={updateMic}
+      {...props}
+    />
+  );
+};
+
+export default UserAudioControl;
