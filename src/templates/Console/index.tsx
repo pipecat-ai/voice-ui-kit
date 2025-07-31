@@ -3,6 +3,7 @@
 import AudioOutput from "@/components/elements/AudioOutput";
 import { ClientStatus } from "@/components/elements/ClientStatus";
 import ConnectButton from "@/components/elements/ConnectButton";
+import type { ConversationProps } from "@/components/elements/Conversation";
 import PipecatLogo from "@/components/elements/PipecatLogo";
 import { SessionInfo } from "@/components/elements/SessionInfo";
 import UserAudioControl from "@/components/elements/UserAudioControl";
@@ -33,6 +34,10 @@ import {
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  ConversationProvider,
+  type ConversationProviderRef,
+} from "@/contexts/ConversationContext";
+import {
   BotIcon,
   ChevronsLeftRightEllipsisIcon,
   CircleAlertIcon,
@@ -43,6 +48,7 @@ import {
   PanelRightCloseIcon,
 } from "@/icons";
 import { cn } from "@/lib/utils";
+import { type ConversationMessage } from "@/types/conversation";
 import {
   type ConnectionEndpoint,
   PipecatClient,
@@ -61,7 +67,7 @@ import {
   SmallWebRTCTransport,
   type SmallWebRTCTransportConstructorOptions,
 } from "@pipecat-ai/small-webrtc-transport";
-import React, { useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import type { ImperativePanelHandle } from "react-resizable-panels";
 
 export interface ConsoleTemplateProps {
@@ -162,6 +168,29 @@ export interface ConsoleTemplateProps {
    * Accepts any valid React element.
    */
   logoComponent?: React.ReactNode;
+
+  /**
+   * Props to pass to the Conversation component.
+   * Allows customization of the conversation display, including styling,
+   * behavior, and appearance of the conversation panel.
+   */
+  conversationElementProps?: Partial<ConversationProps>;
+
+  /**
+   * Callback that receives the injectMessage function.
+   * This allows parent components to get the injectMessage function to manually add messages.
+   */
+  onInjectMessage?: (
+    injectMessage: (
+      message: Pick<ConversationMessage, "role" | "content">,
+    ) => void,
+  ) => void;
+
+  /**
+   * Callback that receives the server message.
+   * This allows parent components to get the server message to manually add messages.
+   */
+  onServerMessage?: (data: unknown) => void;
 }
 
 const defaultClientOptions: Partial<PipecatClientOptions> = {};
@@ -169,396 +198,427 @@ const defaultTransportOptions:
   | Partial<SmallWebRTCTransportConstructorOptions>
   | Partial<DailyTransportConstructorOptions> = {};
 
-export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = ({
-  audioCodec = "default",
-  clientOptions = defaultClientOptions,
-  transportOptions = defaultTransportOptions,
-  connectParams,
-  noAudioOutput = false,
-  noBotAudio = false,
-  noBotVideo = false,
-  noConversation = false,
-  noLogo = false,
-  noMetrics = false,
-  noSessionInfo = false,
-  noStatusInfo = false,
-  noThemeSwitch = false,
-  noUserAudio = false,
-  noUserVideo = false,
-  title = "Pipecat Playground",
-  transportType = "daily",
-  videoCodec = "default",
-  collapseInfoPanel = false,
-  logoComponent,
-}) => {
-  const [isBotAreaCollapsed, setIsBotAreaCollapsed] = useState(false);
-  const [isInfoPanelCollapsed, setIsInfoPanelCollapsed] = useState(false);
-  const [isEventsPanelCollapsed, setIsEventsPanelCollapsed] = useState(false);
-  const [sessionId, setSessionId] = useState("");
-  const [participantId, setParticipantId] = useState("");
-  const [client, setClient] = useState<PipecatClient | null>(null);
-  const [isClientReady, setIsClientReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo(
+  ({
+    audioCodec = "default",
+    clientOptions = defaultClientOptions,
+    transportOptions = defaultTransportOptions,
+    connectParams,
+    noAudioOutput = false,
+    noBotAudio = false,
+    noBotVideo = false,
+    noConversation = false,
+    noLogo = false,
+    noMetrics = false,
+    noSessionInfo = false,
+    noStatusInfo = false,
+    noThemeSwitch = false,
+    noUserAudio = false,
+    noUserVideo = false,
+    title = "Pipecat Playground",
+    transportType = "daily",
+    videoCodec = "default",
+    collapseInfoPanel = false,
+    logoComponent,
+    conversationElementProps,
+    onInjectMessage,
+    onServerMessage,
+  }) => {
+    const [isBotAreaCollapsed, setIsBotAreaCollapsed] = useState(false);
+    const [isInfoPanelCollapsed, setIsInfoPanelCollapsed] = useState(false);
+    const [isEventsPanelCollapsed, setIsEventsPanelCollapsed] = useState(false);
+    const [sessionId, setSessionId] = useState("");
+    const [participantId, setParticipantId] = useState("");
+    const [client, setClient] = useState<PipecatClient | null>(null);
+    const [isClientReady, setIsClientReady] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  const infoPanelRef = useRef<ImperativePanelHandle>(null);
+    const infoPanelRef = useRef<ImperativePanelHandle>(null);
 
-  useEffect(
-    function initClient() {
-      // Only run on client side
-      if (typeof window === "undefined") return;
-
-      let transport: DailyTransport | SmallWebRTCTransport;
-      switch (transportType) {
-        case "smallwebrtc":
-          transport = new SmallWebRTCTransport(
-            transportOptions as SmallWebRTCTransportConstructorOptions,
-          );
-          break;
-        case "daily":
-        default:
-          transport = new DailyTransport(
-            transportOptions as DailyTransportConstructorOptions,
-          );
-          transport.dailyCallClient.on("meeting-session-updated", (event) => {
-            setSessionId(event.meetingSession.id);
-          });
-          break;
-      }
-      const pcClient = new PipecatClient({
-        enableCam: !noUserVideo,
-        enableMic: !noUserAudio,
-        ...clientOptions,
-        transport: clientOptions?.transport ?? transport,
-        callbacks: {
-          onParticipantJoined: (participant) => {
-            setParticipantId(participant.id || "");
-            clientOptions?.callbacks?.onParticipantJoined?.(participant);
-          },
-          onTrackStarted(track, participant) {
-            if (participant?.id && participant.local)
-              setParticipantId(participant.id);
-            clientOptions?.callbacks?.onTrackStarted?.(track, participant);
-          },
-        },
-      });
-      pcClient.initDevices();
-      setClient(pcClient);
-      setIsClientReady(true);
-      return () => {
-        /**
-         * Disconnect client when component unmounts or options change.
-         */
-        pcClient.disconnect();
-      };
-    },
-    [clientOptions, transportOptions, noUserAudio, noUserVideo, transportType],
-  );
-
-  useEffect(
-    function updateSmallWebRTCCodecs() {
-      if (!client || transportType !== "smallwebrtc") return;
-      const transport = client.transport as SmallWebRTCTransport;
-      if (audioCodec) {
-        transport.setAudioCodec(audioCodec);
-      }
-      if (videoCodec) {
-        transport.setVideoCodec(videoCodec);
-      }
-    },
-    [audioCodec, client, videoCodec, transportType],
-  );
-
-  const handleConnect = async () => {
-    if (!client) return;
-    setError(null);
-    try {
-      await client.connect(connectParams);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Unknown error");
-      await client.disconnect();
-    }
-  };
-
-  const handleDisconnect = async () => {
-    if (!client) return;
-    setError(null);
-    await client.disconnect();
-  };
-
-  // Return loading state until client is ready (prevents hydration mismatch)
-  if (!isClientReady || !client) {
-    return (
-      <div className="vkui:flex vkui:items-center vkui:justify-center vkui:h-full vkui:w-full">
-        <LoaderSpinner />
-      </div>
+    const handleConversationProviderRef = useCallback(
+      (node: ConversationProviderRef | null) => {
+        if (node && onInjectMessage) {
+          onInjectMessage(node.injectMessage);
+        }
+      },
+      [onInjectMessage],
     );
-  }
 
-  const noBotArea = noBotAudio && noBotVideo;
-  const noConversationPanel = noConversation && noMetrics;
-  const noDevices = noAudioOutput && noUserAudio && noUserVideo;
-  const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
+    useEffect(
+      function initClient() {
+        // Only run on client side
+        if (typeof window === "undefined") return;
 
-  return (
-    <PipecatClientProvider client={client}>
-      {error && (
-        <Banner
-          variant="destructive"
-          className="vkui:animate-in vkui:fade-in vkui:duration-300"
-        >
-          <BannerIcon icon={CircleAlertIcon} />
-          <BannerTitle>
-            Unable to connect. Please check web console for errors.
-          </BannerTitle>
-          <BannerClose variant="destructive" />
-        </Banner>
-      )}
-      <div className="vkui:grid vkui:grid-cols-1 vkui:grid-rows-[min-content_1fr] vkui:sm:grid-rows-[min-content_1fr_auto] vkui:h-full vkui:w-full vkui:overflow-auto">
-        <div className="vkui:grid vkui:grid-cols-2 vkui:sm:grid-cols-[150px_1fr_150px] vkui:gap-2 vkui:items-center vkui:justify-center vkui:p-2 vkui:bg-background vkui:sm:relative vkui:top-0 vkui:w-full vkui:z-10">
-          {noLogo ? (
-            <span className="vkui:h-6" />
-          ) : (
-            (logoComponent ?? (
-              <PipecatLogo className="vkui:h-6 vkui:w-auto vkui:text-foreground" />
-            ))
-          )}
-          <strong className="vkui:hidden vkui:sm:block vkui:text-center">
-            {title}
-          </strong>
-          <div className="vkui:flex vkui:items-center vkui:justify-end vkui:gap-2 vkui:sm:gap-3 vkui:xl:gap-6">
-            <div className="vkui:flex vkui:items-center vkui:gap-1">
-              {!noThemeSwitch && <ThemeModeToggle />}
-              <Button
-                className="vkui:hidden vkui:sm:flex"
-                variant={"ghost"}
-                isIcon
-                onClick={() => {
-                  if (isInfoPanelCollapsed) {
-                    infoPanelRef.current?.expand();
-                  } else {
-                    infoPanelRef.current?.collapse();
-                  }
-                }}
-              >
-                {isInfoPanelCollapsed ? (
-                  <PanelLeftCloseIcon />
-                ) : (
-                  <PanelRightCloseIcon />
-                )}
-              </Button>
-            </div>
-            <ConnectButton
-              onConnect={handleConnect}
-              onDisconnect={handleDisconnect}
-            />
-          </div>
+        let transport: DailyTransport | SmallWebRTCTransport;
+        switch (transportType) {
+          case "smallwebrtc":
+            transport = new SmallWebRTCTransport(
+              transportOptions as SmallWebRTCTransportConstructorOptions,
+            );
+            break;
+          case "daily":
+          default:
+            transport = new DailyTransport(
+              transportOptions as DailyTransportConstructorOptions,
+            );
+            transport.dailyCallClient.on("meeting-session-updated", (event) => {
+              setSessionId(event.meetingSession.id);
+            });
+            break;
+        }
+        const pcClient = new PipecatClient({
+          enableCam: !noUserVideo,
+          enableMic: !noUserAudio,
+          ...clientOptions,
+          transport: clientOptions?.transport ?? transport,
+          callbacks: {
+            onParticipantJoined: (participant) => {
+              setParticipantId(participant.id || "");
+              clientOptions?.callbacks?.onParticipantJoined?.(participant);
+            },
+            onTrackStarted(track, participant) {
+              if (participant?.id && participant.local)
+                setParticipantId(participant.id);
+              clientOptions?.callbacks?.onTrackStarted?.(track, participant);
+            },
+            onServerMessage(data) {
+              onServerMessage?.(data);
+            },
+          },
+        });
+        pcClient.initDevices();
+        setClient(pcClient);
+        setIsClientReady(true);
+        return () => {
+          /**
+           * Disconnect client when component unmounts or options change.
+           */
+          pcClient.disconnect();
+        };
+      },
+      [
+        clientOptions,
+        transportOptions,
+        noUserAudio,
+        noUserVideo,
+        transportType,
+        onServerMessage,
+      ],
+    );
+
+    useEffect(
+      function updateSmallWebRTCCodecs() {
+        if (!client || transportType !== "smallwebrtc") return;
+        const transport = client.transport as SmallWebRTCTransport;
+        if (audioCodec) {
+          transport.setAudioCodec(audioCodec);
+        }
+        if (videoCodec) {
+          transport.setVideoCodec(videoCodec);
+        }
+      },
+      [audioCodec, client, videoCodec, transportType],
+    );
+
+    const handleConnect = async () => {
+      if (!client) return;
+      setError(null);
+      try {
+        await client.connect(connectParams);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Unknown error");
+        await client.disconnect();
+      }
+    };
+
+    const handleDisconnect = async () => {
+      if (!client) return;
+      setError(null);
+      await client.disconnect();
+    };
+
+    // Return loading state until client is ready (prevents hydration mismatch)
+    if (!isClientReady || !client) {
+      return (
+        <div className="vkui:flex vkui:items-center vkui:justify-center vkui:h-full vkui:w-full">
+          <LoaderSpinner />
         </div>
-        <div className="vkui:hidden vkui:sm:block">
-          <ResizablePanelGroup direction="vertical" className="vkui:h-full">
-            <ResizablePanel defaultSize={70} minSize={50}>
-              <ResizablePanelGroup direction="horizontal">
-                {!noBotArea && (
-                  <>
-                    <ResizablePanel
-                      className="vkui:flex vkui:flex-col vkui:gap-2 vkui:p-2 vkui:xl:gap-4"
-                      defaultSize={26}
-                      maxSize={30}
-                      minSize={10}
-                      collapsible
-                      collapsedSize={8}
-                      onCollapse={() => setIsBotAreaCollapsed(true)}
-                      onExpand={() => setIsBotAreaCollapsed(false)}
-                    >
-                      {!noBotAudio && (
-                        <BotAudioPanel
-                          className={cn({
-                            "vkui:mb-auto": noBotVideo,
-                          })}
-                          collapsed={isBotAreaCollapsed}
-                        />
-                      )}
-                      {!noBotVideo && (
-                        <BotVideoPanel
-                          className={cn({
-                            "vkui:mt-auto": noBotAudio,
-                          })}
-                          collapsed={isBotAreaCollapsed}
-                        />
-                      )}
-                    </ResizablePanel>
-                    {(!noConversationPanel || !noInfoPanel) && (
-                      <ResizableHandle withHandle />
-                    )}
-                  </>
-                )}
-                {!noConversationPanel && (
-                  <>
-                    <ResizablePanel
-                      className="vkui:h-full vkui:p-2"
-                      defaultSize={collapseInfoPanel ? 70 : 47}
-                      minSize={30}
-                    >
-                      <ConversationPanel
-                        noConversation={noConversation}
-                        noMetrics={noMetrics}
-                      />
-                    </ResizablePanel>
-                    {!noInfoPanel && <ResizableHandle withHandle />}
-                  </>
-                )}
-                {!noInfoPanel && (
-                  <ResizablePanel
-                    id="info-panel"
-                    ref={infoPanelRef}
-                    collapsible
-                    collapsedSize={4}
-                    defaultSize={collapseInfoPanel ? 4 : 27}
-                    minSize={15}
-                    onCollapse={() => setIsInfoPanelCollapsed(true)}
-                    onExpand={() => setIsInfoPanelCollapsed(false)}
-                    className="vkui:p-2"
+      );
+    }
+
+    const noBotArea = noBotAudio && noBotVideo;
+    const noConversationPanel = noConversation && noMetrics;
+    const noDevices = noAudioOutput && noUserAudio && noUserVideo;
+    const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
+
+    return (
+      <PipecatClientProvider client={client}>
+        <ConversationProvider ref={handleConversationProviderRef}>
+          {error && (
+            <Banner
+              variant="destructive"
+              className="vkui:animate-in vkui:fade-in vkui:duration-300"
+            >
+              <BannerIcon icon={CircleAlertIcon} />
+              <BannerTitle>
+                Unable to connect. Please check web console for errors.
+              </BannerTitle>
+              <BannerClose variant="destructive" />
+            </Banner>
+          )}
+          <div className="vkui:grid vkui:grid-cols-1 vkui:grid-rows-[min-content_1fr] vkui:sm:grid-rows-[min-content_1fr_auto] vkui:h-full vkui:w-full vkui:overflow-auto">
+            <div className="vkui:grid vkui:grid-cols-2 vkui:sm:grid-cols-[150px_1fr_150px] vkui:gap-2 vkui:items-center vkui:justify-center vkui:p-2 vkui:bg-background vkui:sm:relative vkui:top-0 vkui:w-full vkui:z-10">
+              {noLogo ? (
+                <span className="vkui:h-6" />
+              ) : (
+                (logoComponent ?? (
+                  <PipecatLogo className="vkui:h-6 vkui:w-auto vkui:text-foreground" />
+                ))
+              )}
+              <strong className="vkui:hidden vkui:sm:block vkui:text-center">
+                {title}
+              </strong>
+              <div className="vkui:flex vkui:items-center vkui:justify-end vkui:gap-2 vkui:sm:gap-3 vkui:xl:gap-6">
+                <div className="vkui:flex vkui:items-center vkui:gap-1">
+                  {!noThemeSwitch && <ThemeModeToggle />}
+                  <Button
+                    className="vkui:hidden vkui:sm:flex"
+                    variant={"ghost"}
+                    isIcon
+                    onClick={() => {
+                      if (isInfoPanelCollapsed) {
+                        infoPanelRef.current?.expand();
+                      } else {
+                        infoPanelRef.current?.collapse();
+                      }
+                    }}
                   >
                     {isInfoPanelCollapsed ? (
-                      <div className="vkui:flex vkui:flex-col vkui:items-center vkui:justify-center vkui:gap-4 vkui:h-full">
-                        {!noStatusInfo && (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <ChevronsLeftRightEllipsisIcon size={16} />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent side="left">
-                              <ClientStatus />
-                            </PopoverContent>
-                          </Popover>
-                        )}
-                        {!noDevices && (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MicIcon size={16} />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="vkui:flex vkui:flex-col vkui:gap-2"
-                              side="left"
-                            >
-                              {!noUserAudio && <UserAudioControl />}
-                              {!noUserVideo && <UserVideoControl />}
-                              {!noAudioOutput && <AudioOutput />}
-                            </PopoverContent>
-                          </Popover>
-                        )}
-                        {!noSessionInfo && (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <InfoIcon size={16} />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent side="left">
-                              <SessionInfo
-                                sessionId={sessionId}
-                                participantId={participantId}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        )}
-                      </div>
+                      <PanelLeftCloseIcon />
                     ) : (
-                      <InfoPanel
-                        noAudioOutput={noAudioOutput}
-                        noSessionInfo={noSessionInfo}
-                        noStatusInfo={noStatusInfo}
-                        noUserAudio={noUserAudio}
-                        noUserVideo={noUserVideo}
-                        participantId={participantId}
-                        sessionId={sessionId}
-                      />
+                      <PanelRightCloseIcon />
                     )}
-                  </ResizablePanel>
-                )}
-              </ResizablePanelGroup>
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel
-              collapsible
-              collapsedSize={4}
-              minSize={7}
-              onCollapse={() => setIsEventsPanelCollapsed(true)}
-              onExpand={() => setIsEventsPanelCollapsed(false)}
-            >
-              <EventsPanel collapsed={isEventsPanelCollapsed} />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-        <Tabs
-          defaultValue={
-            noBotArea ? (noConversationPanel ? "info" : "conversation") : "bot"
-          }
-          className="vkui:flex vkui:flex-col vkui:gap-0 vkui:sm:hidden vkui:overflow-hidden"
-        >
-          <div className="vkui:flex vkui:flex-col vkui:overflow-hidden vkui:flex-1">
-            {!noBotArea && (
-              <TabsContent
-                value="bot"
-                className="vkui:flex-1 vkui:overflow-auto vkui:flex vkui:flex-col vkui:gap-4 vkui:p-2"
-              >
-                {!noBotAudio && <BotAudioPanel />}
-                {!noBotVideo && <BotVideoPanel />}
-              </TabsContent>
-            )}
-            {!noConversationPanel && (
-              <TabsContent
-                value="conversation"
-                className="vkui:flex-1 vkui:overflow-auto"
-              >
-                <ConversationPanel
-                  noConversation={noConversation}
-                  noMetrics={noMetrics}
+                  </Button>
+                </div>
+                <ConnectButton
+                  onConnect={handleConnect}
+                  onDisconnect={handleDisconnect}
                 />
-              </TabsContent>
-            )}
-            <TabsContent
-              value="info"
-              className="vkui:flex-1 vkui:overflow-auto vkui:p-2"
+              </div>
+            </div>
+            <div className="vkui:hidden vkui:sm:block">
+              <ResizablePanelGroup direction="vertical" className="vkui:h-full">
+                <ResizablePanel defaultSize={70} minSize={50}>
+                  <ResizablePanelGroup direction="horizontal">
+                    {!noBotArea && (
+                      <>
+                        <ResizablePanel
+                          className="vkui:flex vkui:flex-col vkui:gap-2 vkui:p-2 vkui:xl:gap-4"
+                          defaultSize={26}
+                          maxSize={30}
+                          minSize={10}
+                          collapsible
+                          collapsedSize={8}
+                          onCollapse={() => setIsBotAreaCollapsed(true)}
+                          onExpand={() => setIsBotAreaCollapsed(false)}
+                        >
+                          {!noBotAudio && (
+                            <BotAudioPanel
+                              className={cn({
+                                "vkui:mb-auto": noBotVideo,
+                              })}
+                              collapsed={isBotAreaCollapsed}
+                            />
+                          )}
+                          {!noBotVideo && (
+                            <BotVideoPanel
+                              className={cn({
+                                "vkui:mt-auto": noBotAudio,
+                              })}
+                              collapsed={isBotAreaCollapsed}
+                            />
+                          )}
+                        </ResizablePanel>
+                        {(!noConversationPanel || !noInfoPanel) && (
+                          <ResizableHandle withHandle />
+                        )}
+                      </>
+                    )}
+                    {!noConversationPanel && (
+                      <>
+                        <ResizablePanel
+                          className="vkui:h-full vkui:p-2"
+                          defaultSize={collapseInfoPanel ? 70 : 47}
+                          minSize={30}
+                        >
+                          <ConversationPanel
+                            noConversation={noConversation}
+                            noMetrics={noMetrics}
+                            conversationElementProps={conversationElementProps}
+                          />
+                        </ResizablePanel>
+                        {!noInfoPanel && <ResizableHandle withHandle />}
+                      </>
+                    )}
+                    {!noInfoPanel && (
+                      <ResizablePanel
+                        id="info-panel"
+                        ref={infoPanelRef}
+                        collapsible
+                        collapsedSize={4}
+                        defaultSize={collapseInfoPanel ? 4 : 27}
+                        minSize={15}
+                        onCollapse={() => setIsInfoPanelCollapsed(true)}
+                        onExpand={() => setIsInfoPanelCollapsed(false)}
+                        className="vkui:p-2"
+                      >
+                        {isInfoPanelCollapsed ? (
+                          <div className="vkui:flex vkui:flex-col vkui:items-center vkui:justify-center vkui:gap-4 vkui:h-full">
+                            {!noStatusInfo && (
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <ChevronsLeftRightEllipsisIcon size={16} />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent side="left">
+                                  <ClientStatus />
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                            {!noDevices && (
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MicIcon size={16} />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="vkui:flex vkui:flex-col vkui:gap-2"
+                                  side="left"
+                                >
+                                  {!noUserAudio && <UserAudioControl />}
+                                  {!noUserVideo && <UserVideoControl />}
+                                  {!noAudioOutput && <AudioOutput />}
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                            {!noSessionInfo && (
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <InfoIcon size={16} />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent side="left">
+                                  <SessionInfo
+                                    sessionId={sessionId}
+                                    participantId={participantId}
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                          </div>
+                        ) : (
+                          <InfoPanel
+                            noAudioOutput={noAudioOutput}
+                            noSessionInfo={noSessionInfo}
+                            noStatusInfo={noStatusInfo}
+                            noUserAudio={noUserAudio}
+                            noUserVideo={noUserVideo}
+                            participantId={participantId}
+                            sessionId={sessionId}
+                          />
+                        )}
+                      </ResizablePanel>
+                    )}
+                  </ResizablePanelGroup>
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel
+                  collapsible
+                  collapsedSize={4}
+                  minSize={7}
+                  onCollapse={() => setIsEventsPanelCollapsed(true)}
+                  onExpand={() => setIsEventsPanelCollapsed(false)}
+                >
+                  <EventsPanel collapsed={isEventsPanelCollapsed} />
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </div>
+            <Tabs
+              defaultValue={
+                noBotArea
+                  ? noConversationPanel
+                    ? "info"
+                    : "conversation"
+                  : "bot"
+              }
+              className="vkui:flex vkui:flex-col vkui:gap-0 vkui:sm:hidden vkui:overflow-hidden"
             >
-              <InfoPanel
-                noAudioOutput={noAudioOutput}
-                noUserAudio={noUserAudio}
-                noUserVideo={noUserVideo}
-                participantId={participantId}
-                sessionId={sessionId}
-              />
-            </TabsContent>
-            <TabsContent
-              value="events"
-              className="vkui:flex-1 vkui:overflow-auto"
-            >
-              <EventsPanel />
-            </TabsContent>
+              <div className="vkui:flex vkui:flex-col vkui:overflow-hidden vkui:flex-1">
+                {!noBotArea && (
+                  <TabsContent
+                    value="bot"
+                    className="vkui:flex-1 vkui:overflow-auto vkui:flex vkui:flex-col vkui:gap-4 vkui:p-2"
+                  >
+                    {!noBotAudio && <BotAudioPanel />}
+                    {!noBotVideo && <BotVideoPanel />}
+                  </TabsContent>
+                )}
+                {!noConversationPanel && (
+                  <TabsContent
+                    value="conversation"
+                    className="vkui:flex-1 vkui:overflow-auto"
+                  >
+                    <ConversationPanel
+                      noConversation={noConversation}
+                      noMetrics={noMetrics}
+                    />
+                  </TabsContent>
+                )}
+                <TabsContent
+                  value="info"
+                  className="vkui:flex-1 vkui:overflow-auto vkui:p-2"
+                >
+                  <InfoPanel
+                    noAudioOutput={noAudioOutput}
+                    noUserAudio={noUserAudio}
+                    noUserVideo={noUserVideo}
+                    participantId={participantId}
+                    sessionId={sessionId}
+                  />
+                </TabsContent>
+                <TabsContent
+                  value="events"
+                  className="vkui:flex-1 vkui:overflow-auto"
+                >
+                  <EventsPanel />
+                </TabsContent>
+              </div>
+              <TabsList className="vkui:w-full vkui:h-12 vkui:rounded-none vkui:z-10 vkui:mt-auto vkui:shrink-0">
+                {!noBotArea && (
+                  <TabsTrigger value="bot">
+                    <BotIcon />
+                  </TabsTrigger>
+                )}
+                {!noConversationPanel && (
+                  <TabsTrigger value="conversation">
+                    <MessagesSquareIcon />
+                  </TabsTrigger>
+                )}
+                <TabsTrigger value="info">
+                  <InfoIcon />
+                </TabsTrigger>
+                <TabsTrigger value="events">
+                  <ChevronsLeftRightEllipsisIcon />
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            {!noAudioOutput && <PipecatClientAudio />}
           </div>
-          <TabsList className="vkui:w-full vkui:h-12 vkui:rounded-none vkui:z-10 vkui:mt-auto vkui:shrink-0">
-            {!noBotArea && (
-              <TabsTrigger value="bot">
-                <BotIcon />
-              </TabsTrigger>
-            )}
-            {!noConversationPanel && (
-              <TabsTrigger value="conversation">
-                <MessagesSquareIcon />
-              </TabsTrigger>
-            )}
-            <TabsTrigger value="info">
-              <InfoIcon />
-            </TabsTrigger>
-            <TabsTrigger value="events">
-              <ChevronsLeftRightEllipsisIcon />
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-        {!noAudioOutput && <PipecatClientAudio />}
-      </div>
-    </PipecatClientProvider>
-  );
-};
+        </ConversationProvider>
+      </PipecatClientProvider>
+    );
+  },
+);

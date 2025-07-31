@@ -16,3 +16,6 @@ export * from "@/visualizers";
 
 // Templates
 export { ConsoleTemplate } from "@/templates/Console";
+
+// Types
+export * from "@/types/conversation";

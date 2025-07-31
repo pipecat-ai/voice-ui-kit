@@ -6,10 +6,8 @@ import {
 } from "@/components/ui/panel";
 import { MicOffIcon } from "@/icons";
 import { cn } from "@/lib/utils";
-import {
-  usePipecatClientMediaTrack,
-  VoiceVisualizer,
-} from "@pipecat-ai/client-react";
+import { VoiceVisualizer } from "@/visualizers/VoiceVisualizer";
+import { usePipecatClientMediaTrack } from "@pipecat-ai/client-react";
 import { useEffect, useRef, useState } from "react";
 
 interface BotAudioPanelProps {
@@ -89,7 +87,7 @@ export const BotAudioPanel: React.FC<BotAudioPanelProps> = ({
               <VoiceVisualizer
                 participantType="bot"
                 backgroundColor="transparent"
-                barColor="#ad46ff"
+                barColor="--vkui-color-agent"
                 barCount={barCount}
                 barGap={width}
                 barLineCap="square"

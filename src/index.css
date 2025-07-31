@@ -50,6 +50,8 @@
   --color-inactive-foreground: oklch(97.1% 0.013 17.38);
   --color-inactive-ring: oklch(57.7% 0.245 27.325 / 20%);
   --color-inactive-accent: oklch(57.7% 0.245 27.325 / 10%);
+  --color-agent: oklch(58.5% 0.233 277.117);
+  --color-client: oklch(62.3% 0.214 259.815);
   --color-chart-1: oklch(0.646 0.222 41.116);
   --color-chart-2: oklch(0.6 0.118 184.704);
   --color-chart-3: oklch(0.398 0.07 227.392);
@@ -103,6 +105,8 @@
   --vkui-color-inactive-foreground: oklch(0.9705 0.0129 17.38);
   --vkui-color-inactive-ring: oklch(0.7022 0.1892 22.23 / 20%);
   --vkui-color-inactive-accent: oklch(0.7022 0.1892 22.23 / 10%);
+  --vkui-color-agent: oklch(58.5% 0.233 277.117);
+  --vkui-color-client: oklch(62.3% 0.214 259.815);
   --vkui-color-chart-1: oklch(0.488 0.243 264.376);
   --vkui-color-chart-2: oklch(0.696 0.17 162.48);
   --vkui-color-chart-3: oklch(0.769 0.188 70.08);

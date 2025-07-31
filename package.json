@@ -1,6 +1,6 @@
 {
   "name": "@pipecat-ai/voice-ui-kit",
-  "version": "0.1.1",
+  "version": "0.1.2-rc.3",
   "type": "module",
   "license": "BSD-2-Clause",
   "workspaces": [
