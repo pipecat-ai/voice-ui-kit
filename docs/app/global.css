@@ -1,3 +1,19 @@
 @import "tailwindcss";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
+
+:root {
+  --color-fd-primary: var(--color-sky-600);
+  --default-font-family: var(--font-sans);
+  --default-mono-font-family: var(--font-mono);
+}
+.dark {
+  --color-fd-primary: var(--color-sky-300);
+}
+
+#nd-sidebar p {
+  font-family: var(--default-mono-font-family);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}

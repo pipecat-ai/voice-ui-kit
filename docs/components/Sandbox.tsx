@@ -78,8 +78,13 @@ export function Sandbox({
   }
 
   return (
-    <div className="vkui-root">
-      <Component {...props}>{children}</Component>
-    </div>
+    <figure
+      dir="ltr"
+      className="my-4 rounded-xl bg-fd-card p-1 shiki relative border outline-none not-prose overflow-hidden text-sm shiki shiki-themes github-light github-dark"
+    >
+      <div className="vkui-root">
+        <Component {...props}>{children}</Component>
+      </div>
+    </figure>
   );
 }

@@ -1,0 +1,54 @@
+---
+title: Installation and Setup
+description: Install the Voice UI Kit and its dependencies
+icon: "Settings"
+---
+
+## Install the Voice UI Kit
+
+```bash tab="npm"
+npm install @pipecat-ai/voice-ui-kit
+```
+
+```bash tab="pnpm"
+pnpm add @pipecat-ai/voice-ui-kit
+```
+
+```bash tab="yarn"
+yarn add @pipecat-ai/voice-ui-kit
+```
+
+```bash tab="bun"
+bun add @pipecat-ai/voice-ui-kit
+```
+
+## Pipecat-specific dependencies
+
+The Voice UI Kit exports various headless components that can be used to build your UI without any further dependencies, but is mostly designed to be used with the [Pipecat Client SDK](https://github.com/pipecat-ai/pipecat-client-web).
+
+If you are building with Pipecat, you'll want to install the necessary client libraries and transport packages:
+
+```bash tab="Daily transport"
+npm install \
+  @pipecat-ai/voice-ui-kit \
+  @pipecat-ai/client-js \
+  @pipecat-ai/client-react \
+  @pipecat-ai/daily-transport
+```
+
+```bash tab="SmallWebRTC transport"
+npm install \
+  @pipecat-ai/voice-ui-kit \
+  @pipecat-ai/client-js \
+  @pipecat-ai/client-react \
+  @pipecat-ai/smallwebrtc-transport
+```
+
+### Additional dependencies
+
+To keep bundle size down, various components are exported without required third-party dependencies.
+
+- `metrics` requires `react-chartjs-2`
+- `visualizers/webgl` requires `three.js`
+
+Dependencies are listed in the associated component's documentation.

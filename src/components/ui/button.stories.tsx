@@ -22,13 +22,24 @@ export const ButtonPrimary: Story<{
   isDisabled: boolean;
   isLoading: boolean;
   withIcon: boolean;
-}> = ({ label, variant, size, state, isDisabled, isLoading, withIcon }) => (
+  loader: "icon" | "stripes";
+}> = ({
+  label,
+  variant,
+  size,
+  state,
+  isDisabled,
+  isLoading,
+  withIcon,
+  loader,
+}) => (
   <Button
     variant={variant}
     size={size}
     state={state}
     disabled={isDisabled}
     isLoading={isLoading}
+    loader={loader}
   >
     {withIcon && !isLoading && <VolumeOffIcon />}
     {label}
@@ -42,6 +53,7 @@ ButtonPrimary.args = {
   isDisabled: false,
   isLoading: false,
   withIcon: false,
+  loader: "icon",
 };
 
 ButtonPrimary.argTypes = {
@@ -60,6 +72,11 @@ ButtonPrimary.argTypes = {
     control: { type: "select" },
     defaultValue: "default",
   },
+  loader: {
+    options: ["icon", "stripes"],
+    control: { type: "select" },
+    defaultValue: "icon",
+  },
 };
 
 ButtonPrimary.storyName = "Button";
@@ -70,13 +87,15 @@ export const ButtonIcon: Story<{
   state: ButtonState;
   isDisabled: boolean;
   isLoading: boolean;
-}> = ({ variant, size, state, isDisabled, isLoading }) => (
+  loader: "icon" | "stripes";
+}> = ({ variant, size, state, isDisabled, isLoading, loader }) => (
   <Button
     isIcon
     variant={variant}
     size={size}
     state={state}
     disabled={isDisabled || isLoading}
+    loader={loader}
   >
     {isLoading ? (
       <LoaderIcon className="size-4 animate-spin" />
@@ -92,6 +111,7 @@ ButtonIcon.args = {
   state: "default",
   isDisabled: false,
   isLoading: false,
+  loader: "icon",
 };
 
 ButtonIcon.argTypes = {
@@ -109,6 +129,11 @@ ButtonIcon.argTypes = {
     options: buttonStateOptions,
     control: { type: "select" },
     defaultValue: "default",
+  },
+  loader: {
+    options: ["icon", "stripes"],
+    control: { type: "select" },
+    defaultValue: "icon",
   },
 };
 

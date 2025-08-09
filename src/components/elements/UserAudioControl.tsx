@@ -134,7 +134,7 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
         >
           <Button
             className={cn(
-              "vkui:p-2! vkui:flex-none vkui:z-0",
+              "vkui:flex-none vkui:z-0 vkui:border-l-0",
               classNames.dropdownMenuTrigger,
             )}
             variant={variant}
@@ -156,8 +156,8 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
   return (
     <ButtonGroup
       className={cn(
-        "vkui:w-full",
-        variant !== "outline" && "vkui:gap-[2px]",
+        "vkui:w-full vkui:gap-[2px]",
+        variant === "outline" && "vkui:gap-[1px]",
         classNames.buttongroup,
       )}
     >

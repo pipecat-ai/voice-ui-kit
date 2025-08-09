@@ -1,0 +1,203 @@
+---
+title: Styling and Theming
+description: Using, customizing and extending the Voice UI Kit styles
+icon: "SwatchBook"
+---
+
+The Voice UI Kit ships with a default theme that can be used as-is or modified to your liking.
+
+It is implemented using [Tailwind CSS](https://tailwindcss.com/) V4 and built to be compatible with a developer's own styling or Tailwind implementation.
+
+- `@pipecat-ai/voice-ui-kit/styles.css` - The default theme, prefixed with `vkui:`
+- `@pipecat-ai/voice-ui-kit/styles.scoped.css` - The default theme, scoped to a `.vkui-root` class
+- Dark mode support (via `:root.vkui:dark`)
+- ShadUI compatibility (via `@theme static`)
+
+## Adding styles
+
+The Voice UI Kit CSS can be imported from the `@pipecat-ai/voice-ui-kit/styles` package.
+
+The CSS file can be imported in your application CSS file (e.g., `global.css`) or directly in your JavaScript code (e.g., `layout.tsx`).
+
+```css title="global.css"
+@import "@pipecat-ai/voice-ui-kit/styles";
+
+/* ... */
+```
+
+If you're using Tailwind, you can import it alongside your own custom styles:
+
+```css title="global.css"
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@import "@pipecat-ai/voice-ui-kit/styles";
+
+/* ... */
+```
+
+You can also include the styles in your application code:
+
+```tsx title="layout.tsx"
+import "./globals.css";
+
+import "@pipecat-ai/voice-ui-kit/styles";
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+### Production-ready builds
+
+Bundled styles are left unoptimized, with all utility classes left inlined. This allows developers to choose a build and optimization strategy that works best for them.
+
+For example, in production, it's recommended to apply minification and other post-processing to the styles at build time. Most modern frameworks (such as Vite, Next.js, etc.) have out-of-the-box support for this.
+
+## Prefixing and scoping
+
+Voice UI Kit variables and utilities are prefixed with a `vkui` namespace. This means you can use them without worrying about conflicts with your own styles.
+
+```html
+<div class="vkui:flex">...</div>
+```
+
+By design, the styles export is left unscoped. This means using the CSS import alongside your own project's Tailwind theme will apply to Voice UI Kit components as well.
+
+While this can be preferable in some cases, sometimes it's not ideal. The Voice UI Kit bundle includes a fully scoped CSS file that can be used instead:
+
+```css title="global.css"
+@import "@pipecat-ai/voice-ui-kit/styles.scoped";
+
+/* Your application CSS file */
+```
+
+The Voice UI Kit theme will now only apply when wrapped in a `.vkui-root` class, and declarations from your own Tailwind theme will not be applied.
+
+```html
+<div class="vkui-root">
+  <span class="vkui:flex">✅ Scoped correctly</span>
+</div>
+
+<div>
+  <span class="vkui:flex">❌ Not scoped</span>
+</div>
+```
+
+## Modifying styles
+
+The Voice UI Kit theme is fully customizable and can be aligned with your application's design system.
+
+```css title="global.css"
+@import "@pipecat-ai/voice-ui-kit/styles";
+
+:root {
+  /* Light mode overrides */
+  --vkui-color-background: oklch(1 0 0);
+  --vkui-color-primary: var(--color-blue-500);
+}
+
+.vkui\:dark {
+  /* Dark mode overrides */
+  --vkui-color-background: oklch(20.5% 0.004 285.885);
+  --vkui-color-primary: var(--color-blue-400);
+}
+```
+
+### Variable list
+
+Alongside the primary [Tailwind variable list](https://tailwindcss.com/docs/theme#default-theme-variable-reference), the Voice UI Kit theme includes the following variables:
+
+```css
+:root {
+  --font-sans: "Geist", "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", "SF Mono", Consolas, "Roboto Mono", monospace;
+
+  --shadow-long:
+    0px 89px 36px rgba(0, 0, 0, 0.01), 0px 50px 30px rgba(0, 0, 0, 0.03),
+    0px 22px 22px rgba(0, 0, 0, 0.04), 0px 6px 12px rgba(0, 0, 0, 0.05);
+  --shadow-short:
+    0px 10px 15px -3px rgba(0, 0, 0, 0.05), 0px 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --shadow-xshort:
+    0px 7px 3px rgba(0, 0, 0, 0.01), 0px 4px 2px rgba(0, 0, 0, 0.03),
+    0px 2px 2px rgba(0, 0, 0, 0.04), 0px 0px 1px rgba(0, 0, 0, 0.05);
+
+  --radius-panel: var(--vkui-radius-sm);
+  --radius-element: var(--vkui-radius-lg);
+
+  /* ShadUI colors */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.141 0.005 285.823);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(55.2% 0.016 285.938);
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.141 0.005 285.823);
+  --color-primary: oklch(0.21 0.006 285.885);
+  --color-primary-foreground: oklch(0.985 0 0);
+  --color-secondary: oklch(0.967 0.001 286.375);
+  --color-secondary-foreground: oklch(0.21 0.006 285.885);
+  --color-muted: oklch(0.967 0.001 286.375);
+  --color-muted-foreground: oklch(0.552 0.016 285.938);
+  --color-accent: oklch(0.967 0.001 286.375);
+  --color-accent-foreground: oklch(0.21 0.006 285.885);
+  --color-destructive: oklch(63.7% 0.237 25.331);
+  --color-border: oklch(0.92 0.004 286.32);
+  --color-input: oklch(0.92 0.004 286.32);
+  --color-ring: oklch(0.705 0.015 286.067);
+  --color-subtle: oklch(0.705 0.015 286.067);
+  --color-mute: oklch(63.7% 0.237 25.331);
+  --color-mute-foreground: oklch(97% 0.05 25.331);
+
+  /* Voice UI Kit colors */
+  --color-active: oklch(69.6% 0.17 162.48);
+  --color-active-foreground: oklch(97.9% 0.021 166.113);
+  --color-active-ring: oklch(69.6% 0.17 162.48 / 20%);
+  --color-active-accent: oklch(69.6% 0.17 162.48 / 10%);
+  --color-inactive: oklch(0.7022 0.1892 22.23);
+  --color-inactive-foreground: oklch(97.1% 0.013 17.38);
+  --color-inactive-ring: oklch(57.7% 0.245 27.325 / 20%);
+  --color-inactive-accent: oklch(57.7% 0.245 27.325 / 10%);
+  --color-agent: oklch(58.5% 0.233 277.117);
+  --color-client: oklch(62.3% 0.214 259.815);
+  --color-chart-1: oklch(0.646 0.222 41.116);
+  --color-chart-2: oklch(0.6 0.118 184.704);
+  --color-chart-3: oklch(0.398 0.07 227.392);
+  --color-chart-4: oklch(0.828 0.189 84.429);
+  --color-chart-5: oklch(0.769 0.188 70.08);
+}
+```
+
+## Dark mode
+
+The Voice UI Kit theme supports dark mode, using a `:root.vkui:dark` selector:
+
+```html
+<html class="vkui:dark">
+  <body>
+    ...
+  </body>
+</html>
+```
+
+### Programmatic dark mode
+
+You can also toggle dark mode programmatically by adding or removing the `vkui:dark` class from your HTML element:
+
+```javascript
+// Enable dark mode
+document.documentElement.classList.add("vkui:dark");
+
+// Disable dark mode
+document.documentElement.classList.remove("vkui:dark");
+
+// Toggle dark mode
+document.documentElement.classList.toggle("vkui:dark");
+```

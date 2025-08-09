@@ -5,6 +5,7 @@ export * from "./ControlBar";
 export * from "./Conversation";
 export * from "./CopyText";
 export * from "./DataList";
+export * from "./DeviceDropDown";
 export * from "./PipecatLogo";
 export * from "./SessionInfo";
 export * from "./Thinking";

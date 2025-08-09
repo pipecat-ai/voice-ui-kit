@@ -1,0 +1,198 @@
+---
+title: Pipecat App Base
+description: Higher-order component that streamlines setup of a Pipecat Client instance.
+component: true
+---
+
+## Overview
+
+The `PipecatAppBase` component reduces the boilerplate code required to bootstrap a new Pipecat Client application.
+
+It handles the common setup tasks that are typically the same across most applications, providing a simpler developer experience:
+
+- Creates a Pipecat Client instance and manages its lifecycle.
+- Wraps children with the necessary providers (such as `ThemeProvider` and `PipecatClientProvider`).
+- Provides connect and disconnect handlers (sync or async).
+- Mounts any available audio tracks using the Pipecat React `<PipecatClientAudio />` component.
+- Passes through transport and client options from the constructor.
+- Automatically disconnects and disposes the client when unmounting.
+- Surfaces error states to the child components.
+- Optionally disables theme provider based on `noThemeProvider` prop.
+
+<Callout>
+  This component creates the `PipecatClientProvider` context for you. Child
+  components will be able to use all Pipecat Client SDK hooks and components.
+</Callout>
+
+## Usage
+
+The `PipecatAppBase` component can be used in two ways:
+
+### 1. Render Prop Pattern (Function Children)
+
+This pattern gives you access to the client instance, connection handlers and state, allowing you to build custom UI that have direct access to these props:
+
+```tsx
+import {
+  PipecatAppBase,
+  ErrorCard,
+  SpinLoader,
+} from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="smallwebrtc"
+      connectParams={{
+        connectionUrl: "/api/offer",
+      }}
+    >
+      {({ client, handleConnect, handleDisconnect, error }) =>
+        !client ? (
+          <SpinLoader />
+        ) : error ? (
+          <ErrorCard error={error} />
+        ) : (
+          <div>
+            <button onClick={handleConnect}>Connect</button>
+            <button onClick={handleDisconnect}>Disconnect</button>
+          </div>
+        )
+      }
+    </PipecatAppBase>
+  );
+}
+```
+
+### 2. Direct Children Pattern
+
+This pattern is simpler when you want to use the built-in components that already handle connection state internally (e.g. using Pipecat React hooks).
+
+```tsx
+import {
+  PipecatAppBase,
+  ConnectButton,
+  ControlBar,
+  UserAudioControl,
+} from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="smallwebrtc"
+      connectParams={{
+        connectionUrl: "/api/offer",
+      }}
+    >
+      <div>
+        <ConnectButton />
+        <ControlBar>
+          <UserAudioControl />
+        </ControlBar>
+      </div>
+    </PipecatAppBase>
+  );
+}
+```
+
+### 3. Without Theme Provider
+
+You can disable the theme provider wrapper by setting `noThemeProvider={true}`:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="smallwebrtc"
+      connectParams={{
+        connectionUrl: "/api/offer",
+      }}
+      noThemeProvider={true}
+    >
+      <YourCustomComponent />
+    </PipecatAppBase>
+  );
+}
+```
+
+### Props
+
+<TypeTable
+  type={{
+    connectParams: {
+      description:
+        "Connection parameters for the transport, including the connection URL and any authentication details",
+      type: "TransportConnectionParams",
+      default: "{}",
+      required: true,
+    },
+    transportType: {
+      description:
+        "The type of transport to use for the connection (smallwebrtc or daily)",
+      type: '"smallwebrtc" | "daily"',
+      default: "smallwebrtc",
+      required: true,
+    },
+    clientOptions: {
+      description:
+        "Optional configuration options for the Pipecat Client instance",
+      type: "PipecatClientOptions",
+      default: "{}",
+      required: false,
+    },
+    noThemeProvider: {
+      description:
+        "Whether to disable the theme provider wrapper. When true, children are rendered without ThemeProvider.",
+      type: "boolean",
+      default: "false",
+      required: false,
+    },
+    themeProps: {
+      description:
+        "Optional theme configuration props to pass to the ThemeProvider",
+      type: "Partial<ThemeProviderProps>",
+      default: "{}",
+      required: false,
+    },
+    children: {
+      description:
+        "Either a render function that receives connection handlers and state, or direct React nodes",
+      type: "((props: PipecatBaseChildProps) => React.ReactNode) | React.ReactNode",
+      required: true,
+    },
+  }}
+/>
+
+### Child Props
+
+The `PipecatAppBase` component passes the following props to its children when using the render prop pattern:
+
+<TypeTable
+  type={{
+    client: {
+      description:
+        "The Pipecat client instance. Null when client is being initialized.",
+      type: "PipecatClient | null",
+      required: true,
+    },
+    handleConnect: {
+      description:
+        "A function to initiate a connection to the session. Can be sync or async.",
+      type: "() => void | Promise<void>",
+      required: false,
+    },
+    handleDisconnect: {
+      description:
+        "A function to disconnect from the current session. Can be sync or async.",
+      type: "() => void | Promise<void>",
+      required: false,
+    },
+    error: {
+      description: "An error message if connection fails",
+      type: "string | null",
+      required: false,
+    },
+  }}
+/>

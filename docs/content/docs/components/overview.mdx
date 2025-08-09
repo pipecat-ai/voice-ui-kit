@@ -1,0 +1,46 @@
+---
+title: "Overview"
+description: "Composable building blocks for your voice application"
+---
+
+Components address the core patterns every voice AI application requires: device management, connectivity controls, and audio/video panels for local and remote interaction.
+
+<Callout title="Not building with Pipecat?">
+  While the Voice UI Kit components are designed to work with the Pipecat Client
+  SDKs, they are not required. You can use the headless variants with any
+  framework.
+</Callout>
+
+## Component Variants
+
+Components are exported in two variants:
+
+### Connected Variants
+
+Connected components implement the Pipecat Client and React SDK, and must be wrapped in a `PipecatClientProvider` context. Their state and configuration is managed by your client object.
+
+They are exported without a `Component` suffix, for example, `UserAudioControl`.
+
+### Headless Variants
+
+Headless variants are pure, 'UI only' components that can be used with any framework or library. They make no assumptions about your underlying framework (such as the Pipecat Client SDKs).
+
+Their visual state and configuration are handled by properties.
+
+Headless components are exported with a `Component` suffix, for example, `UserAudioControlComponent`.
+
+## Primitives
+
+UI primitives are the lower-level UI components used to build higher-level components.
+
+`Button`, `Select`, `Card`, etc. are all examples of UI primitives. Most components use one or more primitives to build their UI.
+
+They are typically derived from [Shadcn](https://ui.shadcn.com/) implementations, making them familiar to customize and extend should you wish.
+
+<Card
+  href="/primitives"
+  title="Primitive Docs"
+  icon={<Blocks className="text-blue-300" />}
+>
+  Learn more about UI primitives
+</Card>

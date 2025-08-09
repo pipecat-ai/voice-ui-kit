@@ -1,5 +1,5 @@
+import { cn } from "@/lib/utils";
 import React, { type ReactNode } from "react";
-import { cn } from "../../lib/utils";
 
 interface DataListProps {
   data: Record<string, string | ReactNode>;

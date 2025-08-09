@@ -6,16 +6,16 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "vkui:bg-primary vkui:text-primary-foreground vkui:hover:bg-primary/90 vkui:border-transparent",
+          "vkui:bg-primary vkui:text-primary-foreground vkui:hover:bg-primary/90 vkui:border-transparent vkui:[--vkui-loader-stripe-color:var(--vkui-color-primary)]",
         secondary:
-          "vkui:bg-secondary vkui:border-transparent vkui:text-secondary-foreground vkui:hover:bg-secondary/60 vkui:focus-visible:border-secondary",
+          "vkui:bg-secondary vkui:border-transparent vkui:text-secondary-foreground vkui:hover:bg-secondary/60 vkui:focus-visible:border-secondary vkui:[--vkui-loader-stripe-color:var(--vkui-color-secondary)]",
         outline:
-          "vkui:text-foreground vkui:border vkui:bg-background vkui:hover:bg-accent vkui:dark:bg-input/30 vkui:dark:border-input vkui:dark:hover:bg-input/50 vkui:focus-visible:border-ring",
+          "vkui:text-foreground vkui:border vkui:bg-background vkui:hover:bg-accent vkui:dark:bg-input/30 vkui:dark:border-input vkui:dark:hover:bg-input/50 vkui:focus-visible:border-ring vkui:[--vkui-loader-stripe-color:var(--vkui-color-accent-foreground)]",
         destructive:
-          "vkui:bg-destructive vkui:border-transparent vkui:text-white vkui:hover:bg-destructive/90 vkui:focus-visible:ring-destructive/20 vkui:dark:focus-visible:ring-destructive/40 vkui:dark:bg-destructive/60",
+          "vkui:bg-destructive vkui:border-transparent vkui:text-white vkui:hover:bg-destructive/90 vkui:focus-visible:ring-destructive/20 vkui:dark:focus-visible:ring-destructive/40 vkui:dark:bg-destructive/60 vkui:[--vkui-loader-stripe-color:var(--vkui-color-destructive)]",
         ghost:
-          "vkui:text-foreground vkui:border vkui:border-transparent vkui:hover:bg-accent vkui:hover:text-accent-foreground vkui:dark:hover:bg-accent/50",
-        link: "vkui:text-primary vkui:underline-offset-4 vkui:hover:underline vkui:border vkui:border-transparent",
+          "vkui:text-foreground vkui:border vkui:border-transparent vkui:hover:bg-accent vkui:hover:text-accent-foreground vkui:dark:hover:bg-accent/50 vkui:[--vkui-loader-stripe-color:var(--vkui-color-accent-foreground)]",
+        link: "vkui:text-primary vkui:underline-offset-4 vkui:hover:underline vkui:border vkui:border-transparent vkui:[--vkui-loader-stripe-color:var(--vkui-color-primary)]",
         active:
           "vkui:bg-active vkui:border vkui:border-transparent vkui:text-active-foreground vkui:hover:bg-active/90 vkui:focus-visible:ring-active/20 vkui:dark:focus-visible:ring-active/40",
         inactive:
@@ -41,6 +41,15 @@ export const buttonVariants = cva(
       isIcon: {
         true: "",
         false: "",
+      },
+      isFullWidth: {
+        true: "vkui:w-full",
+        false: "",
+      },
+      loader: {
+        icon: "",
+        stripes:
+          "vkui:loader-stripes vkui:disabled:opacity-100 vkui:dark:disabled:opacity-100 vkui:text-white/0",
       },
     },
     compoundVariants: [
@@ -110,6 +119,7 @@ export const buttonVariants = cva(
       size: "default",
       state: "default",
       isIcon: false,
+      isFullWidth: false,
     },
   },
 );

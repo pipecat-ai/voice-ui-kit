@@ -13,12 +13,16 @@ export function Button({
   state,
   isIcon,
   isLoading = false,
+  isFullWidth = false,
   asChild = false,
+  loader = "icon",
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
     isLoading?: boolean;
+    isFullWidth?: boolean;
+    loader?: "icon" | "stripes";
   }) {
   const Comp = asChild ? Slot : "button";
 
@@ -27,12 +31,20 @@ export function Button({
       <Comp
         data-slot="button"
         className={cn(
-          buttonVariants({ variant, size, state, isIcon, className }),
+          buttonVariants({
+            variant,
+            size,
+            state,
+            isIcon,
+            isFullWidth,
+            loader,
+            className,
+          }),
         )}
         {...props}
         disabled
       >
-        <LoaderIcon className="vkui:animate-spin" />
+        {loader === "icon" && <LoaderIcon className="vkui:animate-spin" />}
         {props.children}
       </Comp>
     );
@@ -42,7 +54,14 @@ export function Button({
     <Comp
       data-slot="button"
       className={cn(
-        buttonVariants({ variant, size, state, isIcon, className }),
+        buttonVariants({
+          variant,
+          size,
+          state,
+          isIcon,
+          isFullWidth,
+          className,
+        }),
       )}
       {...props}
     />

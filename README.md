@@ -1,5 +1,6 @@
 # Pipecat Voice UI Kit
 ![NPM Version](https://img.shields.io/npm/v/@pipecat-ai/voice-ui-kit)
+[![Docs](https://img.shields.io/badge/documentation-blue)](https://docs.pipecat.ai/client/introduction)
 
 <img width="100%" src="image.png" />
 
@@ -8,7 +9,7 @@ Components, hooks and template apps for building React voice AI applications qui
 
 - 🔬 **Debug console** – Flexible, modular console UI to test and benchmark your Pipecat apps
 
-- 🔌 **Headless components** – Construct your own UIs with building blocks for voice, video, and real-time AI interactions
+- 🔌 **Components** – Construct your own UIs with building blocks for voice, video, and real-time AI interactions
 
 - 🚀 **Drop-in templates** – Fully-featured, configurable UIs for developing and showcasing Pipecat apps
 
@@ -17,6 +18,7 @@ Components, hooks and template apps for building React voice AI applications qui
 - 📱 **Responsive design** – Optimized for desktop, tablet, and mobile devices
 
 - ⭐ **Example apps** – Real-world implementations demonstrating best practices
+
 
 ## Quickstart
 
@@ -48,7 +50,7 @@ import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
 
 // Styles
-import "@pipecat-ai/voice-ui-kit/styles.css";
+import "@pipecat-ai/voice-ui-kit/styles";
 
 import { ConsoleTemplate, ThemeProvider } from "@pipecat-ai/voice-ui-kit";
 
@@ -58,8 +60,9 @@ export default function App() {
     <ThemeProvider>
       <div className="w-full h-dvh bg-background">
         <ConsoleTemplate
-          onConnect={ async () => {
-            // ... bot connect logic here
+          transportType="smallwebrtc"
+          connectParams={{
+            connectionUrl: "/api/offer",
           }}
         />
       </div>
@@ -68,53 +71,67 @@ export default function App() {
 }
 ```
 
-_Need a Pipecat agent to play with quickly? Check out this example and deploy in seconds to Pipecat Cloud!_
+## Build a custom UI
 
-## What's included?
+```tsx
+import {
+  ConnectButton,
+  ControlBar,
+  ErrorCard,
+  FullScreenContainer,
+  PipecatAppBase,
+  PipecatBasePassedProps,
+  SpinLoader,
+  VoiceVisualizer,
+  UserAudioControl
+} from "@pipecat-ai/voice-ui-kit";
 
-- How it's built, dependencies used etc
+import { App } from "./app";
 
-### Key dependencies
+export default function Home() {
+  return (
+    <FullScreenContainer>
+      <PipecatAppBase
+        transportType="smallwebrtc"
+        connectParams={{
+          connectionUrl: "/api/offer",
+        }}
+      >
+        {({
+          handleConnect,
+          handleDisconnect,
+          loading,
+          error,
+        }: PipecatBasePassedProps) =>
+          loading ? (
+            <SpinLoader />
+          ) : error ? (
+            <ErrorCard error={error} />
+          ) : (
+            <>
+              <VoiceVisualizer participantType="bot" />
 
-- Tailwind
+              <ControlBar>
+                <UserAudioControl />
+                <ConnectButton
+                  onConnect={handleConnect}
+                  onDisconnect={handleDisconnect} />
+              </ControlBar>
+            </>
+          )
+        }
+      </PipecatAppBase>
+    </FullScreenContainer>
+  );
+}
+```
 
-- Shadcn & Radix
+## Examples and Docs
 
-### How to use it
+📓 [Documentation](https://voiceuikit.pipecat.ai)
 
-- Components
-  - How to use, link to docs
+Examples:
 
-- Elements
-  - How to use, link to docs
-
-- Voice visualizers
-  - How to use, link to docs
-  - Using WebGL visualizers
-
-- Templates
-  - How to use, link to docs
-
-  - Figma file (coming soon)
-
-## Styling and themeing
-
-- Use with or without styles
-
-- Customizing the included theme
-  - shadcn variables list
-  - TW4 variables list
-  - changing the icon liberary
-
-- Scoping to avoid conflicts
-- working with TW3
-
-## Example projects
-
-- Links out
-
-## Working with the framework
-
-### Extending with your own components
-
-- Ladle / component stories
+- [Console Template](./examples/01-console/)
+- [Custom UI with components](./examples/02-components/)
+- [Pipcat Base App](./examples/03-pipecat-base-app/)

@@ -21,9 +21,9 @@ const selectTriggerVariants = cva(
       },
       size: {
         default:
-          "vkui:h-8 vkui:pl-3 vkui:pr-2.5 vkui:py-2 vkui:gap-2 vkui:[&_svg]:size-3.5",
-        sm: "vkui:h-7 vkui:pl-3 vkui:pr-2.5 vkui:py-1.5 vkui:gap-2 vkui:[&_svg]:size-3.5",
-        lg: "vkui:h-10 vkui:px-3.5 vkui:py-2.5 vkui:gap-3 vkui:[&_svg]:size-4",
+          "vkui:h-8 vkui:pl-3 vkui:pr-2.5 vkui:py-2 vkui:gap-2 vkui:[&_svg]:size-3.5 vkui:[&_[data-slot^=select-guide]]:mr-2",
+        sm: "vkui:h-7 vkui:pl-3 vkui:pr-2.5 vkui:py-1.5 vkui:gap-2 vkui:[&_svg]:size-3.5 vkui:[&_[data-slot^=select-guide]]:mr-2",
+        lg: "vkui:h-10 vkui:px-3.5 vkui:py-2.5 vkui:gap-3 vkui:[&_svg]:size-4 vkui:[&_[data-slot^=select-guide]]:mr-3",
       },
     },
     defaultVariants: {

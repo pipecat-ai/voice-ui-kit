@@ -35,7 +35,7 @@ export const ControlBar = ({
       )}
       {...props}
     >
-      <CardContent className="vkui:flex vkui:flex-row vkui:gap-4 vkui:p-4">
+      <CardContent className="vkui:flex vkui:flex-row vkui:gap-6">
         {children}
       </CardContent>
     </Card>

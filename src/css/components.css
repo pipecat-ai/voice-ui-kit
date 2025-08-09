@@ -1,0 +1,181 @@
+@layer components {
+  .vkui\:mono-upper {
+    font-family: var(--vkui-font-mono);
+    font-weight: var(--vkui-font-weight-bold);
+    font-size: var(--vkui-text-xs);
+    line-height: var(--tw-leading, var(--vkui-text-xs--line-height));
+    letter-spacing: var(--vkui-tracking-wider);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .vkui\:borderclip {
+    background-clip: padding-box, border-box;
+  }
+
+  .vkui\:elbow {
+    position: relative;
+    overflow: visible;
+
+    &:before {
+      content: "";
+      position: absolute;
+      inset: calc(var(--vkui-elbow-offset) * -1);
+      background: 
+        /* Top-left corner: horizontal part */
+        linear-gradient(var(--vkui-color-elbow), var(--vkui-color-elbow)) top 0
+          left 0 / var(--vkui-elbow-size) var(--vkui-elbow-width) no-repeat,
+        /* Top-left corner: vertical part */
+          linear-gradient(var(--vkui-color-elbow), var(--vkui-color-elbow)) top
+          0 left 0 / var(--vkui-elbow-width) var(--vkui-elbow-size) no-repeat,
+        /* Top-right corner: horizontal part */
+          linear-gradient(var(--vkui-color-elbow), var(--vkui-color-elbow)) top
+          0 right 0 / var(--vkui-elbow-size) var(--vkui-elbow-width) no-repeat,
+        /* Top-right corner: vertical part */
+          linear-gradient(var(--vkui-color-elbow), var(--vkui-color-elbow)) top
+          0 right 0 / var(--vkui-elbow-width) var(--vkui-elbow-size) no-repeat,
+        /* Bottom-left corner: horizontal part */
+          linear-gradient(var(--vkui-color-elbow), var(--vkui-color-elbow))
+          bottom 0 left 0 / var(--vkui-elbow-size) var(--vkui-elbow-width)
+          no-repeat,
+        /* Bottom-left corner: vertical part */
+          linear-gradient(var(--vkui-color-elbow), var(--vkui-color-elbow))
+          bottom 0 left 0 / var(--vkui-elbow-width) var(--vkui-elbow-size)
+          no-repeat,
+        /* Bottom-right corner: horizontal part */
+          linear-gradient(var(--vkui-color-elbow), var(--vkui-color-elbow))
+          bottom 0 right 0 / var(--vkui-elbow-size) var(--vkui-elbow-width)
+          no-repeat,
+        /* Bottom-right corner: vertical part */
+          linear-gradient(var(--vkui-color-elbow), var(--vkui-color-elbow))
+          bottom 0 right 0 / var(--vkui-elbow-width) var(--vkui-elbow-size)
+          no-repeat;
+      pointer-events: none;
+      opacity: var(--vkui-elbow-opacity);
+    }
+  }
+
+  .vkui\:bg-scanlines {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      color-mix(
+          in srgb,
+          currentColor calc(var(--vkui-scanlines-opacity) * 100%),
+          transparent
+        )
+        2px,
+      color-mix(
+          in srgb,
+          currentColor calc(var(--vkui-scanlines-opacity) * 100%),
+          transparent
+        )
+        4px
+    );
+    background-clip: padding-box;
+  }
+
+  .vkui\:bg-grid {
+    --vkui-grid-color: color-mix(
+      in srgb,
+      currentColor calc(var(--vkui-grid-opacity) * 100%),
+      transparent
+    );
+    background-image:
+      linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent var(--vkui-grid-size),
+        var(--vkui-grid-color) var(--vkui-grid-size),
+        var(--vkui-grid-color)
+          calc(var(--vkui-grid-size) + var(--vkui-grid-border-width))
+      ),
+      linear-gradient(
+        to right,
+        transparent 0,
+        transparent var(--vkui-grid-size),
+        var(--vkui-grid-color) var(--vkui-grid-size),
+        var(--vkui-grid-color)
+          calc(var(--vkui-grid-size) + var(--vkui-grid-border-width))
+      );
+    background-size:
+      100% calc(var(--vkui-grid-size) + var(--vkui-grid-border-width)),
+      calc(var(--vkui-grid-size) + var(--vkui-grid-border-width)) 100%;
+    background-repeat: repeat;
+    background-position: 0 0;
+    background-clip: padding-box;
+  }
+
+  .vkui\:bg-stripes {
+    --vkui-stripe-color: color-mix(
+      in srgb,
+      currentColor calc(var(--vkui-grid-opacity) * 100%),
+      transparent
+    );
+    position: relative;
+    overflow: hidden;
+
+    & > [data-slot^="card-"] {
+      margin-inline: var(--vkui-stripe-inset);
+    }
+
+    & > [data-slot^="card-"]:first-child {
+      margin-top: var(--vkui-stripe-inset);
+    }
+
+    & > [data-slot^="card-"]:last-child {
+      margin-bottom: var(--vkui-stripe-inset);
+    }
+
+    &:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent var(--vkui-stripe-gap-size),
+        var(--vkui-stripe-color) var(--vkui-stripe-gap-size),
+        var(--vkui-stripe-color) var(--vkui-stripe-size)
+      );
+      mask-image:
+        linear-gradient(
+          to right,
+          black 0,
+          black var(--vkui-stripe-border-size),
+          transparent var(--vkui-stripe-border-size),
+          transparent calc(100% - var(--vkui-stripe-border-size)),
+          black calc(100% - var(--vkui-stripe-border-size))
+        ),
+        linear-gradient(
+          to bottom,
+          black 0,
+          black var(--vkui-stripe-border-size),
+          transparent var(--vkui-stripe-border-size),
+          transparent calc(100% - var(--vkui-stripe-border-size)),
+          black calc(100% - var(--vkui-stripe-border-size))
+        );
+      mask-composite: add;
+      -webkit-mask-composite: source-over;
+      pointer-events: none;
+      z-index: 0;
+    }
+  }
+
+  .vkui\:loader-stripes {
+    --vkui-loader-stripe-color: currentColor;
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--vkui-loader-stripe-color),
+      var(--vkui-loader-stripe-color) var(--vkui-loader-stripe-width),
+      var(--vkui-color-background) var(--vkui-loader-stripe-width),
+      var(--vkui-color-background) calc(var(--vkui-loader-stripe-width) * 2)
+    );
+    background-size: calc(var(--vkui-loader-stripe-width) * 2.828427125)
+      calc(var(--vkui-loader-stripe-width) * 2.828427125);
+    animation: scroll var(--vkui-loader-stripe-speed) linear infinite;
+    overflow: hidden;
+    background-clip: padding-box;
+  }
+}

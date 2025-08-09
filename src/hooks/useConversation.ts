@@ -1,43 +1,73 @@
+import { type ConversationMessage } from "@/types/conversation";
 import { RTVIEvent } from "@pipecat-ai/client-js";
 import { useRTVIClientEvent } from "@pipecat-ai/client-react";
-import { useRef, useState } from "react";
-
-interface ConversationMessage {
-  role: "user" | "assistant";
-  content: string;
-  final?: boolean;
-  createdAt: string;
-  updatedAt?: string;
-}
+import { useCallback, useMemo, useRef, useState } from "react";
 
 interface Props {
   onMessageAdded?: (message: ConversationMessage) => void;
 }
 
-const sortByCreatedAt = (
-  a: ConversationMessage,
-  b: ConversationMessage,
-): number => {
-  return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-};
-
-const filterEmptyMessages = (
-  message: ConversationMessage,
-  index: number,
-  array: ConversationMessage[],
-): boolean => {
-  if (message.content) return true;
-
-  // For empty messages, check if there's a non-empty message with the same role following it
-  const nextMessageWithSameRole = array
-    .slice(index + 1)
-    .find((m) => m.role === message.role && m.content);
-
-  return !nextMessageWithSameRole;
-};
-
 export const useConversation = ({ onMessageAdded }: Props = {}) => {
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
+
+  const sortByCreatedAt = useCallback(
+    (a: ConversationMessage, b: ConversationMessage): number => {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    },
+    [],
+  );
+
+  const filterEmptyMessages = useCallback(
+    (
+      message: ConversationMessage,
+      index: number,
+      array: ConversationMessage[],
+    ): boolean => {
+      if (typeof message.content === "string") {
+        if (message.content) return true;
+      } else {
+        // For ReactNode content, always keep it
+        return true;
+      }
+
+      // For empty string messages, check if there's a non-empty message with the same role following it
+      const nextMessageWithSameRole = array
+        .slice(index + 1)
+        .find(
+          (m) =>
+            m.role === message.role &&
+            (typeof m.content === "string" ? m.content : true),
+        );
+
+      return !nextMessageWithSameRole;
+    },
+    [],
+  );
+
+  const injectMessage = useCallback(
+    (message: {
+      role: "user" | "assistant" | "system";
+      content: string | React.ReactNode;
+    }) => {
+      const now = new Date();
+      const newMessage: ConversationMessage = {
+        role: message.role,
+        content: message.content,
+        final: true,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      };
+
+      setMessages((prev) => {
+        const updatedMessages = [...prev, newMessage]
+          .sort(sortByCreatedAt)
+          .filter(filterEmptyMessages);
+        onMessageAdded?.(newMessage);
+        return updatedMessages;
+      });
+    },
+    [onMessageAdded, sortByCreatedAt, filterEmptyMessages],
+  );
 
   useRTVIClientEvent(RTVIEvent.Connected, () => {
     setMessages([]);
@@ -253,7 +283,7 @@ export const useConversation = ({ onMessageAdded }: Props = {}) => {
   });
 
   // Merge messages of the same role that are close in time (within 30 seconds)
-  const getMergedMessages = () => {
+  const getMergedMessages = useMemo(() => {
     const mergedMessages: ConversationMessage[] = [];
 
     for (let i = 0; i < messages.length; i++) {
@@ -270,6 +300,7 @@ export const useConversation = ({ onMessageAdded }: Props = {}) => {
       const shouldMerge =
         lastMerged &&
         lastMerged.role === currentMessage.role &&
+        currentMessage.role !== "system" && // Never merge system messages
         timeDiff < 30000; // 30 seconds threshold
 
       if (shouldMerge) {
@@ -285,10 +316,11 @@ export const useConversation = ({ onMessageAdded }: Props = {}) => {
     }
 
     return mergedMessages;
-  };
+  }, [messages]);
 
   return {
-    messages: getMergedMessages(),
+    messages: getMergedMessages,
+    injectMessage,
   };
 };
 export default useConversation;
