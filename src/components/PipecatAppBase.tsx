@@ -30,6 +30,8 @@ export interface PipecatBaseProps {
   noThemeProvider?: boolean;
   /** Default theme to use for the app */
   themeProps?: Partial<ThemeProviderProps>;
+  /** Auto connect on mount */
+  connectOnMount?: boolean;
 
   /**
    * Children can be either:
@@ -108,10 +110,11 @@ export interface PipecatBaseChildProps {
  * ```
  */
 export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
-  connectParams,
-  transportType,
   clientOptions,
+  connectParams,
+  connectOnMount = false,
   noThemeProvider = false,
+  transportType,
   themeProps,
   children,
 }) => {
@@ -137,6 +140,10 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
         });
         currentClient = pcClient;
         setClient(pcClient);
+
+        if (connectOnMount) {
+          await pcClient.connect(connectParams);
+        }
       } catch (error) {
         console.error("Failed to initialize transport:", error);
       }
@@ -147,7 +154,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
       setClient(null);
       setError(null);
     };
-  }, [connectParams, transportType, clientOptions]);
+  }, [connectParams, transportType, clientOptions, connectOnMount]);
 
   /**
    * Initiates a connection to the session using the configured client.

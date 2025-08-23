@@ -69,7 +69,7 @@ description: Displays a card with optional header, content and footer.
       default: "false",
     },
     withGradientBorder: {
-      description: "Whether to use a gradient border",
+      description: "Whether to use a gradient border. Not compatible with background patterns.",
       type: "boolean",
       required: false,
       default: "false",
@@ -345,6 +345,10 @@ Note: will not work with rounded corners.
 </LiveComponent>
 
 ### Gradient Border
+
+<Callout>
+Note: Using gradient border applies only when a `background` variant is not set.
+</Callout>
 
 <LiveComponent language="tsx">
 {`
