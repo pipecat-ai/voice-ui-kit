@@ -12,8 +12,7 @@
     "@pipecat-ai/voice-ui-kit": "workspace:*",
     "next": "15.3.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tw-animate-css": "^1.3.5"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

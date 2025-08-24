@@ -1,6 +1,6 @@
 import { Button, type ButtonProps } from "@/components/ui/button";
-import { TerminalIcon, TriangleAlertIcon } from "@/icons";
 import type { Story, StoryDefault } from "@ladle/react";
+import { TerminalIcon, TriangleAlertIcon } from "lucide-react";
 import {
   buttonRoundedOptions,
   buttonSizeOptions,

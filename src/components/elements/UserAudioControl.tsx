@@ -7,7 +7,6 @@ import {
   type ButtonState,
   type ButtonVariant,
 } from "@/components/ui/buttonVariants";
-import { ChevronDownIcon, MicIcon, MicOffIcon } from "@/icons";
 import { cn } from "@/lib/utils";
 import { VoiceVisualizer } from "@/visualizers";
 import {
@@ -16,6 +15,7 @@ import {
   usePipecatClient,
   usePipecatClientMediaDevices,
 } from "@pipecat-ai/client-react";
+import { ChevronDownIcon, MicIcon, MicOffIcon } from "lucide-react";
 import { useEffect } from "react";
 import { ButtonGroup } from "../ui";
 import { DeviceDropDown } from "./DeviceDropDown";

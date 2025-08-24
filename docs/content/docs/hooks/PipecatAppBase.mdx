@@ -117,6 +117,28 @@ export default function Home() {
 }
 ```
 
+### 4. Auto-Connect on Mount
+
+You can automatically connect to the session when the component mounts by setting `connectOnMount={true}`:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="smallwebrtc"
+      connectParams={{
+        webrtcUrl: "/api/offer",
+      }}
+      connectOnMount={true}
+    >
+      <YourCustomComponent />
+    </PipecatAppBase>
+  );
+}
+```
+
 ### Props
 
 <TypeTable
@@ -150,6 +172,13 @@ export default function Home() {
       description:
         "Optional theme configuration props to pass to the ThemeProvider",
       type: "Partial<ThemeProviderProps>",
+      required: false,
+    },
+    connectOnMount: {
+      description:
+        "Whether to automatically connect to the session when the component mounts",
+      type: "boolean",
+      default: "false",
       required: false,
     },
     children: {

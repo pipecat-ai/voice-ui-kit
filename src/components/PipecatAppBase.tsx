@@ -30,7 +30,7 @@ export interface PipecatBaseProps {
   noThemeProvider?: boolean;
   /** Default theme to use for the app */
   themeProps?: Partial<ThemeProviderProps>;
-  /** Auto connect on mount */
+  /** Whether to automatically connect to the session when the component mounts. Defaults to false. */
   connectOnMount?: boolean;
 
   /**
@@ -70,8 +70,9 @@ export interface PipecatBaseChildProps {
  * - Handles error states and loading states
  * - Automatically disconnects the client when unmounting
  * - Optionally disables theme provider based on noThemeProvider prop
+ * - Optionally auto-connects to the session on mount based on connectOnMount prop
  *
- * @param props - Configuration for the audio client including connection params and transport type
+ * @param props - Configuration for the audio client including connection params, transport type, and auto-connect behavior
  * @returns A provider component that wraps children with client context and handlers
  *
  * @example
@@ -104,6 +105,15 @@ export interface PipecatBaseChildProps {
  *   connectParams={...}
  *   transportType="daily"
  *   noThemeProvider={true}
+ * >
+ *   <YourComponent />
+ * </PipecatAppBase>
+ *
+ * // Using with connectOnMount to auto-connect on component mount
+ * <PipecatAppBase
+ *   connectParams={...}
+ *   transportType="smallwebrtc"
+ *   connectOnMount={true}
  * >
  *   <YourComponent />
  * </PipecatAppBase>

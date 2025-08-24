@@ -37,16 +37,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  BotIcon,
-  ChevronsLeftRightEllipsisIcon,
-  CircleAlertIcon,
-  InfoIcon,
-  MessagesSquareIcon,
-  MicIcon,
-  PanelLeftCloseIcon,
-  PanelRightCloseIcon,
-} from "@/icons";
 import type {
   DailyTransportOptions,
   SmallWebRTCTransportOptions,
@@ -63,6 +53,16 @@ import {
   PipecatClientAudio,
   PipecatClientProvider,
 } from "@pipecat-ai/client-react";
+import {
+  BotIcon,
+  ChevronsLeftRightEllipsisIcon,
+  CircleAlertIcon,
+  InfoIcon,
+  MessagesSquareIcon,
+  MicIcon,
+  PanelLeftCloseIcon,
+  PanelRightCloseIcon,
+} from "lucide-react";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import type { ImperativePanelHandle } from "react-resizable-panels";
 

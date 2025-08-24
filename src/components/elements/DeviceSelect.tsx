@@ -81,9 +81,7 @@ export const DeviceSelectComponent = ({
   );
 };
 
-export interface DeviceSelectProps extends DeviceSelectBaseProps {}
-
-export const DeviceSelect: React.FC<DeviceSelectProps> = (props) => {
+export const DeviceSelect: React.FC<DeviceSelectBaseProps> = (props) => {
   const client = usePipecatClient();
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();

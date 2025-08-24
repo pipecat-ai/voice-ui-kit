@@ -1,6 +1,6 @@
-import { TerminalIcon } from "@/icons";
 import { cn } from "@/lib/utils";
 import type { Story, StoryDefault } from "@ladle/react";
+import { TerminalIcon } from "lucide-react";
 
 export default {
   title: "Documentation / Theme",

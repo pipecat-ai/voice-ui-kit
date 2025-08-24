@@ -26,7 +26,7 @@ export type PipecatConnectionState =
  *
  * **State Mapping:**
  * - `"ready"` → `"connected"`
- * - `"authenticating"` | `"authenticated"` → `"connecting"`
+ * - `"authenticating"` | `"authenticated"` | `"connecting"` → `"connecting"`
  * - All other states → `"disconnected"`
  *
  * @returns {PipecatConnectionState} The simplified connection state

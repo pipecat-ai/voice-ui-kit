@@ -13,9 +13,9 @@ import {
   SpinLoader,
 } from "@/components/ui";
 import { usePipecatConnectionState } from "@/hooks";
-import { ChevronDownIcon, SendIcon } from "@/icons";
 import { cn } from "@/lib/utils";
 import { TransportConnectionParams } from "@pipecat-ai/client-js";
+import { ChevronDownIcon, SendIcon } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
 
 export interface WidgetTemplateProps {
@@ -58,10 +58,10 @@ const TextInput = ({ debounceTime = 300 }: { debounceTime?: number }) => {
   }, [message]);
 
   useEffect(() => {
+    if (!message.trim()) return;
+
     const timeoutId = setTimeout(() => {
-      if (message.trim()) {
-        handleSend();
-      }
+      handleSend();
     }, debounceTime);
 
     return () => clearTimeout(timeoutId);
@@ -95,20 +95,18 @@ const TextInput = ({ debounceTime = 300 }: { debounceTime?: number }) => {
 };
 
 const WidgetPanel = (props: WidgetTemplateProps) => {
-  const { debounceTime, classNames } = props;
-
   return (
     <Card
       withGradientBorder
       className={cn(
         "w-full self-end justify-self-end max-w-md z-20 animate-in fade-in-0 slide-in-from-bottom-2 duration-300",
-        classNames?.widgetContainer,
+        props.classNames?.widgetContainer,
       )}
       shadow="xlong"
       size="lg"
     >
       <CardContent>
-        <TextInput debounceTime={debounceTime} />
+        <TextInput debounceTime={props.debounceTime} />
         <Divider size="md" />
         <UserAudioControl size="lg" />
       </CardContent>
@@ -117,13 +115,7 @@ const WidgetPanel = (props: WidgetTemplateProps) => {
 };
 
 export const WidgetTemplate: React.FC<WidgetTemplateProps> = memo(
-  ({
-    debounceTime = 300,
-    classNames,
-    toggleButtonLabel = "Open",
-    connectParams,
-    ...rest
-  }) => {
+  ({ classNames, toggleButtonLabel = "Open", connectParams, ...rest }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const widgetComp = (

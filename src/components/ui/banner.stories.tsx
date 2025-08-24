@@ -1,5 +1,5 @@
-import { CircleAlertIcon } from "@/icons";
 import type { Story, StoryDefault } from "@ladle/react";
+import { CircleAlertIcon } from "lucide-react";
 import {
   Banner,
   BannerClose,

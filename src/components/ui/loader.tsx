@@ -1,8 +1,8 @@
-import { LoaderIcon } from "@/icons";
 import { cn } from "@/lib/utils";
+import { Loader2Icon } from "lucide-react";
 
 export const SpinLoader = ({ size = 32 }: { size?: number }) => {
-  return <LoaderIcon className="animate-spin opacity-50" size={size} />;
+  return <Loader2Icon className="animate-spin opacity-50" size={size} />;
 };
 
 export const StripeLoader = ({ className }: { className?: string }) => {
