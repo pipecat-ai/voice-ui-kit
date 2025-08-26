@@ -12,11 +12,10 @@ import { VoiceVisualizer } from "@/visualizers";
 import {
   type OptionalMediaDeviceInfo,
   PipecatClientMicToggle,
-  usePipecatClient,
   usePipecatClientMediaDevices,
+  usePipecatClientTransportState,
 } from "@pipecat-ai/client-react";
 import { ChevronDownIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useEffect } from "react";
 import { ButtonGroup } from "../ui";
 import { DeviceDropDown } from "./DeviceDropDown";
 
@@ -187,26 +186,17 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
 };
 
 export const UserAudioControl: React.FC<Props> = (props) => {
-  const client = usePipecatClient();
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();
 
-  const hasAudio = client?.isMicEnabled;
-  const loading = hasAudio === null;
-
-  useEffect(() => {
-    if (!client) return;
-
-    if (["idle", "disconnected"].includes(client.state)) {
-      client.initDevices();
-    }
-  }, [client]);
+  const transportState = usePipecatClientTransportState();
+  const loading =
+    transportState === "disconnected" || transportState === "initializing";
 
   return (
     <PipecatClientMicToggle>
       {({ isMicEnabled, onClick }) => (
         <UserAudioComponent
-          noAudio={!hasAudio}
           onClick={onClick}
           isMicEnabled={isMicEnabled}
           availableMics={availableMics}
