@@ -5,7 +5,6 @@ import {
   PanelHeader,
   PanelTitle,
 } from "@/components/ui/panel";
-import { FunnelIcon } from "@/icons";
 import { cn } from "@/lib/utils";
 import { RTVIEvent } from "@pipecat-ai/client-js";
 import {
@@ -13,6 +12,7 @@ import {
   usePipecatClientTransportState,
   useRTVIClientEvent,
 } from "@pipecat-ai/client-react";
+import { FunnelIcon } from "lucide-react";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 
 interface EventData {

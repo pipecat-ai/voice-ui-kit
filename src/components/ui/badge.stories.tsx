@@ -1,5 +1,5 @@
-import { TriangleAlertIcon } from "@/icons";
 import type { Story, StoryDefault } from "@ladle/react";
+import { TriangleAlertIcon } from "lucide-react";
 import { Badge, type BadgeProps } from "./badge";
 import { Button } from "./button";
 import { Progress } from "./progress";

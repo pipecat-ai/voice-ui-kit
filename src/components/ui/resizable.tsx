@@ -6,9 +6,9 @@ import {
   usePanelGroupContext,
 } from "react-resizable-panels";
 
-import { EllipsisVerticalIcon } from "@/icons";
 import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
+import { EllipsisVerticalIcon } from "lucide-react";
 
 function ResizablePanelGroup({
   className,

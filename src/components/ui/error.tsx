@@ -5,8 +5,8 @@ import {
   CardProps,
   CardTitle,
 } from "@/components/ui/card";
-import { InfoIcon } from "@/icons";
 import { cn } from "@/lib/utils";
+import { InfoIcon } from "lucide-react";
 
 export const ErrorCard = ({
   title = "An Error Occurred",

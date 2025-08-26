@@ -1,5 +1,4 @@
 import DataList from "@/components/elements/DataList";
-import { LoaderIcon } from "@/icons";
 import { TextDashBlankslate } from "@/index";
 import { cn } from "@/lib/utils";
 import { RTVIEvent } from "@pipecat-ai/client-js";
@@ -7,6 +6,7 @@ import {
   usePipecatClientTransportState,
   useRTVIClientEvent,
 } from "@pipecat-ai/client-react";
+import { Loader2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -50,7 +50,7 @@ export const ClientStatusComponent = ({
       {transportState &&
         ["authenticating", "authenticated", "connecting"].includes(
           transportState,
-        ) && <LoaderIcon size={12} className="animate-spin" />}
+        ) && <Loader2Icon size={12} className="animate-spin" />}
     </span>
   );
 };

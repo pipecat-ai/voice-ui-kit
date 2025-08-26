@@ -1,4 +1,8 @@
 export {
+  usePipecatConnectionState,
+  type PipecatConnectionState,
+} from "./usePipecatConnectionState";
+export {
   useConversation,
   usePipecatConversation,
 } from "./usePipecatConversation";

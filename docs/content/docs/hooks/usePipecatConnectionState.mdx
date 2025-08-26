@@ -1,0 +1,147 @@
+---
+title: usePipecatConnectionState
+description: Hook that provides a simplified connection state for Pipecat transport.
+---
+
+## Overview
+
+`usePipecatConnectionState` derives a simplified connection state from Pipecat transport, mapping to `disconnected`, `connecting`, and `connected`. 
+
+This hook is designed to simplify UI state management for controls that only need to know the connectivity status.
+
+## Usage
+
+**What is the difference from `usePipecatClientTransportState`**
+
+`usePipecatClientTransportState` returns the full transport state, useful when you need to know the exact state of the transport:
+
+```tsx
+import { usePipecatClientTransportState } from "@pipecat-ai/voice-ui-kit";
+
+const transportState = usePipecatClientTransportState();
+
+// "disconnected", "initializing", "initialized", "authenticating", "authenticated", "connecting", "connected", "ready", "disconnecting"
+```
+
+See: [usePipecatClientTransportState](https://docs.pipecat.ai/client/js/transports/transport#transport-states).
+
+`usePipecatConnectionState` returns a simplified connection state that is useful for UI controls:
+
+### Basic
+
+```tsx
+import { usePipecatConnectionState } from "@pipecat-ai/voice-ui-kit";
+
+export function ConnectButton() {
+  const connectionState = usePipecatConnectionState();
+  
+  return (
+    <button
+      disabled={connectionState !== "connected"}
+      onClick={handleConnect}
+    >
+      {connectionState === "connected" ? "Connected" :
+       connectionState === "connecting" ? "Connecting..." : "Connect"}
+    </button>
+  );
+}
+```
+
+### With loading states
+
+```tsx
+import { usePipecatConnectionState } from "@pipecat-ai/voice-ui-kit";
+
+export function ConnectionStatus() {
+  const connectionState = usePipecatConnectionState();
+  
+  return (
+    <div>
+      <div className={`status-indicator ${connectionState}`}>
+        {connectionState === "connected" && "✓ Connected"}
+        {connectionState === "connecting" && "⟳ Connecting..."}
+        {connectionState === "disconnected" && "✗ Disconnected"}
+      </div>
+    </div>
+  );
+}
+```
+
+### Full example with conditional rendering
+
+```tsx
+import React from "react";
+import { usePipecatConnectionState } from "@pipecat-ai/voice-ui-kit";
+
+export function ConnectionControls() {
+  const connectionState = usePipecatConnectionState();
+  
+  const getButtonText = () => {
+    switch (connectionState) {
+      case "connected":
+        return "Disconnect";
+      case "connecting":
+        return "Connecting...";
+      default:
+        return "Connect";
+    }
+  };
+  
+  const getStatusColor = () => {
+    switch (connectionState) {
+      case "connected":
+        return "green";
+      case "connecting":
+        return "yellow";
+      default:
+        return "red";
+    }
+  };
+  
+  return (
+    <div className="connection-controls">
+      <div className={`status-led ${getStatusColor()}`} />
+      <button
+        disabled={connectionState === "connecting"}
+        onClick={connectionState === "connected" ? handleDisconnect : handleConnect}
+      >
+        {getButtonText()}
+      </button>
+      
+      {connectionState === "connecting" && (
+        <div className="loading-spinner" />
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## API
+
+### Return
+
+<TypeTable
+  className="text-sm"
+  type={{
+    connectionState: {
+      description: "The simplified connection state derived from Pipecat transport states",
+      type: "PipecatConnectionState",
+      required: true,
+    },
+  }}
+/>
+
+### Types
+
+<TypeTable
+  className="text-sm"
+  type={{
+    PipecatConnectionState: {
+      description: "Simplified connection states for UI controls",
+      type: '"disconnected" | "connecting" | "connected"',
+      required: true,
+    },
+  }}
+/>

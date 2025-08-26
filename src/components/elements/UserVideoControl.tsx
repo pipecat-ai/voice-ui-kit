@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/buttongroup";
-import { ChevronDownIcon, VideoIcon, VideoOffIcon } from "@/icons";
 import { cn } from "@/lib/utils";
 import {
   type OptionalMediaDeviceInfo,
@@ -8,6 +7,7 @@ import {
   PipecatClientVideo,
   usePipecatClientMediaDevices,
 } from "@pipecat-ai/client-react";
+import { ChevronDownIcon, VideoIcon, VideoOffIcon } from "lucide-react";
 import { DeviceDropDown } from "./DeviceDropDown";
 
 interface Props {

@@ -1,7 +1,7 @@
 import buttonVariants from "@/components/ui/buttonVariants";
-import { LoaderIcon } from "@/icons";
 import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps } from "class-variance-authority";
+import { LoaderIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 

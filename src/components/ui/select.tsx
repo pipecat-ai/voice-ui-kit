@@ -1,14 +1,14 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
 
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  SelectChevronIcon,
-} from "@/icons";
 import { getPipecatUIContainer } from "@/lib/dom";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronsUpDownIcon,
+  ChevronUpIcon,
+} from "lucide-react";
 
 const selectTriggerVariants = cva(
   "truncate data-[placeholder]:text-muted-foreground font-mono text-xs [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between border bg-transparent whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0",
@@ -104,7 +104,7 @@ export function SelectTrigger({
     >
       <span className="truncate flex-1 min-w-0">{children}</span>
       <SelectPrimitive.Icon asChild>
-        <SelectChevronIcon className="opacity-50 flex-none" />
+        <ChevronsUpDownIcon className="opacity-50 flex-none" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );

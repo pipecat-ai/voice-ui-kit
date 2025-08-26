@@ -4,10 +4,10 @@ import {
   PanelHeader,
   PanelTitle,
 } from "@/components/ui/panel";
-import { MicOffIcon } from "@/icons";
 import { cn } from "@/lib/utils";
 import { VoiceVisualizer } from "@/visualizers/VoiceVisualizer";
 import { usePipecatClientMediaTrack } from "@pipecat-ai/client-react";
+import { MicOffIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface BotAudioPanelProps {

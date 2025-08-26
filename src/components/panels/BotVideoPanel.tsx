@@ -4,12 +4,12 @@ import {
   PanelHeader,
   PanelTitle,
 } from "@/components/ui/panel";
-import { VideoOffIcon } from "@/icons";
 import { cn } from "@/lib/utils";
 import {
   PipecatClientVideo,
   usePipecatClientMediaTrack,
 } from "@pipecat-ai/client-react";
+import { VideoOffIcon } from "lucide-react";
 
 interface BotVideoPanelProps {
   className?: string;
