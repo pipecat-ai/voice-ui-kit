@@ -35,7 +35,7 @@ EXAMPLE_CHUNK_OVERLAP = 1000
 # ----------------------------
 # OpenAI models for different purposes
 EMBEDDING_MODEL = "text-embedding-3-large"
-LLM_MODEL = "gpt-5"
+LLM_MODEL = "gpt-4o-mini"
 LLM_TEMPERATURE = 0
 
 # Retriever config

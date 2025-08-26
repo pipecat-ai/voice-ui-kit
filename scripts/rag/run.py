@@ -381,6 +381,7 @@ def main():
     parser.add_argument("--verbose", action="store_true", help="Verbose logs")
     parser.add_argument("--dry-run", action="store_true", help="Dry run mode - no database writes or permanent changes")
     parser.add_argument("--debug-retrieval", action="store_true", help="Debug mode - show retrieved documents before LLM processing")
+    parser.add_argument("--fast", action="store_true", help="Use fast similarity search instead of SelfQueryRetriever")
     args = parser.parse_args()
 
     if args.verbose:
@@ -423,38 +424,20 @@ def main():
         LOG.info(f"Asking: {args.ask}")
         
         # Use the new retrieve module
-        from retrieve import make_chain
+        from retrieve import query
         
-        # Get the retriever directly for debugging
-        database = create_database(db_dir=args.db)
-        retriever = database.get_retriever()
-        docs = retriever.invoke(args.ask)
-        
-        if args.debug_retrieval:
-            print("\n=== RETRIEVED DOCUMENTS ===")
-            print(f"Retrieved {len(docs)} documents:")
-            for i, doc in enumerate(docs):
-                print(f"\n--- Document {i+1} ---")
-                print(f"File: {doc.metadata.get('relpath', 'unknown')}")
-                print(f"Kind: {doc.metadata.get('kind', 'unknown')}")
-                print(f"Ext: {doc.metadata.get('ext', 'unknown')}")
-                print(f"Component: {doc.metadata.get('component', 'none')}")
-                print(f"Lines: {doc.metadata.get('start_line', '?')}-{doc.metadata.get('end_line', '?')}")
-                print(f"Content length: {len(doc.page_content)} chars")
-                print(f"Content preview: {doc.page_content[:CONTENT_PREVIEW_LENGTH]}...")
-                if any(pattern in doc.metadata.get('relpath', '') for pattern in PROPS_FILE_PATTERNS) or any(pattern in doc.page_content.lower() for pattern in INTERFACE_CONTENT_PATTERNS):
-                    print(f"FULL CONTENT:")
-                    print(doc.page_content)
-                print("-" * 50)
-            print("\n" + "="*80 + "\n")
-        
-        chain = make_chain(args.db)
         t0 = time.time()
-        out = chain.invoke({"question": args.ask})
+        result = query(
+            question=args.ask,
+            db_dir=args.db,
+            debug_retrieval=args.debug_retrieval,
+            use_fast_search=args.fast
+        )
         dt = time.time() - t0
+        
         print("\n=== ANSWER ===\n")
-        print(out.content)
-        LOG.info(f"Answered in {dt:.2f}s")
+        print(result["answer"])
+        LOG.info(f"Answered in {dt:.2f}s using {result.get('method', 'unknown')} method")
 
 if __name__ == "__main__":
     main()

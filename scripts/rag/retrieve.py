@@ -112,8 +112,13 @@ def make_chain(db_dir: str = ".chroma"):
         "For complete information about a component, you need both the implementation (code) and the styling (CSS) files."
     )
     
-    # Create SelfQueryRetriever
-    llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE)
+    # Create SelfQueryRetriever with optimized settings
+    llm = ChatOpenAI(
+        model=LLM_MODEL, 
+        temperature=LLM_TEMPERATURE,
+        request_timeout=10,  # 10 second timeout
+        max_retries=1  # Reduce retries
+    )
     retriever = SelfQueryRetriever.from_llm(
         llm,
         database.vectorstore,
@@ -121,6 +126,8 @@ def make_chain(db_dir: str = ".chroma"):
         metadata_field_info=metadata_field_info,
         verbose=SELF_QUERY_VERBOSE,
         search_kwargs={"k": RETRIEVER_K},
+        enable_limit=True,  # Enable query limits
+        max_llm_queries_per_chain=1,  # Limit LLM calls
     )
     
     LOG.info("SelfQueryRetriever initialized successfully")
@@ -133,7 +140,7 @@ def make_chain(db_dir: str = ".chroma"):
     
     # Create the chain
     chain = RunnableMap({
-        "sources": lambda x: format_docs(retriever.get_relevant_documents(x["question"])),
+        "sources": lambda x: format_docs(retriever.invoke(x["question"])),
         "question": lambda x: x["question"],
     }) | prompt | llm
     
@@ -142,17 +149,59 @@ def make_chain(db_dir: str = ".chroma"):
 # ----------------------------
 # Query Function
 # ----------------------------
-def query(question: str, db_dir: str = ".chroma", debug_retrieval: bool = False) -> Dict[str, Any]:
+def query(question: str, db_dir: str = ".chroma", debug_retrieval: bool = False, use_fast_search: bool = False) -> Dict[str, Any]:
     """Query the RAG system with a question"""
     
-    # Create chain
-    chain = make_chain(db_dir)
-    
-    # Execute query
-    response = chain.invoke({"question": question})
-    
-    return {
-        "question": question,
-        "answer": response.content,
-        "chain": chain
-    }
+    if use_fast_search:
+        # Use simple similarity search for faster results
+        database = create_database(db_dir=db_dir)
+        docs = database.similarity_search(question, k=RETRIEVER_K)
+        
+        if debug_retrieval:
+            print("\n=== RETRIEVED DOCUMENTS (Fast Search) ===")
+            print(f"Retrieved {len(docs)} documents:")
+            for i, doc in enumerate(docs):
+                print(f"\n--- Document {i+1} ---")
+                print(f"File: {doc.metadata.get('relpath', 'unknown')}")
+                print(f"Kind: {doc.metadata.get('kind', 'unknown')}")
+                print(f"Ext: {doc.metadata.get('ext', 'unknown')}")
+                print(f"Component: {doc.metadata.get('component', 'none')}")
+                print(f"Lines: {doc.metadata.get('start_line', '?')}-{doc.metadata.get('end_line', '?')}")
+                print(f"Content length: {len(doc.page_content)} chars")
+                print(f"Content preview: {doc.page_content[:200]}...")
+                print("-" * 50)
+            print("\n" + "="*80 + "\n")
+        
+        sources = format_docs(docs)
+        
+        # Create simple chain without SelfQueryRetriever
+        llm = ChatOpenAI(
+            model=LLM_MODEL, 
+            temperature=LLM_TEMPERATURE,
+            request_timeout=15
+        )
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", SYSTEM_PROMPT),
+            ("human", HUMAN_PROMPT),
+        ])
+        
+        response = prompt.invoke({
+            "question": question,
+            "sources": sources
+        }) | llm
+        
+        return {
+            "question": question,
+            "answer": response.content,
+            "method": "fast_similarity_search"
+        }
+    else:
+        # Use SelfQueryRetriever for more accurate results
+        chain = make_chain(db_dir)
+        response = chain.invoke({"question": question})
+        
+        return {
+            "question": question,
+            "answer": response.content,
+            "method": "self_query_retriever"
+        }
