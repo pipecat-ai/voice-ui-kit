@@ -7,7 +7,6 @@ import { RootProvider } from "fumadocs-ui/provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
-import Bot from "./bot";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -42,7 +41,6 @@ export default function Layout({ children }: { children: ReactNode }) {
           <DocsLayout tree={source.pageTree} {...baseOptions}>
             {children}
           </DocsLayout>
-          <Bot />
         </RootProvider>
       </body>
     </html>

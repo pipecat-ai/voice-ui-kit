@@ -12,7 +12,7 @@ async function buildCSS() {
 
     const result = await postcss([
       tailwindcss({
-        content: ["./src/**/*.{js,ts,jsx,tsx}"],
+        content: ["src/**/*.{js,ts,jsx,tsx}"],
       }),
     ]).process(sourceCss, { from: sourceCssPath });
 
@@ -22,7 +22,7 @@ async function buildCSS() {
 
     const rawUtilitiesSrc = path.resolve(
       process.cwd(),
-      "src/css/utilities.css",
+      "src/css/utilities.css"
     );
     const rawUtilitiesDist = path.resolve(process.cwd(), "dist/utilities.css");
     if (fs.existsSync(rawUtilitiesSrc)) {
@@ -38,7 +38,7 @@ async function buildCSS() {
 
     const scopedCssPath = path.resolve(
       process.cwd(),
-      "dist/voice-ui-kit-scoped.css",
+      "dist/voice-ui-kit-scoped.css"
     );
     fs.writeFileSync(scopedCssPath, scopedResult.css);
 
