@@ -14,7 +14,9 @@ import {
   PipecatClientAudio,
   PipecatClientProvider,
 } from "@pipecat-ai/client-react";
-import React, { useEffect, useState } from "react";
+import type { DailyTransportConstructorOptions } from "@pipecat-ai/daily-transport";
+import type { SmallWebRTCTransportConstructorOptions } from "@pipecat-ai/small-webrtc-transport";
+import React, { memo, useEffect, useState } from "react";
 
 /**
  * Props for the PipecatAppBase component.
@@ -24,6 +26,10 @@ export interface PipecatBaseProps {
   connectParams: TransportConnectionParams;
   /** Type of transport to use for the connection */
   transportType: "smallwebrtc" | "daily";
+  /** Options for configuring the transport. */
+  transportOptions?:
+    | SmallWebRTCTransportConstructorOptions
+    | DailyTransportConstructorOptions;
   /** Optional configuration options for the Pipecat client */
   clientOptions?: Partial<PipecatClientOptions>;
   /** Whether to disable the theme provider */
@@ -124,6 +130,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   connectParams,
   connectOnMount = false,
   noThemeProvider = false,
+  transportOptions,
   transportType,
   themeProps,
   children,
@@ -140,7 +147,10 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
 
     (async () => {
       try {
-        const transport = await createTransport(transportType);
+        const transport = await createTransport(
+          transportType,
+          transportOptions,
+        );
 
         const pcClient = new PipecatClient({
           enableCam: false,
@@ -164,7 +174,13 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
       setClient(null);
       setError(null);
     };
-  }, [connectParams, transportType, clientOptions, connectOnMount]);
+  }, [
+    clientOptions,
+    connectOnMount,
+    connectParams,
+    transportOptions,
+    transportType,
+  ]);
 
   /**
    * Initiates a connection to the session using the configured client.
