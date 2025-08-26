@@ -16,7 +16,7 @@ import {
 } from "@pipecat-ai/client-react";
 import type { DailyTransportConstructorOptions } from "@pipecat-ai/daily-transport";
 import type { SmallWebRTCTransportConstructorOptions } from "@pipecat-ai/small-webrtc-transport";
-import React, { memo, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 /**
  * Props for the PipecatAppBase component.
@@ -38,6 +38,8 @@ export interface PipecatBaseProps {
   themeProps?: Partial<ThemeProviderProps>;
   /** Whether to automatically connect to the session when the component mounts. Defaults to false. */
   connectOnMount?: boolean;
+  /** Disables audio output for the bot. Default: false */
+  noAudioOutput?: boolean;
 
   /**
    * Children can be either:
@@ -129,6 +131,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   clientOptions,
   connectParams,
   connectOnMount = false,
+  noAudioOutput = false,
   noThemeProvider = false,
   transportOptions,
   transportType,
@@ -236,7 +239,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   const clientProvider = (
     <PipecatClientProvider client={client!}>
       {typeof children === "function" ? children(passedProps) : children}
-      <PipecatClientAudio />
+      {!noAudioOutput && <PipecatClientAudio />}
     </PipecatClientProvider>
   );
 
