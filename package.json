@@ -94,6 +94,7 @@
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-popover": "^1.1.14",
+    "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-tabs": "^1.1.12",
