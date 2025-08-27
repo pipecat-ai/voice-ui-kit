@@ -33,15 +33,15 @@ See: [usePipecatClientTransportState](https://docs.pipecat.ai/client/js/transpor
 import { usePipecatConnectionState } from "@pipecat-ai/voice-ui-kit";
 
 export function ConnectButton() {
-  const connectionState = usePipecatConnectionState();
+  const { isConnected, isConnecting } = usePipecatConnectionState();
   
   return (
     <button
-      disabled={connectionState !== "connected"}
+      disabled={!isConnected}
       onClick={handleConnect}
     >
-      {connectionState === "connected" ? "Connected" :
-       connectionState === "connecting" ? "Connecting..." : "Connect"}
+      {isConnected ? "Connected" :
+       isConnecting ? "Connecting..." : "Connect"}
     </button>
   );
 }
@@ -53,14 +53,14 @@ export function ConnectButton() {
 import { usePipecatConnectionState } from "@pipecat-ai/voice-ui-kit";
 
 export function ConnectionStatus() {
-  const connectionState = usePipecatConnectionState();
+  const { state, isConnected, isConnecting, isDisconnected } = usePipecatConnectionState();
   
   return (
     <div>
-      <div className={`status-indicator ${connectionState}`}>
-        {connectionState === "connected" && "✓ Connected"}
-        {connectionState === "connecting" && "⟳ Connecting..."}
-        {connectionState === "disconnected" && "✗ Disconnected"}
+      <div className={`status-indicator ${state}`}>
+        {isConnected && "✓ Connected"}
+        {isConnecting && "⟳ Connecting..."}
+        {isDisconnected && "✗ Disconnected"}
       </div>
     </div>
   );
@@ -74,41 +74,31 @@ import React from "react";
 import { usePipecatConnectionState } from "@pipecat-ai/voice-ui-kit";
 
 export function ConnectionControls() {
-  const connectionState = usePipecatConnectionState();
+  const { isConnected, isConnecting, isDisconnected } = usePipecatConnectionState();
   
   const getButtonText = () => {
-    switch (connectionState) {
-      case "connected":
-        return "Disconnect";
-      case "connecting":
-        return "Connecting...";
-      default:
-        return "Connect";
-    }
+    if (isConnected) return "Disconnect";
+    if (isConnecting) return "Connecting...";
+    return "Connect";
   };
   
   const getStatusColor = () => {
-    switch (connectionState) {
-      case "connected":
-        return "green";
-      case "connecting":
-        return "yellow";
-      default:
-        return "red";
-    }
+    if (isConnected) return "green";
+    if (isConnecting) return "yellow";
+    return "red";
   };
   
   return (
     <div className="connection-controls">
       <div className={`status-led ${getStatusColor()}`} />
       <button
-        disabled={connectionState === "connecting"}
-        onClick={connectionState === "connected" ? handleDisconnect : handleConnect}
+        disabled={isConnecting}
+        onClick={isConnected ? handleDisconnect : handleConnect}
       >
         {getButtonText()}
       </button>
       
-      {connectionState === "connecting" && (
+      {isConnecting && (
         <div className="loading-spinner" />
       )}
     </div>
@@ -125,9 +115,24 @@ export function ConnectionControls() {
 <TypeTable
   className="text-sm"
   type={{
-    connectionState: {
+    state: {
       description: "The simplified connection state derived from Pipecat transport states",
       type: "PipecatConnectionState",
+      required: true,
+    },
+    isConnected: {
+      description: "True when the connection is established and ready",
+      type: "boolean",
+      required: true,
+    },
+    isConnecting: {
+      description: "True when attempting to establish a connection",
+      type: "boolean",
+      required: true,
+    },
+    isDisconnected: {
+      description: "True when disconnected or in an error state",
+      type: "boolean",
       required: true,
     },
   }}
@@ -141,6 +146,11 @@ export function ConnectionControls() {
     PipecatConnectionState: {
       description: "Simplified connection states for UI controls",
       type: '"disconnected" | "connecting" | "connected"',
+      required: true,
+    },
+    PipecatConnectionStateResult: {
+      description: "Return type for the usePipecatConnectionState hook",
+      type: "object",
       required: true,
     },
   }}

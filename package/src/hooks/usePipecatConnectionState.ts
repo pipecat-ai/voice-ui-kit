@@ -14,6 +14,20 @@ export type PipecatConnectionState =
   | "connected";
 
 /**
+ * Return type for the usePipecatConnectionState hook.
+ */
+export interface PipecatConnectionStateResult {
+  /** The current connection state */
+  state: PipecatConnectionState;
+  /** True when the connection is established and ready */
+  isConnected: boolean;
+  /** True when attempting to establish a connection */
+  isConnecting: boolean;
+  /** True when disconnected or in an error state */
+  isDisconnected: boolean;
+}
+
+/**
  * Hook that provides a simplified connection state for Pipecat transport.
  *
  * This hook derives a basic connectivity state from the underlying Pipecat transport
@@ -29,24 +43,24 @@ export type PipecatConnectionState =
  * - `"authenticating"` | `"authenticated"` | `"connecting"` → `"connecting"`
  * - All other states → `"disconnected"`
  *
- * @returns {PipecatConnectionState} The simplified connection state
+ * @returns {PipecatConnectionStateResult} Object containing the state and boolean flags
  *
  * @example
  * ```tsx
- * const connectionState = usePipecatConnectionState();
+ * const { state, isConnected, isConnecting, isDisconnected } = usePipecatConnectionState();
  *
  * return (
  *   <button
- *     disabled={connectionState !== "connected"}
+ *     disabled={!isConnected}
  *     onClick={handleConnect}
  *   >
- *     {connectionState === "connected" ? "Connected" :
- *      connectionState === "connecting" ? "Connecting..." : "Connect"}
+ *     {isConnected ? "Connected" :
+ *      isConnecting ? "Connecting..." : "Connect"}
  *   </button>
  * );
  * ```
  */
-export const usePipecatConnectionState = () => {
+export const usePipecatConnectionState = (): PipecatConnectionStateResult => {
   const [connectionState, setConnectionState] =
     useState<PipecatConnectionState>("disconnected");
 
@@ -63,5 +77,10 @@ export const usePipecatConnectionState = () => {
     }, []),
   );
 
-  return connectionState;
+  return {
+    state: connectionState,
+    isConnected: connectionState === "connected",
+    isConnecting: connectionState === "connecting",
+    isDisconnected: connectionState === "disconnected",
+  };
 };

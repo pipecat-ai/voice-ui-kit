@@ -1,15 +1,15 @@
 import type { Story, StoryDefault } from "@ladle/react";
 import { Card, CardContent } from "./card";
-import { Input } from "./input";
+import { Textarea } from "./textarea";
 
 export default {
   title: "Primitives",
 } satisfies StoryDefault;
 
-export const Default: Story<typeof Input> = ({ ...props }) => (
+export const Default: Story<typeof Textarea> = ({ ...props }) => (
   <Card className="flex flex-col gap-8 w-full h-full">
     <CardContent>
-      <Input {...props} placeholder="Placeholder" />
+      <Textarea {...props} placeholder="Placeholder" />
     </CardContent>
   </Card>
 );
@@ -36,4 +36,4 @@ Default.argTypes = {
   },
 };
 
-Default.storyName = "Input";
+Default.storyName = "Textarea";
