@@ -1,31 +1,31 @@
 {
-    "name": "voice-ui-kit-monorepo",
-    "version": "0.0.0",
-    "private": true,
-    "type": "module",
-    "workspaces": [
-        "package",
-        "docs",
-        "examples/*"
-    ],
-    "dependencies": {
-        "@pipecat-ai/client-js": "^1.2.0",
-        "@pipecat-ai/client-react": "^1.0.1",
-        "@daily-co/daily-js": "^0.80.0",
-        "react": "^19.1.0",
-        "react-dom": "^19.1.0",
-        "tailwindcss": "^4.1.12"
-    },
-    "devDependencies": {
-        "@tailwindcss/postcss": "^4.1.12",
-        "typescript": "^5.8.3",
-        "postcss": "^8.5.6",
-        "postcss-prefix-selector": "^2.1.1",
-        "postcss-prefixwrap": "^1.55.0"
-    },
-    "scripts": {
-        "build": "pnpm --filter=@pipecat-ai/voice-ui-kit build",
-        "dev": "pnpm --filter=@pipecat-ai/voice-ui-kit dev",
-        "dev:docs": "pnpm --filter=@pipecat-ai/voice-ui-kit-docs dev"
-    }
+  "name": "voice-ui-kit-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "package",
+    "docs",
+    "examples/*"
+  ],
+  "dependencies": {
+    "@pipecat-ai/client-js": "^1.2.0",
+    "@pipecat-ai/client-react": "^1.0.1",
+    "@daily-co/daily-js": "^0.80.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.12"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.12",
+    "typescript": "^5.8.3",
+    "postcss": "^8.5.6",
+    "postcss-prefix-selector": "^2.1.1",
+    "postcss-prefixwrap": "^1.55.0"
+  },
+  "scripts": {
+    "build": "pnpm --filter=@pipecat-ai/voice-ui-kit build",
+    "dev": "pnpm --filter=@pipecat-ai/voice-ui-kit dev",
+    "dev:docs": "pnpm --filter=@pipecat-ai/voice-ui-kit-docs dev"
+  }
 }
