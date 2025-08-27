@@ -1,7 +1,7 @@
-import AudioOutput from "@/components/elements/AudioOutput";
 import { ClientStatus } from "@/components/elements/ClientStatus";
 import { SessionInfo } from "@/components/elements/SessionInfo";
 import UserAudioControl from "@/components/elements/UserAudioControl";
+import AudioOutput from "@/components/elements/UserAudioOutputControl";
 import UserVideoControl from "@/components/elements/UserVideoControl";
 import {
   Panel,

@@ -18,7 +18,7 @@ const selectTriggerVariants = cva(
         primary:
           "text-primary-foreground bg-primary hover:bg-primary/90 dark:hover:bg-primary/90 border-transparent data-[placeholder]:text-primary-foreground dark:bg-primary [&_svg:not([class*='text-'])]:text-brder",
         outline: "text-foreground border-input hover:bg-accent",
-        ghost: "text-foreground border-none hover:bg-accent",
+        ghost: "text-foreground border-transparent hover:bg-accent",
       },
       size: {
         md: "button-md [&_svg]:size-3.5 [&_[data-slot^=select-guide]]:mr-2",

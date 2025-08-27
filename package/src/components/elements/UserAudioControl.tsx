@@ -18,7 +18,7 @@ import {
 import { ChevronDownIcon, MicIcon, MicOffIcon } from "lucide-react";
 import { useEffect } from "react";
 import { ButtonGroup } from "../ui";
-import { DeviceDropDown } from "./DeviceDropDown";
+import { DeviceDropDownComponent } from "./DeviceDropDown";
 
 interface Props {
   variant?: ButtonVariant;
@@ -151,7 +151,7 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
           )}
         </Button>
         {!noDevicePicker && (
-          <DeviceDropDown
+          <DeviceDropDownComponent
             menuLabel="Microphone device"
             availableDevices={availableMics}
             selectedDevice={selectedMic}
@@ -173,7 +173,7 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
             >
               <ChevronDownIcon size={16} />
             </Button>
-          </DeviceDropDown>
+          </DeviceDropDownComponent>
         )}
       </>
     );
