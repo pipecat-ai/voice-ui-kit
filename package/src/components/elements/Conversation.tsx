@@ -16,6 +16,7 @@ export interface ConversationProps {
   noAutoscroll?: boolean;
   assistantLabel?: string;
   clientLabel?: string;
+  systemLabel?: string;
 }
 
 export const Conversation: React.FC<ConversationProps> = memo(
@@ -24,6 +25,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
     noAutoscroll = false,
     assistantLabel = "assistant",
     clientLabel = "user",
+    systemLabel = "system",
   }) => {
     const transportState = usePipecatClientTransportState();
 
@@ -80,9 +82,9 @@ export const Conversation: React.FC<ConversationProps> = memo(
       () => ({
         user: clientLabel,
         assistant: assistantLabel,
-        system: "system",
+        system: systemLabel,
       }),
-      [clientLabel, assistantLabel],
+      [assistantLabel, clientLabel, systemLabel],
     );
 
     // Show messages first if they exist, regardless of connection state

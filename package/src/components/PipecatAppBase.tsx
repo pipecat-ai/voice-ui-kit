@@ -14,6 +14,8 @@ import {
   PipecatClientAudio,
   PipecatClientProvider,
 } from "@pipecat-ai/client-react";
+import type { DailyTransportConstructorOptions } from "@pipecat-ai/daily-transport";
+import type { SmallWebRTCTransportConstructorOptions } from "@pipecat-ai/small-webrtc-transport";
 import React, { useEffect, useState } from "react";
 
 /**
@@ -24,6 +26,10 @@ export interface PipecatBaseProps {
   connectParams: TransportConnectionParams;
   /** Type of transport to use for the connection */
   transportType: "smallwebrtc" | "daily";
+  /** Options for configuring the transport. */
+  transportOptions?:
+    | SmallWebRTCTransportConstructorOptions
+    | DailyTransportConstructorOptions;
   /** Optional configuration options for the Pipecat client */
   clientOptions?: Partial<PipecatClientOptions>;
   /** Whether to disable the theme provider */
@@ -32,6 +38,8 @@ export interface PipecatBaseProps {
   themeProps?: Partial<ThemeProviderProps>;
   /** Whether to automatically connect to the session when the component mounts. Defaults to false. */
   connectOnMount?: boolean;
+  /** Disables audio output for the bot. Default: false */
+  noAudioOutput?: boolean;
 
   /**
    * Children can be either:
@@ -123,7 +131,9 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   clientOptions,
   connectParams,
   connectOnMount = false,
+  noAudioOutput = false,
   noThemeProvider = false,
+  transportOptions,
   transportType,
   themeProps,
   children,
@@ -140,7 +150,10 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
 
     (async () => {
       try {
-        const transport = await createTransport(transportType);
+        const transport = await createTransport(
+          transportType,
+          transportOptions,
+        );
 
         const pcClient = new PipecatClient({
           enableCam: false,
@@ -164,7 +177,13 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
       setClient(null);
       setError(null);
     };
-  }, [connectParams, transportType, clientOptions, connectOnMount]);
+  }, [
+    clientOptions,
+    connectOnMount,
+    connectParams,
+    transportOptions,
+    transportType,
+  ]);
 
   /**
    * Initiates a connection to the session using the configured client.
@@ -220,7 +239,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   const clientProvider = (
     <PipecatClientProvider client={client!}>
       {typeof children === "function" ? children(passedProps) : children}
-      <PipecatClientAudio />
+      {!noAudioOutput && <PipecatClientAudio />}
     </PipecatClientProvider>
   );
 
