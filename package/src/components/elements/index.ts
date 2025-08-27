@@ -10,6 +10,7 @@ export * from "./DeviceSelect";
 export * from "./HighlightOverlay";
 export * from "./PipecatLogo";
 export * from "./SessionInfo";
+export * from "./TextInput";
 export * from "./Thinking";
 export * from "./TranscriptOverlay";
 export * from "./UserAudioControl";
