@@ -53,9 +53,9 @@
 
   /** Button Sizing  **/
   --button-size-sm: calc(var(--spacing) * 7);
-  --button-size-md: calc(var(--spacing) * 8);
-  --button-size-lg: calc(var(--spacing) * 10);
-  --button-size-xl: calc(var(--spacing) * 12);
+  --button-size-md: calc(var(--spacing) * 9);
+  --button-size-lg: calc(var(--spacing) * 11);
+  --button-size-xl: calc(var(--spacing) * 13);
   --button-px-mul: 0.5;
   --button-px-icon-mul: 0.35;
   --button-px-gap-mul: 0.25;

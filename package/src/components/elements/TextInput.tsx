@@ -1,4 +1,10 @@
-import { Button, ButtonProps, Textarea } from "@/components/ui";
+import {
+  Button,
+  ButtonProps,
+  Input,
+  InputProps,
+  Textarea,
+} from "@/components/ui";
 import { usePipecatConnectionState } from "@/hooks/usePipecatConnectionState";
 import { cn } from "@/lib/utils";
 import { usePipecatClient } from "@pipecat-ai/client-react";
@@ -13,12 +19,14 @@ export interface TextInputComponentProps {
   buttonLabel?: React.ReactNode;
   buttonIcon?: React.ReactNode;
   buttonProps?: ButtonProps;
+  inputProps?: InputProps;
   classNames?: {
     container?: string;
     input?: string;
     button?: string;
   };
   placeholder?: string;
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export const TextInputComponent = ({
@@ -31,6 +39,7 @@ export const TextInputComponent = ({
   buttonIcon = <SendIcon />,
   buttonProps,
   placeholder = "Type message...",
+  size = "md",
 }: TextInputComponentProps) => {
   const [isSending, setIsSending] = useState(false);
   const [message, setMessage] = useState("");
@@ -83,23 +92,26 @@ export const TextInputComponent = ({
   };
 
   const canSend = !disabled && !isSending && !!message.trim();
+
+  const InputComponent = multiline ? Textarea : Input;
+
   return (
     <div className={cn("flex flex-row gap-2", classNames?.container)}>
-      <Textarea
+      <InputComponent
         placeholder={placeholder}
         value={message}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         disabled={disabled || isSending}
+        size={size}
         className={cn("flex-1", classNames?.input)}
-        size="lg"
-        multiline={multiline}
+        {...(multiline && { multiline: true })}
       />
       <Button
         onClick={handleSend}
         disabled={!canSend}
         isLoading={isSending}
-        size="lg"
+        size={size}
         className={cn(classNames?.button)}
         isIcon={!buttonLabel}
         {...buttonProps}

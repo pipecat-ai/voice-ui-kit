@@ -36,12 +36,12 @@ export interface DeviceDropDownComponentProps {
   updateDevice?: (deviceId: string) => void;
   /** Custom CSS classes for different parts of the component. */
   classNames?: {
-    /** CSS classes for the dropdown menu trigger element. */
-    dropdownMenuTrigger?: string;
     /** CSS classes for the dropdown menu content container. */
     dropdownMenuContent?: string;
     /** CSS classes for individual dropdown menu checkbox items. */
     dropdownMenuCheckboxItem?: string;
+    /** CSS classes for the dropdown menu label. */
+    dropdownMenuLabel?: string;
   };
 }
 
@@ -49,29 +49,10 @@ export interface DeviceDropDownComponentProps {
  * Props for the connected DeviceDropDown component that automatically integrates with Pipecat Client.
  * This variant must be used within a PipecatClientProvider context.
  */
-export interface DeviceDropDownProps
-  extends Omit<
-    DeviceDropDownComponentProps,
-    "availableDevices" | "selectedDevice" | "updateDevice"
-  > {
-  /** The trigger element that opens the dropdown menu. Can be any React element. */
-  children: React.ReactNode;
-  /** Whether to hide the menu label at the top of the dropdown. */
-  noMenuLabel?: boolean;
-  /** Whether to hide the separator below the menu label. */
-  noMenuSeparator?: boolean;
-  /** Text label displayed at the top of the dropdown menu. */
-  menuLabel?: string;
-  /** Custom CSS classes for different parts of the component. */
-  classNames?: {
-    /** CSS classes for the dropdown menu trigger element. */
-    dropdownMenuTrigger?: string;
-    /** CSS classes for the dropdown menu content container. */
-    dropdownMenuContent?: string;
-    /** CSS classes for individual dropdown menu checkbox items. */
-    dropdownMenuCheckboxItem?: string;
-  };
-}
+export type DeviceDropDownProps = Omit<
+  DeviceDropDownComponentProps,
+  "availableDevices" | "selectedDevice" | "updateDevice"
+>;
 
 /**
  * Headless dropdown menu component for selecting microphone input devices.
@@ -110,7 +91,11 @@ export const DeviceDropDownComponent = ({
         align="end"
         className={cn(classNames?.dropdownMenuContent)}
       >
-        {!noMenuLabel && <DropdownMenuLabel>{menuLabel}</DropdownMenuLabel>}
+        {!noMenuLabel && (
+          <DropdownMenuLabel className={cn(classNames?.dropdownMenuLabel)}>
+            {menuLabel}
+          </DropdownMenuLabel>
+        )}
         {!noMenuSeparator && <DropdownMenuSeparator />}
         {availableDevices?.map((device) => (
           <DropdownMenuCheckboxItem

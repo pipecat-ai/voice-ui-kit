@@ -7,7 +7,7 @@ import * as VoiceUIKit from "@pipecat-ai/voice-ui-kit";
 import { CodeBlock, Pre as CodePre } from "fumadocs-ui/components/codeblock";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
-import { Loader2 } from "lucide-react";
+import { CircleIcon, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useMemo, useState } from "react";
 import { LiveError, LivePreview, LiveProvider } from "react-live";
@@ -119,7 +119,7 @@ export function LiveComponent({
     [displaySource]
   );
   const mergedScope = useMemo(
-    () => ({ React, ...VoiceUIKit, ...(scope ?? {}) }),
+    () => ({ React, ...VoiceUIKit, CircleIcon, ...(scope ?? {}) }),
     [scope]
   );
 
@@ -183,7 +183,10 @@ export function LiveComponent({
         enableTypeScript={true}
       >
         <Tabs defaultValue={initialTab} items={["Preview", "Code"]}>
-          <Tab value="Preview" className="@container">
+          <Tab
+            value="Preview"
+            className="min-h-[200px] flex items-center p-6 md:p-10 lg:p-12 xl:p-14"
+          >
             <div className={`${previewClassName} relative w-full`}>
               {mounted ? (
                 previewComp
