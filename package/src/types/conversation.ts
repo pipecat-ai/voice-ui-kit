@@ -7,11 +7,3 @@ export interface ConversationMessage {
   createdAt: string;
   updatedAt?: string;
 }
-
-export interface ConversationContextType {
-  messages: ConversationMessage[];
-  injectMessage: (message: {
-    role: "user" | "assistant" | "system";
-    content: string | ReactNode;
-  }) => void;
-}
