@@ -1,5 +1,5 @@
 import Thinking from "@/components/elements/Thinking";
-import { useConversationContext } from "@/hooks/useConversationContext";
+import usePipecatConversation from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
 import { usePipecatClientTransportState } from "@pipecat-ai/client-react";
 import { Fragment, memo, useCallback, useEffect, useRef } from "react";
@@ -51,7 +51,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
         ) <= Math.ceil(scrollRef.current.clientHeight);
     }, [noAutoscroll]);
 
-    const { messages } = useConversationContext();
+    const { messages } = usePipecatConversation();
 
     const isConnecting =
       transportState === "authenticating" || transportState === "connecting";

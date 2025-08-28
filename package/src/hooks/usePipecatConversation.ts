@@ -1,7 +1,8 @@
 import { type ConversationMessage } from "@/types/conversation";
 import { RTVIEvent } from "@pipecat-ai/client-js";
 import { useRTVIClientEvent } from "@pipecat-ai/client-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useConversationStore } from "@/stores/conversationStore";
 
 /**
  * Options for `useConversation`.
@@ -22,318 +23,144 @@ interface Props {
  * - Exposes `injectMessage` to programmatically add messages
  */
 export const usePipecatConversation = ({ onMessageAdded }: Props = {}) => {
-  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const {
+    messages,
+    setOnMessageAdded,
+    clearMessages,
+    addMessage,
+    finalizeLastMessage,
+    removeEmptyLastMessage,
+    injectMessage,
+  } = useConversationStore();
 
-  const sortByCreatedAt = useCallback(
-    (a: ConversationMessage, b: ConversationMessage): number => {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    },
-    [],
-  );
+  const userStoppedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const assistantStreamResetRef = useRef<number>(0);
 
-  const filterEmptyMessages = useCallback(
-    (
-      message: ConversationMessage,
-      index: number,
-      array: ConversationMessage[],
-    ): boolean => {
-      if (typeof message.content === "string") {
-        if (message.content) return true;
-      } else {
-        // For ReactNode content, always keep it
-        return true;
-      }
-
-      // For empty string messages, check if there's a non-empty message with the same role following it
-      const nextMessageWithSameRole = array
-        .slice(index + 1)
-        .find(
-          (m) =>
-            m.role === message.role &&
-            (typeof m.content === "string" ? m.content : true),
-        );
-
-      return !nextMessageWithSameRole;
-    },
-    [],
-  );
-
-  const injectMessage = useCallback(
-    (message: {
-      role: "user" | "assistant" | "system";
-      content: string | React.ReactNode;
-    }) => {
-      const now = new Date();
-      const newMessage: ConversationMessage = {
-        role: message.role,
-        content: message.content,
-        final: true,
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-      };
-
-      setMessages((prev) => {
-        const updatedMessages = [...prev, newMessage]
-          .sort(sortByCreatedAt)
-          .filter(filterEmptyMessages);
-        onMessageAdded?.(newMessage);
-        return updatedMessages;
-      });
-    },
-    [onMessageAdded, sortByCreatedAt, filterEmptyMessages],
-  );
+  // Set the callback when component mounts or changes
+  useEffect(() => {
+    setOnMessageAdded(onMessageAdded);
+  }, [onMessageAdded, setOnMessageAdded]);
 
   useRTVIClientEvent(RTVIEvent.Connected, () => {
-    setMessages([]);
+    clearMessages();
   });
 
   useRTVIClientEvent(RTVIEvent.BotLlmStarted, () => {
-    const now = new Date();
-    setMessages((prev) => {
-      const lastBotMessageIndex = prev.findLastIndex(
-        (msg) => msg.role === "assistant",
-      );
-      const lastBotMessage = prev[lastBotMessageIndex];
-      if (
-        lastBotMessage &&
-        lastBotMessage.role === "assistant" &&
-        !lastBotMessage.content
-      ) {
-        return prev.sort(sortByCreatedAt).filter(filterEmptyMessages);
-      }
-      const newMessage: ConversationMessage = {
+    // Start a new assistant message only if there isn't one already in progress
+    const store = useConversationStore.getState();
+    const lastAssistantIndex = store.messages.findLastIndex(
+      (msg) => msg.role === "assistant",
+    );
+    const lastAssistant =
+      lastAssistantIndex !== -1
+        ? store.messages[lastAssistantIndex]
+        : undefined;
+
+    if (!lastAssistant || lastAssistant.final) {
+      addMessage({
         role: "assistant",
         content: "",
         final: false,
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-      };
-      onMessageAdded?.(newMessage);
-      return [...prev, newMessage]
-        .sort(sortByCreatedAt)
-        .filter(filterEmptyMessages);
-    });
+      });
+    }
+
+    // Nudge a reset counter so any consumer logic can infer fresh turn if needed
+    assistantStreamResetRef.current += 1;
   });
 
   useRTVIClientEvent(RTVIEvent.BotLlmText, (data) => {
-    const now = new Date();
-    setMessages((prev) => {
-      const lastBotMessageIndex = prev.findLastIndex(
-        (msg) => msg.role === "assistant",
-      );
-      const lastBotMessage = prev[lastBotMessageIndex];
+    // Some backends emit cumulative transcripts. Replace content when the
+    // incoming text already contains the existing content as a prefix; otherwise append.
+    const store = useConversationStore.getState();
+    const lastAssistantIndex = store.messages.findLastIndex(
+      (msg) => msg.role === "assistant",
+    );
+    const lastAssistant =
+      lastAssistantIndex !== -1
+        ? store.messages[lastAssistantIndex]
+        : undefined;
 
-      if (!lastBotMessage) {
-        const newMessage: ConversationMessage = {
-          role: "assistant",
-          content: data.text,
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
-        };
-        onMessageAdded?.(newMessage);
-        return [...prev, newMessage]
-          .sort(sortByCreatedAt)
-          .filter(filterEmptyMessages);
-      }
+    const currentContent =
+      typeof lastAssistant?.content === "string" ? lastAssistant.content : "";
+    const incoming = data.text ?? "";
 
-      // Bump potential empty last message
-      if (!lastBotMessage.content) {
-        const newMessages = prev.slice();
-        newMessages.splice(lastBotMessageIndex, 1, {
-          ...lastBotMessage,
-          content: data.text,
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
-        });
-        return newMessages.sort(sortByCreatedAt).filter(filterEmptyMessages);
-      }
+    let nextContent: string;
+    if (incoming.startsWith(currentContent)) {
+      nextContent = incoming; // cumulative chunk, replace
+    } else if (currentContent.endsWith(incoming)) {
+      nextContent = currentContent; // duplicate small chunk, ignore
+    } else {
+      nextContent = currentContent + incoming; // delta chunk, append
+    }
 
-      const isRecent =
-        lastBotMessage &&
-        lastBotMessage.role === "assistant" &&
-        now.getTime() - new Date(lastBotMessage.createdAt).getTime() < 10000; // 10 seconds threshold
-
-      if (isRecent) {
-        const newMessages = prev.slice();
-        newMessages.splice(lastBotMessageIndex, 1, {
-          ...lastBotMessage,
-          content: lastBotMessage.content + data.text,
-          createdAt: lastBotMessage.content
-            ? lastBotMessage.createdAt
-            : now.toISOString(),
-          updatedAt: now.toISOString(),
-        });
-        return newMessages.sort(sortByCreatedAt).filter(filterEmptyMessages);
-      }
-
-      const newMessage: ConversationMessage = {
-        role: "assistant",
-        content: data.text,
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-      };
-
-      onMessageAdded?.(newMessage);
-      return [...prev, newMessage]
-        .sort(sortByCreatedAt)
-        .filter(filterEmptyMessages);
+    store.updateLastMessage("assistant", {
+      content: nextContent,
+      final: false,
     });
   });
 
   useRTVIClientEvent(RTVIEvent.BotLlmStopped, () => {
-    setMessages((prev) => {
-      const lastBotMessageIndex = prev.findLastIndex(
-        (msg) => msg.role === "assistant",
-      );
-      const lastBotMessage = prev[lastBotMessageIndex];
-      if (!lastBotMessage) return prev;
-      if (
-        lastBotMessage &&
-        lastBotMessage.role === "assistant" &&
-        !lastBotMessage.content
-      ) {
-        return prev
-          .slice(0, -1)
-          .sort(sortByCreatedAt)
-          .filter(filterEmptyMessages);
-      }
-      lastBotMessage.final = true;
-      const newMessages = prev.slice();
-      newMessages.splice(lastBotMessageIndex, 1, {
-        ...lastBotMessage,
-        updatedAt: new Date().toISOString(),
-      });
-      onMessageAdded?.(lastBotMessage);
-      return newMessages.sort(sortByCreatedAt).filter(filterEmptyMessages);
-    });
+    finalizeLastMessage("assistant");
   });
 
-  const userStoppedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
-
   useRTVIClientEvent(RTVIEvent.UserStartedSpeaking, () => {
+    // Clear any pending cleanup timers and create a placeholder so the
+    // user's message appears in correct chronological order even if
+    // transcription lags behind the bot response.
     clearTimeout(userStoppedTimeout.current);
-    const now = new Date();
-    setMessages((prev) => {
-      const lastUserMessageIndex = prev.findLastIndex(
-        (msg) => msg.role === "user",
-      );
-      const lastUserMessage = prev[lastUserMessageIndex];
-      if (
-        lastUserMessage &&
-        lastUserMessage.role === "user" &&
-        !lastUserMessage.content
-      ) {
-        const newMessages = prev.slice();
-        newMessages.splice(lastUserMessageIndex, 1, {
-          ...lastUserMessage,
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
-        });
-        return newMessages.sort(sortByCreatedAt).filter(filterEmptyMessages);
-      }
-      const newMessage: ConversationMessage = {
+
+    const store = useConversationStore.getState();
+    const lastUserMessageIndex = store.messages.findLastIndex(
+      (msg) => msg.role === "user",
+    );
+    const lastUser =
+      lastUserMessageIndex !== -1
+        ? store.messages[lastUserMessageIndex]
+        : undefined;
+
+    if (!lastUser || lastUser.final) {
+      addMessage({
         role: "user",
         content: "",
         final: false,
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-      };
-      onMessageAdded?.(newMessage);
-      return [...prev, newMessage]
-        .sort(sortByCreatedAt)
-        .filter(filterEmptyMessages);
-    });
+      });
+    }
   });
 
   useRTVIClientEvent(RTVIEvent.UserTranscript, (data) => {
-    const now = new Date();
-    setMessages((prev) => {
-      const lastUserMessageIndex = prev.findLastIndex(
-        (msg) => msg.role === "user",
-      );
-      const lastUserMessage = prev[lastUserMessageIndex];
-      if (lastUserMessage && !lastUserMessage.final) {
-        const updatedMessage: ConversationMessage = {
-          ...lastUserMessage,
-          final: data.final,
-          content: data.text,
-          updatedAt: now.toISOString(),
-        };
-        onMessageAdded?.(updatedMessage);
-        const newMessages = prev.slice();
-        newMessages.splice(lastUserMessageIndex, 1, updatedMessage);
-        return newMessages.sort(sortByCreatedAt).filter(filterEmptyMessages);
-      }
-      const newMessage: ConversationMessage = {
+    // For user transcripts, we update the last message directly
+    const store = useConversationStore.getState();
+    const lastUserMessageIndex = store.messages.findLastIndex(
+      (msg) => msg.role === "user",
+    );
+
+    if (lastUserMessageIndex !== -1) {
+      store.updateLastMessage("user", {
+        content: data.text,
+        final: data.final,
+      });
+    } else {
+      addMessage({
         role: "user",
         content: data.text,
         final: data.final,
-        createdAt: now.toISOString(),
-      };
-      onMessageAdded?.(newMessage);
-      return [...prev, newMessage]
-        .sort(sortByCreatedAt)
-        .filter(filterEmptyMessages);
-    });
+      });
+    }
+
+    // If we got any transcript, cancel pending cleanup
+    clearTimeout(userStoppedTimeout.current);
   });
 
   useRTVIClientEvent(RTVIEvent.UserStoppedSpeaking, () => {
     clearTimeout(userStoppedTimeout.current);
+    // If no transcript ends up arriving, ensure any accidental empty placeholder is removed.
     userStoppedTimeout.current = setTimeout(() => {
-      setMessages((prev) => {
-        const lastUserMessageIndex = prev.findLastIndex(
-          (msg) => msg.role === "user",
-        );
-        const lastUserMessage = prev[lastUserMessageIndex];
-
-        if (!lastUserMessage || lastUserMessage.content)
-          return prev.sort(sortByCreatedAt).filter(filterEmptyMessages);
-
-        const newMessages = prev.slice();
-        newMessages.splice(lastUserMessageIndex, 1);
-        return newMessages.sort(sortByCreatedAt).filter(filterEmptyMessages);
-      });
-    }, 5000);
+      removeEmptyLastMessage("user");
+    }, 3000);
   });
 
-  // Merge messages of the same role that are close in time (within 30 seconds)
-  const getMergedMessages = useMemo(() => {
-    const mergedMessages: ConversationMessage[] = [];
-
-    for (let i = 0; i < messages.length; i++) {
-      const currentMessage = messages[i];
-      const lastMerged = mergedMessages[mergedMessages.length - 1];
-
-      const timeDiff = lastMerged
-        ? Math.abs(
-            new Date(currentMessage.createdAt).getTime() -
-              new Date(lastMerged.createdAt).getTime(),
-          )
-        : Infinity;
-
-      const shouldMerge =
-        lastMerged &&
-        lastMerged.role === currentMessage.role &&
-        currentMessage.role !== "system" && // Never merge system messages
-        timeDiff < 30000; // 30 seconds threshold
-
-      if (shouldMerge) {
-        mergedMessages[mergedMessages.length - 1] = {
-          ...lastMerged,
-          content: `${lastMerged.content} ${currentMessage.content}`,
-          updatedAt: currentMessage.updatedAt || currentMessage.createdAt,
-          final: currentMessage.final !== false,
-        };
-      } else {
-        mergedMessages.push({ ...currentMessage });
-      }
-    }
-
-    return mergedMessages;
-  }, [messages]);
-
   return {
-    messages: getMergedMessages,
+    messages,
     injectMessage,
   };
 };

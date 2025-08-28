@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  ConversationProvider,
-  type ConversationProviderRef,
-} from "@/components/ConversationContext";
+import usePipecatConversation from "@/hooks/usePipecatConversation";
 import AudioOutput from "@/components/elements/AudioOutput";
 import { ClientStatus } from "@/components/elements/ClientStatus";
 import ConnectButton from "@/components/elements/ConnectButton";
@@ -61,7 +58,7 @@ import {
   PanelLeftCloseIcon,
   PanelRightCloseIcon,
 } from "lucide-react";
-import React, { memo, useCallback, useRef, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import type { ImperativePanelHandle } from "react-resizable-panels";
 import { PipecatAppBase } from "../../components/PipecatAppBase";
 import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
@@ -291,14 +288,12 @@ const ConsoleUI = ({
 
   const infoPanelRef = useRef<ImperativePanelHandle>(null);
 
-  const handleConversationProviderRef = useCallback(
-    (node: ConversationProviderRef | null) => {
-      if (node && onInjectMessage) {
-        onInjectMessage(node.injectMessage);
-      }
-    },
-    [onInjectMessage],
-  );
+  const { injectMessage } = usePipecatConversation();
+
+  // Expose injectMessage to parent if requested
+  useEffect(() => {
+    if (onInjectMessage) onInjectMessage(injectMessage);
+  }, [onInjectMessage, injectMessage]);
 
   const noBotArea = noBotAudio && noBotVideo;
   const noConversationPanel = noConversation && noMetrics;
@@ -316,7 +311,7 @@ const ConsoleUI = ({
   });
 
   return (
-    <ConversationProvider ref={handleConversationProviderRef}>
+    <>
       {!noAutoInitDevices && <AutoInitDevices />}
       <SmallWebRTCCodecSetter
         audioCodec={audioCodec}
@@ -574,6 +569,6 @@ const ConsoleUI = ({
         </Tabs>
         {!noAudioOutput && <PipecatClientAudio />}
       </div>
-    </ConversationProvider>
+    </>
   );
 };

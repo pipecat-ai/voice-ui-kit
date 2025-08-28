@@ -103,7 +103,8 @@
     "lucide-react": "^0.511.0",
     "react-chartjs-2": "^5.3.0",
     "react-resizable-panels": "^3.0.3",
-    "tailwind-merge": "^3.3.0"
+    "tailwind-merge": "^3.3.0",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@daily-co/daily-js": "^0.80.0",
