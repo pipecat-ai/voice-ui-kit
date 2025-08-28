@@ -112,7 +112,6 @@ export const UserVideoComponent: React.FC<ComponentProps> = ({
               classNames={{
                 dropdownMenuCheckboxItem: classNames.dropdownMenuCheckboxItem,
                 dropdownMenuContent: classNames.dropdownMenuContent,
-                dropdownMenuTrigger: classNames.dropdownMenuTrigger,
               }}
               menuLabel="Camera device"
             >
