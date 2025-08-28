@@ -1,0 +1,259 @@
+---
+title: Device Select
+description: Microphone / audio input selection component
+component: DeviceSelect
+---
+
+The DeviceSelect component provides a user interface for selecting and managing microphone input devices in your voice application. It integrates with the Pipecat Client SDK to automatically detect available microphones and allow users to switch between them.
+
+<LiveComponent language="tsx">
+{`
+  import { DeviceSelectComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <DeviceSelectComponent
+    placeholder="Select input device"
+    guide="Microphone"
+    availableDevices={[
+      {deviceId: "microphone1", label: "Microphone 1"},
+      {deviceId: "microphone2", label: "Microphone 2"},
+    ]}
+    selectedDevice={null}
+    updateDevice={(deviceId) => console.log("Selected:", deviceId)}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### DeviceSelect
+
+The `DeviceSelect` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
+
+<LiveComponent language="tsx" withPipecat withDevices>
+{`
+  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
+
+  <DeviceSelect />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    placeholder: {
+      description: "Placeholder text for the select input",
+      type: "string",
+      required: false,
+      default: '"Device select"',
+    },
+    guide: {
+      description: "Optional guide content to display in the select trigger",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ selectTrigger?: string; selectContent?: string; selectItem?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    selectProps: {
+      description: "Props to pass to the underlying Select component",
+      type: "SelectProps",
+      required: false,
+      default: "undefined",
+    },
+    contentProps: {
+      description: "Props to pass to the SelectContent component",
+      type: "SelectContentProps",
+      required: false,
+      default: "undefined",
+    },
+    className: {
+      description: "Additional CSS classes to apply to the select trigger",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+### DeviceSelectComponent
+
+The `DeviceSelectComponent` is the headless variant that accepts all device data and callbacks as props. This allows you to use it with any framework or state management solution.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { DeviceSelectComponent } from "@pipecat-ai/voice-ui-kit";
+
+  // Example with mock data
+  const mockDevices = [
+    { deviceId: "mic1", label: "Built-in Microphone" },
+    { deviceId: "mic2", label: "External USB Mic" },
+  ];
+
+  function Demo() {
+    return (
+    <DeviceSelectComponent
+        availableDevices={mockDevices}
+        selectedDevice={mockDevices[0]}
+        updateDevice={(deviceId) => console.log("Selected:", deviceId)}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    availableDevices: {
+      description: "Array of available microphone devices",
+      type: "MediaDeviceInfo[]",
+      required: false,
+      default: "undefined",
+    },
+    selectedDevice: {
+      description: "Currently selected microphone device",
+      type: "OptionalMediaDeviceInfo",
+      required: false,
+      default: "undefined",
+    },
+    updateDevice: {
+      description: "Callback function called when a device is selected",
+      type: "(deviceId: string) => void",
+      required: false,
+      default: "undefined",
+    },
+    placeholder: {
+      description: "Placeholder text for the select input",
+      type: "string",
+      required: false,
+      default: '"Device select"',
+    },
+    guide: {
+      description: "Optional guide content to display in the select trigger",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ selectTrigger?: string; selectContent?: string; selectItem?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    selectProps: {
+      description: "Props to pass to the underlying Select component",
+      type: "SelectProps",
+      required: false,
+      default: "undefined",
+    },
+    contentProps: {
+      description: "Props to pass to the SelectContent component",
+      type: "SelectContentProps",
+      required: false,
+      default: "undefined",
+    },
+    className: {
+      description: "Additional CSS classes to apply to the select trigger",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+The DeviceSelect component automatically detects available microphone devices and provides a dropdown interface for selection.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
+
+  <DeviceSelect />
+`}
+</LiveComponent>
+
+#### Custom Placeholder
+
+You can customize the placeholder text shown in the select input.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
+
+  <DeviceSelect placeholder="Choose your microphone" />
+`}
+</LiveComponent>
+
+#### Guide Content
+
+You can add guide content to the select trigger for additional context.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
+
+  <DeviceSelect
+    guide="Microphone"
+    placeholder="Please select"
+  />
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Pass class names to target child components to customize the styling.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
+
+  <DeviceSelect
+    classNames={{
+      selectTrigger: "border-2 border-primary",
+      selectContent: "border-2 border-primary shadow-xlong",
+      selectItem: "font-mono text-xs uppercase",
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Automatic Device Detection**: Automatically discovers available microphone devices on the user's system
+- **Real-time Updates**: Updates the available devices list when devices are connected or disconnected
+- **Accessible**: Includes proper ARIA labels and keyboard navigation
+- **Responsive**: Adapts to different screen sizes and container widths
+- **Theme Support**: Integrates with the Voice UI Kit theming system
+- **Flexible**: Available in both connected and headless variants
+
+## Integration
+
+The connected `DeviceSelect` component uses the `usePipecatClientMediaDevices` hook from the Pipecat Client React SDK. This means it must be used within a `PipecatClientProvider` context to function properly.
+
+The component will automatically:
+- Fetch available microphone devices
+- Display the currently selected microphone
+- Handle device selection changes
+- Update the Pipecat Client's microphone configuration
+
+## Device Information
+
+The component displays device information in the following format:
+- If a device has a label, it will be displayed as-is
+- If no label is available, it will show "Device" followed by the first 5 characters of the device ID
+- Empty or invalid device IDs are handled gracefully

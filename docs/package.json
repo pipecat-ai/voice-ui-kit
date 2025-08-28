@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",
+    "@pipecat-ai/small-webrtc-transport": "^1.3.0",
     "@pipecat-ai/voice-ui-kit": "workspace:*",
     "fumadocs-core": "15.6.11",
     "fumadocs-mdx": "11.7.5",

@@ -1,14 +1,16 @@
 "use client";
 
+import { PipecatClient } from "@pipecat-ai/client-js";
+import { PipecatClientProvider } from "@pipecat-ai/client-react";
+import { SmallWebRTCTransport } from "@pipecat-ai/small-webrtc-transport";
 import * as VoiceUIKit from "@pipecat-ai/voice-ui-kit";
+import { CodeBlock, Pre as CodePre } from "fumadocs-ui/components/codeblock";
+import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+import { CircleIcon, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useMemo, useState } from "react";
 import { LiveError, LivePreview, LiveProvider } from "react-live";
-
-import { CodeBlock, Pre as CodePre } from "fumadocs-ui/components/codeblock";
-import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
-import { Loader2 } from "lucide-react";
 
 type LiveComponentProps = {
   code?: string;
@@ -23,6 +25,7 @@ type LiveComponentProps = {
   initialTab?: "preview" | "code";
   imports?: string | string[];
   previewOrientation?: "horizontal" | "vertical";
+  withPipecat?: boolean;
 };
 
 function normalizeCodeIndentation(snippet: string): string {
@@ -39,7 +42,7 @@ function normalizeCodeIndentation(snippet: string): string {
   if (!minIndent) return s;
   return lines
     .map((line) =>
-      line.startsWith(" ".repeat(minIndent)) ? line.slice(minIndent) : line,
+      line.startsWith(" ".repeat(minIndent)) ? line.slice(minIndent) : line
     )
     .join("\n");
 }
@@ -81,13 +84,26 @@ export function LiveComponent({
   previewOrientation = "horizontal",
   initialTab = "preview",
   height = "h-fit",
+  withPipecat,
 }: LiveComponentProps) {
-  const { theme: themeFromProvider, resolvedTheme } = useTheme();
+  const { theme: themeFromProvider } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [intent, setIntent] = useState(false);
+  const [client, setClient] = useState<PipecatClient | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!withPipecat || client || !intent) {
+      return;
+    }
+    const pcClient = new PipecatClient({
+      transport: new SmallWebRTCTransport(),
+    });
+    setClient(pcClient);
+  }, [withPipecat, client, intent]);
 
   const rawSource = useMemo(() => {
     if (typeof code === "string") return code;
@@ -96,20 +112,67 @@ export function LiveComponent({
   }, [code, children]);
   const displaySource = useMemo(
     () => normalizeCodeIndentation(rawSource),
-    [rawSource],
+    [rawSource]
   );
   const execSource = useMemo(
     () => stripImportsExportsRequires(displaySource),
-    [displaySource],
+    [displaySource]
   );
   const mergedScope = useMemo(
-    () => ({ React, ...VoiceUIKit, ...(scope ?? {}) }),
-    [scope],
+    () => ({ React, ...VoiceUIKit, CircleIcon, ...(scope ?? {}) }),
+    [scope]
   );
 
   const h = typeof height === "number" ? `h-[${height}px]` : height;
   const previewOrientationClass =
     previewOrientation === "horizontal" ? "flex-row" : "flex-col";
+
+  let previewComp = (
+    <LivePreview
+      language={language}
+      className={`${defaultPreviewClassName} ${h} ${previewOrientationClass} ${
+        themeFromProvider === "dark" ? "dark" : ""
+      } ${editorClassName ?? ""}`}
+    />
+  );
+
+  if (withPipecat) {
+    if (!intent) {
+      previewComp = (
+        <div
+          className={`${h} ${themeFromProvider === "dark" ? "dark" : ""} ${
+            editorClassName ?? ""
+          }`}
+        >
+          <VoiceUIKit.Card
+            className="w-full h-full flex items-center justify-center text-center"
+            background="stripes"
+          >
+            <VoiceUIKit.CardHeader>
+              <VoiceUIKit.CardTitle>
+                Media device access required
+              </VoiceUIKit.CardTitle>
+            </VoiceUIKit.CardHeader>
+            <VoiceUIKit.CardContent>
+              This preview requires access to microphone and / or camera. No
+              data is sent or received.
+            </VoiceUIKit.CardContent>
+            <VoiceUIKit.CardContent>
+              <VoiceUIKit.Button onClick={() => setIntent(true)}>
+                Show preview
+              </VoiceUIKit.Button>
+            </VoiceUIKit.CardContent>
+          </VoiceUIKit.Card>
+        </div>
+      );
+    } else {
+      previewComp = (
+        <PipecatClientProvider client={client!}>
+          {previewComp}
+        </PipecatClientProvider>
+      );
+    }
+  }
 
   return (
     <div className={className}>
@@ -120,12 +183,13 @@ export function LiveComponent({
         enableTypeScript={true}
       >
         <Tabs defaultValue={initialTab} items={["Preview", "Code"]}>
-          <Tab value="Preview" className="@container">
+          <Tab
+            value="Preview"
+            className="min-h-[200px] flex items-center p-6 md:p-10 lg:p-12 xl:p-14"
+          >
             <div className={`${previewClassName} relative w-full`}>
               {mounted ? (
-                <LivePreview
-                  className={`${defaultPreviewClassName} ${h} ${previewOrientationClass} ${themeFromProvider === "dark" ? "dark" : ""}`}
-                />
+                previewComp
               ) : (
                 <div className="h-full w-full flex items-center justify-center">
                   <Loader2
@@ -164,10 +228,11 @@ export function LiveComponent({
           <LiveError />
         </div>
       </LiveProvider>
-      {/* Hardcoded portal structure that matches .vkui-root .dark CSS selector */}
       <div className="vkui-root">
         <div
-          className={`voice-ui-kit ${themeFromProvider === "dark" ? "dark" : ""}`}
+          className={`voice-ui-kit ${
+            themeFromProvider === "dark" ? "dark" : ""
+          }`}
         />
       </div>
     </div>

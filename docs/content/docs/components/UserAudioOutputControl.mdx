@@ -1,0 +1,247 @@
+---
+title: User Audio Output Control
+description: Speaker device selection component for user audio output
+component: UserAudioOutputControl
+---
+
+The UserAudioOutputControl component provides a user interface for selecting and managing audio output devices in your voice application. When using the connected variant, it integrates with the Pipecat Client SDK to automatically detect available speakers and allow users to switch between them.
+
+<LiveComponent language="tsx">
+{`
+  import { UserAudioOutputControlComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioOutputControlComponent
+    availableDevices={[
+      {deviceId: "speaker1", label: "Speaker 1"},
+      {deviceId: "speaker2", label: "Speaker 2"},
+    ]}
+    selectedDevice={null}
+    updateDevice={(deviceId) => console.log("Selected:", deviceId)}
+  />
+`}
+</LiveComponent>
+
+
+
+---
+
+## Component Variants
+
+### UserAudioOutputControl
+
+The `UserAudioOutputControl` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserAudioOutputControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioOutputControl />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    label: {
+      description: "Label text displayed next to the select input",
+      type: "string",
+      required: false,
+      default: '"Audio Output"',
+    },
+    placeholder: {
+      description: "Placeholder text for the select input",
+      type: "string",
+      required: false,
+      default: '"Select a speaker"',
+    },
+    guide: {
+      description: "Optional guide content to display in the select trigger",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ selectTrigger?: string; selectContent?: string; selectItem?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    selectProps: {
+      description: "Props to pass to the underlying Select component",
+      type: "SelectProps",
+      required: false,
+      default: "undefined",
+    },
+    contentProps: {
+      description: "Props to pass to the SelectContent component",
+      type: "SelectContentProps",
+      required: false,
+      default: "undefined",
+    },
+    className: {
+      description: "Additional CSS classes to apply to the select trigger",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+### UserAudioOutputControlComponent
+
+The `UserAudioOutputControlComponent` is the headless variant that accepts all device data and callbacks as props. This allows you to use it with any framework or state management solution.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { UserAudioOutputControlComponent } from "@pipecat-ai/voice-ui-kit";
+
+  const mockDevices = [
+    { deviceId: "speaker1", label: "Built-in Speakers" },
+    { deviceId: "speaker2", label: "External Headphones" },
+  ];
+
+  function Demo() {
+    const [selectedDevice, setSelectedDevice] = React.useState(null);
+    
+    return(
+      <UserAudioOutputControlComponent
+        availableDevices={mockDevices}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    label: {
+      description: "Label text displayed next to the select input",
+      type: "string",
+      required: false,
+      default: '"Audio Output"',
+    },
+    placeholder: {
+      description: "Placeholder text for the select input",
+      type: "string",
+      required: false,
+      default: '"Select a speaker"',
+    },
+    guide: {
+      description: "Optional guide content to display in the select trigger",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    availableDevices: {
+      description: "Array of available audio output devices",
+      type: "MediaDeviceInfo[]",
+      required: false,
+      default: "undefined",
+    },
+    selectedDevice: {
+      description: "Currently selected audio output device",
+      type: "OptionalMediaDeviceInfo",
+      required: false,
+      default: "undefined",
+    },
+    updateDevice: {
+      description: "Callback function called when a device is selected",
+      type: "(deviceId: string) => void",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ selectTrigger?: string; selectContent?: string; selectItem?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    selectProps: {
+      description: "Props to pass to the underlying Select component",
+      type: "SelectProps",
+      required: false,
+      default: "undefined",
+    },
+    contentProps: {
+      description: "Props to pass to the SelectContent component",
+      type: "SelectContentProps",
+      required: false,
+      default: "undefined",
+    },
+    className: {
+      description: "Additional CSS classes to apply to the select trigger",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+### Custom Label
+
+You can customize the label text displayed next to the select input.
+
+<LiveComponent language="tsx">
+{`
+  import { UserAudioOutputControlComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioOutputControlComponent label="Speaker Selection" />
+`}
+</LiveComponent>
+
+### Custom Placeholder
+
+You can customize the placeholder text shown in the select input.
+
+<LiveComponent language="tsx">
+{`
+  import { UserAudioOutputControlComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioOutputControlComponent placeholder="Choose your audio output" />
+`}
+</LiveComponent>
+
+### Select Variant
+
+You can customize both the label and placeholder text together.
+
+<LiveComponent language="tsx">
+{`
+  import { UserAudioOutputControlComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioOutputControlComponent
+    label="Output Device" 
+    placeholder="Select your preferred speaker"
+    variant="outline"
+  />
+`}
+</LiveComponent>
+
+### With Custom Styling
+
+You can apply custom CSS classes to different parts of the component using the `classNames` prop.
+
+<LiveComponent language="tsx">
+{`
+  import { UserAudioOutputControlComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioOutputControlComponent
+    availableDevices={[
+      {deviceId: "speaker1", label: "Speaker 1"},
+      {deviceId: "speaker2", label: "Speaker 2"},
+    ]}
+    classNames={{
+      selectTrigger: "text-xs uppercase shadow-short border-2 border-border",
+      selectContent: "text-xs font-mono uppercase border-2 shadow-xlong bg-accent",
+      selectItem: "text-zinc-500 focus:bg-black focus:text-white"
+    }}
+  />
+`}
+</LiveComponent>

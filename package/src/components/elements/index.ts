@@ -1,4 +1,3 @@
-export * from "./AudioOutput";
 export * from "./ClientStatus";
 export * from "./ConnectButton";
 export * from "./ControlBar";
@@ -14,4 +13,5 @@ export * from "./TextInput";
 export * from "./Thinking";
 export * from "./TranscriptOverlay";
 export * from "./UserAudioControl";
+export * from "./UserAudioOutputControl";
 export * from "./UserVideoControl";

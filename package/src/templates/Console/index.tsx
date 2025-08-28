@@ -4,13 +4,13 @@ import {
   ConversationProvider,
   type ConversationProviderRef,
 } from "@/components/ConversationContext";
-import AudioOutput from "@/components/elements/AudioOutput";
 import { ClientStatus } from "@/components/elements/ClientStatus";
 import ConnectButton from "@/components/elements/ConnectButton";
 import type { ConversationProps } from "@/components/elements/Conversation";
 import PipecatLogo from "@/components/elements/PipecatLogo";
 import { SessionInfo } from "@/components/elements/SessionInfo";
 import UserAudioControl from "@/components/elements/UserAudioControl";
+import AudioOutput from "@/components/elements/UserAudioOutputControl";
 import UserVideoControl from "@/components/elements/UserVideoControl";
 import { BotAudioPanel } from "@/components/panels/BotAudioPanel";
 import { BotVideoPanel } from "@/components/panels/BotVideoPanel";

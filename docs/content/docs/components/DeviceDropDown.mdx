@@ -1,0 +1,270 @@
+---
+title: Device Drop Down
+description: Dropdown menu for microphone / audio input device selection
+component: DeviceDropDown
+---
+
+The `DeviceDropDown` component provides a dropdown menu interface for selecting and managing microphone input devices in your voice application. 
+
+Component derives from the [Shadcn Dropdown Menu](https://ui.shadcn.com/docs/components/dropdown-menu).
+
+<LiveComponent language="tsx">
+{`
+  import { Button, DeviceDropDownComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <DeviceDropDownComponent
+    availableDevices={[
+      {deviceId: "microphone1", label: "Microphone Device"},
+      {deviceId: "microphone2", label: "Another Microphone Device"},
+    ]}
+    selectedDevice={{deviceId: "microphone1", label: "Microphone 1"}}
+    updateDevice={(deviceId) => console.log("Selected:", deviceId)}
+  >
+    <Button variant="outline">Select Device</Button>
+  </DeviceDropDownComponent>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### DeviceDropDown
+
+The `DeviceDropDown` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { DeviceDropDown, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <DeviceDropDown menuLabel="Select Microphone">
+    <Button variant="outline">Choose Device</Button>
+  </DeviceDropDown>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    children: {
+      description: "The trigger element that opens the dropdown menu",
+      type: "React.ReactNode",
+      required: true,
+      default: "undefined",
+    },
+    noMenuLabel: {
+      description: "Whether to hide the menu label",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noMenuSeparator: {
+      description: "Whether to hide the separator below the menu label",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    menuLabel: {
+      description: "Text label displayed at the top of the dropdown menu",
+      type: "string",
+      required: false,
+      default: '"Device select"',
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ dropdownMenuContent?: string; dropdownMenuCheckboxItem?: string; dropdownMenuLabel?: string; }",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+### DeviceDropDownComponent
+
+The `DeviceDropDownComponent` is the headless variant that accepts all device data and callbacks as props. This allows you to use it with any framework or state management solution.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { DeviceDropDownComponent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  // Example with mock data
+  const mockDevices = [
+    { deviceId: "mic1", label: "Built-in Microphone" },
+    { deviceId: "mic2", label: "External USB Mic" },
+  ];
+
+  function Demo() {
+    return (
+      <DeviceDropDownComponent
+        availableDevices={mockDevices}
+        selectedDevice={mockDevices[0]}
+        updateDevice={(deviceId) => console.log("Selected:", deviceId)}
+        menuLabel="Select Microphone"
+      >
+        <Button variant="outline">Choose Device</Button>
+      </DeviceDropDownComponent>
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    children: {
+      description: "The trigger element that opens the dropdown menu",
+      type: "React.ReactNode",
+      required: true,
+      default: "undefined",
+    },
+    noMenuLabel: {
+      description: "Whether to hide the menu label",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noMenuSeparator: {
+      description: "Whether to hide the separator below the menu label",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    menuLabel: {
+      description: "Text label displayed at the top of the dropdown menu",
+      type: "string",
+      required: false,
+      default: '"Device select"',
+    },
+    availableDevices: {
+      description: "Array of available microphone devices",
+      type: "MediaDeviceInfo[]",
+      required: false,
+      default: "undefined",
+    },
+    selectedDevice: {
+      description: "Currently selected microphone device",
+      type: "OptionalMediaDeviceInfo",
+      required: false,
+      default: "undefined",
+    },
+    updateDevice: {
+      description: "Callback function called when a device is selected",
+      type: "(deviceId: string) => void",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ dropdownMenuContent?: string; dropdownMenuCheckboxItem?: string; dropdownMenuLabel?: string; }",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+
+---
+
+## Usage Examples
+
+
+#### Custom Trigger with Icon
+
+Create a custom trigger with icons or other elements.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { DeviceDropDownComponent } from "@pipecat-ai/voice-ui-kit";
+
+  const mockDevices = [
+    { deviceId: "mic1", label: "Built-in Microphone" },
+    { deviceId: "mic2", label: "External USB Mic" },
+  ];
+
+  function Demo() {
+    return (
+      <DeviceDropDownComponent
+        availableDevices={mockDevices}
+        selectedDevice={mockDevices[0]}
+        updateDevice={(deviceId) => console.log("Selected:", deviceId)}
+      >
+        <div className="flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer hover:bg-gray-50">
+          <CircleIcon />
+          <span>Select Input</span>
+        </div>
+      </DeviceDropDownComponent>
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+#### Custom Menu Label and Styling
+
+Customize the menu appearance and behavior.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { DeviceDropDownComponent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  const mockDevices = [
+    { deviceId: "mic1", label: "Built-in Microphone" },
+    { deviceId: "mic2", label: "External USB Mic" },
+  ];
+
+  function Demo() {
+    return (
+      <DeviceDropDownComponent
+        menuLabel="Available Microphones"
+        noMenuSeparator={false}
+        availableDevices={mockDevices}
+        selectedDevice={mockDevices[0]}
+        updateDevice={(deviceId) => console.log("Selected:", deviceId)}
+        classNames={{
+          dropdownMenuLabel: "uppercase text-xs tracking-widest font-bold",
+          dropdownMenuContent: "w-64 border-2 shadow-xlong",
+          dropdownMenuCheckboxItem: "text-xs uppercase font-mono",
+        }}
+      >
+        <Button variant="ghost">Customized Styles</Button>
+      </DeviceDropDownComponent>
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+#### Minimal Menu without Label
+
+Create a clean dropdown without labels or separators.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { DeviceDropDownComponent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  const mockDevices = [
+    { deviceId: "mic1", label: "Built-in Microphone" },
+    { deviceId: "mic2", label: "External USB Mic" },
+  ];
+
+  function Demo() {
+    return (
+      <DeviceDropDownComponent
+        noMenuLabel={true}
+        noMenuSeparator={true}
+        availableDevices={mockDevices}
+        selectedDevice={mockDevices[0]}
+        updateDevice={(deviceId) => console.log("Selected:", deviceId)}
+      >
+        <Button variant="outline" size="sm">⚙️</Button>
+      </DeviceDropDownComponent>
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>

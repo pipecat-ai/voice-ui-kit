@@ -30,5 +30,5 @@ code {
 }
 
 .ladle-section {
-  @apply flex flex-row gap-4 pb-4 w-full;
+  @apply flex flex-row gap-4 pb-4 w-full justify-start items-center;
 }
