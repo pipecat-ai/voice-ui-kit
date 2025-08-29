@@ -4,22 +4,33 @@ import { useEffect, useId } from "react";
 import { useConversationStore } from "@/stores/conversationStore";
 
 /**
- * Options for `useConversation`.
+ * Options for `usePipecatConversation`.
  */
 interface Props {
-  /** Optional callback invoked whenever a new message is added or finalized. */
+  /**
+   * Optional callback invoked whenever a new message is added or finalized.
+   * This callback will be called with the latest message object.
+   */
   onMessageAdded?: (message: ConversationMessage) => void;
 }
 
 /**
- * React hook that derives a clean, ordered conversation stream from RTVI events.
+ * React hook for accessing and subscribing to the current conversation stream.
  *
- * Behavior:
- * - Listens to Pipecat client events for user and assistant messages
- * - Creates in-progress placeholder messages for streaming text, finalizes on stop
- * - Filters empty placeholder messages when later replaced by real content
- * - Merges consecutive messages of the same role when close in time
- * - Exposes `injectMessage` to programmatically add messages
+ * This hook provides:
+ * - The current list of conversation messages, ordered and merged for display.
+ * - An `injectMessage` function to programmatically add a message to the conversation.
+ * - The ability to register a callback (`onMessageAdded`) that is called whenever a new message is added or finalized.
+ *
+ * Internally, this hook:
+ * - Subscribes to conversation state updates and merges/filters messages for UI consumption.
+ * - Ensures the provided callback is registered and unregistered as the component mounts/unmounts or the callback changes.
+ *
+ * @param {Props} [options] - Optional configuration for the hook.
+ * @returns {{
+ *   messages: ConversationMessage[];
+ *   injectMessage: (message: { role: "user" | "assistant" | "system"; parts: any[] }) => void;
+ * }}
  */
 export const usePipecatConversation = ({ onMessageAdded }: Props = {}) => {
   const { messages, injectMessage } = useConversationContext();
@@ -31,7 +42,7 @@ export const usePipecatConversation = ({ onMessageAdded }: Props = {}) => {
 
   // Register and unregister the callback
   useEffect(() => {
-    // Register the callback
+    // Register the callback for message updates
     registerMessageCallback(callbackId, onMessageAdded);
 
     // Cleanup: unregister when component unmounts or callback changes
