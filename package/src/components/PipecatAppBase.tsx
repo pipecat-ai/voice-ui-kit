@@ -4,6 +4,7 @@ import {
   ThemeProvider,
   type ThemeProviderProps,
 } from "@/components/ThemeProvider";
+import { ConversationProvider } from "@/components/ConversationProvider";
 import { createTransport } from "@/lib/transports";
 import {
   PipecatClient,
@@ -238,8 +239,10 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   // Only create PipecatClientProvider when client is fully initialized
   const clientProvider = (
     <PipecatClientProvider client={client!}>
-      {typeof children === "function" ? children(passedProps) : children}
-      {!noAudioOutput && <PipecatClientAudio />}
+      <ConversationProvider>
+        {typeof children === "function" ? children(passedProps) : children}
+        {!noAudioOutput && <PipecatClientAudio />}
+      </ConversationProvider>
     </PipecatClientProvider>
   );
 
