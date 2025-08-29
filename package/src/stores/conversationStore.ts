@@ -1,14 +1,19 @@
+import {
+  type ConversationMessage,
+  type ConversationMessagePart,
+} from "@/types/conversation";
 import { create } from "zustand";
-import { type ConversationMessage } from "@/types/conversation";
 
 interface ConversationState {
   messages: ConversationMessage[];
-  onMessageAdded?: (message: ConversationMessage) => void;
+  messageCallbacks: Map<string, (message: ConversationMessage) => void>;
 
   // Actions
-  setOnMessageAdded: (
+  registerMessageCallback: (
+    id: string,
     callback?: (message: ConversationMessage) => void,
   ) => void;
+  unregisterMessageCallback: (id: string) => void;
   clearMessages: () => void;
   addMessage: (
     message: Omit<ConversationMessage, "createdAt" | "updatedAt">,
@@ -17,13 +22,16 @@ interface ConversationState {
     role: "user" | "assistant",
     updates: Partial<ConversationMessage>,
   ) => void;
-  appendToLastMessage: (role: "user" | "assistant", text: string) => void;
   finalizeLastMessage: (role: "user" | "assistant") => void;
   removeEmptyLastMessage: (role: "user" | "assistant") => void;
   injectMessage: (message: {
     role: "user" | "assistant" | "system";
-    content: string | React.ReactNode;
+    parts: ConversationMessagePart[];
   }) => void;
+  upsertUserTranscript: (
+    text: string | React.ReactNode,
+    final: boolean,
+  ) => void;
 }
 
 const sortByCreatedAt = (
@@ -33,25 +41,24 @@ const sortByCreatedAt = (
   return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 };
 
+const isMessageEmpty = (message: ConversationMessage): boolean => {
+  const parts = message.parts || [];
+  if (parts.length === 0) return true;
+  return parts.every((p) =>
+    typeof p.text === "string" ? p.text.trim().length === 0 : false,
+  );
+};
+
 const filterEmptyMessages = (
   messages: ConversationMessage[],
 ): ConversationMessage[] => {
   return messages.filter((message, index, array) => {
-    if (typeof message.content === "string") {
-      if (message.content) return true;
-    } else {
-      // For ReactNode content, always keep it
-      return true;
-    }
+    if (!isMessageEmpty(message)) return true;
 
-    // For empty string messages, check if there's a non-empty message with the same role following it
+    // For empty messages, keep only if no following non-empty message with same role
     const nextMessageWithSameRole = array
       .slice(index + 1)
-      .find(
-        (m) =>
-          m.role === message.role &&
-          (typeof m.content === "string" ? m.content : true),
-      );
+      .find((m) => m.role === message.role && !isMessageEmpty(m));
 
     return !nextMessageWithSameRole;
   });
@@ -76,13 +83,13 @@ const mergeMessages = (
     const shouldMerge =
       lastMerged &&
       lastMerged.role === currentMessage.role &&
-      currentMessage.role !== "system" && // Never merge system messages
-      timeDiff < 30000; // 30 seconds threshold
+      currentMessage.role !== "system" &&
+      timeDiff < 30000;
 
     if (shouldMerge) {
       mergedMessages[mergedMessages.length - 1] = {
         ...lastMerged,
-        content: `${lastMerged.content} ${currentMessage.content}`,
+        parts: [...(lastMerged.parts || []), ...(currentMessage.parts || [])],
         updatedAt: currentMessage.updatedAt || currentMessage.createdAt,
         final: currentMessage.final !== false,
       };
@@ -94,11 +101,37 @@ const mergeMessages = (
   return mergedMessages;
 };
 
+// Helper function to call all registered callbacks
+const callAllMessageCallbacks = (
+  callbacks: Map<string, (message: ConversationMessage) => void>,
+  message: ConversationMessage,
+) => {
+  callbacks.forEach((callback) => {
+    try {
+      callback(message);
+    } catch (error) {
+      console.error("Error in message callback:", error);
+    }
+  });
+};
+
 export const useConversationStore = create<ConversationState>((set) => ({
   messages: [],
-  onMessageAdded: undefined,
+  messageCallbacks: new Map(),
 
-  setOnMessageAdded: (callback) => set({ onMessageAdded: callback }),
+  registerMessageCallback: (id, callback) =>
+    set((state) => {
+      const newState = { ...state };
+      newState.messageCallbacks.set(id, callback || (() => {}));
+      return newState;
+    }),
+
+  unregisterMessageCallback: (id) =>
+    set((state) => {
+      const newState = { ...state };
+      newState.messageCallbacks.delete(id);
+      return newState;
+    }),
 
   clearMessages: () => set({ messages: [] }),
 
@@ -116,7 +149,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
         filterEmptyMessages(updatedMessages.sort(sortByCreatedAt)),
       );
 
-      state.onMessageAdded?.(message);
+      callAllMessageCallbacks(state.messageCallbacks, message);
       return { messages: processedMessages };
     });
   },
@@ -134,88 +167,14 @@ export const useConversationStore = create<ConversationState>((set) => ({
         ...messages[lastMessageIndex],
         ...updates,
         updatedAt: new Date().toISOString(),
-      };
+      } as ConversationMessage;
 
       messages[lastMessageIndex] = updatedMessage;
       const processedMessages = mergeMessages(
         filterEmptyMessages(messages.sort(sortByCreatedAt)),
       );
 
-      state.onMessageAdded?.(updatedMessage);
-      return { messages: processedMessages };
-    });
-  },
-
-  appendToLastMessage: (role, text) => {
-    const now = new Date();
-    set((state) => {
-      const messages = [...state.messages];
-      const lastMessageIndex = messages.findLastIndex(
-        (msg) => msg.role === role,
-      );
-
-      if (lastMessageIndex === -1) {
-        // No existing message, create new one
-        const newMessage: ConversationMessage = {
-          role,
-          content: text,
-          final: false,
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
-        };
-        const updatedMessages = [...messages, newMessage];
-        const processedMessages = mergeMessages(
-          filterEmptyMessages(updatedMessages.sort(sortByCreatedAt)),
-        );
-
-        state.onMessageAdded?.(newMessage);
-        return { messages: processedMessages };
-      }
-
-      const lastMessage = messages[lastMessageIndex];
-      const isRecent =
-        now.getTime() - new Date(lastMessage.createdAt).getTime() < 10000;
-
-      let updatedMessage: ConversationMessage;
-
-      if (!lastMessage.content) {
-        // Replace empty message
-        updatedMessage = {
-          ...lastMessage,
-          content: text,
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
-        };
-      } else if (isRecent) {
-        // Append to recent message
-        updatedMessage = {
-          ...lastMessage,
-          content: lastMessage.content + text,
-          updatedAt: now.toISOString(),
-        };
-      } else {
-        // Create new message
-        const newMessage: ConversationMessage = {
-          role,
-          content: text,
-          final: false,
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
-        };
-        const updatedMessages = [...messages, newMessage];
-        const processedMessages = mergeMessages(
-          filterEmptyMessages(updatedMessages.sort(sortByCreatedAt)),
-        );
-
-        state.onMessageAdded?.(newMessage);
-        return { messages: processedMessages };
-      }
-
-      messages[lastMessageIndex] = updatedMessage;
-      const processedMessages = mergeMessages(
-        filterEmptyMessages(messages.sort(sortByCreatedAt)),
-      );
-
+      callAllMessageCallbacks(state.messageCallbacks, updatedMessage);
       return { messages: processedMessages };
     });
   },
@@ -231,17 +190,28 @@ export const useConversationStore = create<ConversationState>((set) => ({
 
       const lastMessage = messages[lastMessageIndex];
 
-      if (!lastMessage.content) {
+      if (isMessageEmpty(lastMessage)) {
         // Remove empty message
         messages.splice(lastMessageIndex, 1);
       } else {
-        // Finalize message
+        // Finalize message and its last part
+        const parts = [...(lastMessage.parts || [])];
+        if (parts.length > 0) {
+          parts[parts.length - 1] = {
+            ...parts[parts.length - 1],
+            final: true,
+          };
+        }
         messages[lastMessageIndex] = {
           ...lastMessage,
+          parts,
           final: true,
           updatedAt: new Date().toISOString(),
         };
-        state.onMessageAdded?.(messages[lastMessageIndex]);
+        callAllMessageCallbacks(
+          state.messageCallbacks,
+          messages[lastMessageIndex],
+        );
       }
 
       const processedMessages = mergeMessages(
@@ -262,7 +232,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
       if (lastMessageIndex === -1) return state;
 
       const lastMessage = messages[lastMessageIndex];
-      if (!lastMessage.content) {
+      if (isMessageEmpty(lastMessage)) {
         messages.splice(lastMessageIndex, 1);
         const processedMessages = mergeMessages(
           filterEmptyMessages(messages.sort(sortByCreatedAt)),
@@ -278,8 +248,8 @@ export const useConversationStore = create<ConversationState>((set) => ({
     const now = new Date();
     const message: ConversationMessage = {
       role: messageData.role,
-      content: messageData.content,
       final: true,
+      parts: [...messageData.parts],
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
     };
@@ -290,7 +260,83 @@ export const useConversationStore = create<ConversationState>((set) => ({
         filterEmptyMessages(updatedMessages.sort(sortByCreatedAt)),
       );
 
-      state.onMessageAdded?.(message);
+      callAllMessageCallbacks(state.messageCallbacks, message);
+      return { messages: processedMessages };
+    });
+  },
+
+  upsertUserTranscript: (text, final) => {
+    const now = new Date();
+    set((state) => {
+      const messages = [...state.messages];
+
+      // Find last non-empty message
+      const lastNonEmptyIndex = messages
+        .map((m, idx) => ({ m, idx }))
+        .reverse()
+        .find(({ m }) => !isMessageEmpty(m))?.idx;
+
+      if (
+        lastNonEmptyIndex !== undefined &&
+        lastNonEmptyIndex >= 0 &&
+        messages[lastNonEmptyIndex].role === "user"
+      ) {
+        // Update existing user message
+        const target = { ...messages[lastNonEmptyIndex] };
+        const parts: ConversationMessagePart[] = Array.isArray(target.parts)
+          ? [...target.parts]
+          : [];
+
+        const lastPart = parts[parts.length - 1];
+        if (!lastPart || lastPart.final) {
+          // Start a new part
+          parts.push({ text, final, createdAt: now.toISOString() });
+        } else {
+          // Update in-progress part
+          parts[parts.length - 1] = {
+            ...lastPart,
+            text,
+            final,
+          };
+        }
+
+        const updatedMessage: ConversationMessage = {
+          ...target,
+          final: final ? true : target.final,
+          parts,
+          updatedAt: now.toISOString(),
+        };
+
+        messages[lastNonEmptyIndex] = updatedMessage;
+
+        const processedMessages = mergeMessages(
+          filterEmptyMessages(messages.sort(sortByCreatedAt)),
+        );
+
+        callAllMessageCallbacks(state.messageCallbacks, updatedMessage);
+        return { messages: processedMessages };
+      }
+
+      // Create a new user message initialized with this transcript
+      const newMessage: ConversationMessage = {
+        role: "user",
+        final,
+        parts: [
+          {
+            text,
+            final,
+            createdAt: now.toISOString(),
+          },
+        ],
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      };
+
+      const updatedMessages = [...messages, newMessage];
+      const processedMessages = mergeMessages(
+        filterEmptyMessages(updatedMessages.sort(sortByCreatedAt)),
+      );
+      callAllMessageCallbacks(state.messageCallbacks, newMessage);
       return { messages: processedMessages };
     });
   },
