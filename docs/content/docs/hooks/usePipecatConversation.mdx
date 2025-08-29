@@ -5,7 +5,26 @@ description: Hook that derives a clean, ordered conversation stream from RTVI ev
 
 ## Overview
 
-`usePipecatConversation` listens to Pipecat RTVI events and produces a clean message list suitable for rendering a chat transcript. It handles streaming text, placeholder messages, finalization, and merging of consecutive messages from the same role.
+`usePipecatConversation` provides access to conversation state managed by the `ConversationProvider`. The provider is automatically included when using `PipecatAppBase` and handles all Pipecat RTVI events to produce a clean message list suitable for rendering a chat transcript. It handles streaming text, placeholder messages, finalization, and merging of consecutive messages from the same role.
+
+## Setup
+
+The `ConversationProvider` is automatically included when you use `PipecatAppBase`, so no additional setup is required:
+
+```tsx
+import { PipecatAppBase, usePipecatConversation } from "@pipecat-ai/voice-ui-kit";
+
+export default function App() {
+  return (
+    <PipecatAppBase
+      transportType="smallwebrtc"
+      connectParams={{ webrtcUrl: "/api/offer" }}
+    >
+      <YourApp />
+    </PipecatAppBase>
+  );
+}
+```
 
 ## Usage
 
@@ -32,7 +51,7 @@ export function ConversationList() {
 
 ```tsx
 const { messages } = usePipecatConversation({
-  onMessageAdded: (m) => console.log("message", m),
+  onMessageAdded: (message) => console.log("New message:", message),
 });
 ```
 
@@ -88,79 +107,4 @@ export function InjectViaHook() {
 }
 ```
 
-```tsx
-import React, { useCallback, useRef } from "react";
-import {
-  ConsoleTemplate,
-  FullScreenContainer,
-  type ConversationMessage,
-} from "@pipecat-ai/voice-ui-kit";
-
-export default function ConsoleInjectExample() {
-  const injectMessageRef = useRef<
-    ((message: Pick<ConversationMessage, "role" | "content">) => void) | null
-  >(null);
-
-  const handleOnInjectMessage = useCallback(
-    (injectFn: (message: Pick<ConversationMessage, "role" | "content">) => void) => {
-      injectMessageRef.current = injectFn;
-    },
-    [],
-  );
-
-  const handleOnServerMessage = useCallback((data: { type: string; payload?: unknown }) => {
-    if (!injectMessageRef.current || !data?.payload) return;
-    if (data.type === "notice") {
-      injectMessageRef.current({ role: "system", content: "Server notice received" });
-    }
-  }, []);
-
-  return (
-    <FullScreenContainer>
-      <ConsoleTemplate
-        transportType="smallwebrtc"
-        connectParams={{ webrtcUrl: "/api/offer" }}
-        onInjectMessage={handleOnInjectMessage}
-        onServerMessage={handleOnServerMessage}
-      />
-    </FullScreenContainer>
-  );
-}
 ```
-
----
-
-## API
-
-### Options
-
-<TypeTable
-  className="text-sm"
-  type={{
-    onMessageAdded: {
-      description: "Callback invoked whenever a new message is added or finalized",
-      type: "(message: ConversationMessage) => void",
-      required: false,
-      default: "undefined",
-    },
-  }}
-/>
-
-### Return
-
-<TypeTable
-  className="text-sm"
-  type={{
-    messages: {
-      description: "Ordered, filtered conversation messages ready to render",
-      type: "ConversationMessage[]",
-      required: true,
-    },
-    injectMessage: {
-      description: "Programmatically inject a message into the conversation stream",
-      type: '{ role: "user" | "assistant" | "system"; content: string | React.ReactNode } => void',
-      required: true,
-    },
-  }}
-/>
-

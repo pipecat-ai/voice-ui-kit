@@ -1,17 +1,15 @@
 import { type ReactNode } from "react";
 
-export interface ConversationMessage {
-  role: "user" | "assistant" | "system";
-  content: string | ReactNode;
-  final?: boolean;
+export interface ConversationMessagePart {
+  text: string | ReactNode;
+  final: boolean;
   createdAt: string;
-  updatedAt?: string;
 }
 
-export interface ConversationContextType {
-  messages: ConversationMessage[];
-  injectMessage: (message: {
-    role: "user" | "assistant" | "system";
-    content: string | ReactNode;
-  }) => void;
+export interface ConversationMessage {
+  role: "user" | "assistant" | "system";
+  final?: boolean;
+  parts: ConversationMessagePart[];
+  createdAt: string;
+  updatedAt?: string;
 }
