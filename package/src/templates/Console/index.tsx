@@ -1,22 +1,19 @@
 "use client";
 
-import {
-  ConversationProvider,
-  type ConversationProviderRef,
-} from "@/components/ConversationContext";
 import { ClientStatus } from "@/components/elements/ClientStatus";
 import ConnectButton from "@/components/elements/ConnectButton";
 import type { ConversationProps } from "@/components/elements/Conversation";
 import PipecatLogo from "@/components/elements/PipecatLogo";
 import { SessionInfo } from "@/components/elements/SessionInfo";
 import UserAudioControl from "@/components/elements/UserAudioControl";
-import AudioOutput from "@/components/elements/UserAudioOutputControl";
+import UserAudioOutputControl from "@/components/elements/UserAudioOutputControl";
 import UserVideoControl from "@/components/elements/UserVideoControl";
 import { BotAudioPanel } from "@/components/panels/BotAudioPanel";
 import { BotVideoPanel } from "@/components/panels/BotVideoPanel";
 import ConversationPanel from "@/components/panels/ConversationPanel";
 import { EventsPanel } from "@/components/panels/EventsPanel";
 import { InfoPanel } from "@/components/panels/InfoPanel";
+import { PipecatAppBase } from "@/components/PipecatAppBase";
 import ThemeModeToggle from "@/components/ThemeModeToggle";
 import {
   Banner,
@@ -25,6 +22,7 @@ import {
   BannerTitle,
 } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
+import { SpinLoader } from "@/components/ui/loader";
 import {
   Popover,
   PopoverContent,
@@ -36,6 +34,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import type {
   DailyTransportOptions,
   SmallWebRTCTransportOptions,
@@ -47,10 +46,7 @@ import {
   RTVIEvent,
   type TransportConnectionParams,
 } from "@pipecat-ai/client-js";
-import {
-  PipecatClientAudio,
-  useRTVIClientEvent,
-} from "@pipecat-ai/client-react";
+import { useRTVIClientEvent } from "@pipecat-ai/client-react";
 import {
   BotIcon,
   ChevronsLeftRightEllipsisIcon,
@@ -61,12 +57,10 @@ import {
   PanelLeftCloseIcon,
   PanelRightCloseIcon,
 } from "lucide-react";
-import React, { memo, useCallback, useRef, useState } from "react";
-import type { ImperativePanelHandle } from "react-resizable-panels";
-import { PipecatAppBase } from "../../components/PipecatAppBase";
-import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
+import { type ImperativePanelHandle } from "react-resizable-panels";
+import React, { memo, useEffect, useRef, useState } from "react";
 import { AutoInitDevices } from "./AutoInitDevices";
-import { SpinLoader } from "../../components/ui";
+import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
 
 // Type aliases for backward compatibility
 type DailyTransportConstructorOptions = DailyTransportOptions;
@@ -170,7 +164,7 @@ export interface ConsoleTemplateProps {
    */
   onInjectMessage?: (
     injectMessage: (
-      message: Pick<ConversationMessage, "role" | "content">,
+      message: Pick<ConversationMessage, "role" | "parts">,
     ) => void,
   ) => void;
 
@@ -291,14 +285,12 @@ const ConsoleUI = ({
 
   const infoPanelRef = useRef<ImperativePanelHandle>(null);
 
-  const handleConversationProviderRef = useCallback(
-    (node: ConversationProviderRef | null) => {
-      if (node && onInjectMessage) {
-        onInjectMessage(node.injectMessage);
-      }
-    },
-    [onInjectMessage],
-  );
+  const { injectMessage } = usePipecatConversation();
+
+  // Expose injectMessage to parent if requested
+  useEffect(() => {
+    if (onInjectMessage) onInjectMessage(injectMessage);
+  }, [onInjectMessage, injectMessage]);
 
   const noBotArea = noBotAudio && noBotVideo;
   const noConversationPanel = noConversation && noMetrics;
@@ -316,7 +308,7 @@ const ConsoleUI = ({
   });
 
   return (
-    <ConversationProvider ref={handleConversationProviderRef}>
+    <>
       {!noAutoInitDevices && <AutoInitDevices />}
       <SmallWebRTCCodecSetter
         audioCodec={audioCodec}
@@ -471,7 +463,7 @@ const ConsoleUI = ({
                             >
                               {!noUserAudio && <UserAudioControl />}
                               {!noUserVideo && <UserVideoControl />}
-                              {!noAudioOutput && <AudioOutput />}
+                              {!noAudioOutput && <UserAudioOutputControl />}
                             </PopoverContent>
                           </Popover>
                         )}
@@ -572,8 +564,7 @@ const ConsoleUI = ({
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        {!noAudioOutput && <PipecatClientAudio />}
       </div>
-    </ConversationProvider>
+    </>
   );
 };
