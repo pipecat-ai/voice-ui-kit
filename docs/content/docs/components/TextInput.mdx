@@ -1,0 +1,377 @@
+---
+title: Text Input
+description: Text input component for sending text messages to the bot
+component: TextInput
+---
+
+The TextInput component provides a user interface for entering and sending textual messages to the bot. It includes both a headless variant for full control and a connected variant that automatically integrates with the Pipecat Client SDK.
+
+<LiveComponent language="tsx">
+{`
+  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <TextInputComponent
+    placeholder="Type your message..."
+    onSend={(message) => console.log("Sending:", message)}
+    classNames={{
+      container: "w-full",
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### TextInput
+
+The `TextInput` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { TextInput } from "@pipecat-ai/voice-ui-kit";
+
+  <TextInput placeholder="Ask me anything..." />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    debounceTime: {
+      description: "Time in milliseconds to debounce input changes",
+      type: "number",
+      required: false,
+      default: "300",
+    },
+    disabled: {
+      description: "Whether the input is disabled",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    role: {
+      description: "Role of the message sender (user or assistant)",
+      type: '"user" | "assistant"',
+      required: false,
+      default: '"user"',
+    },
+    runImmediately: {
+      description: "Whether to run the message immediately when sent",
+      type: "boolean",
+      required: false,
+      default: "true",
+    },
+    noConnectedPlaceholder: {
+      description: "Placeholder text shown when not connected to Pipecat",
+      type: "string",
+      required: false,
+      default: '"Connect to send"',
+    },
+    multiline: {
+      description: "Whether to use a multiline textarea instead of single-line input",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    buttonLabel: {
+      description: "Custom label for the send button",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    buttonIcon: {
+      description: "Custom icon for the send button",
+      type: "React.ReactNode",
+      required: false,
+      default: "<SendIcon />",
+    },
+    buttonProps: {
+      description: "Props to pass to the send button",
+      type: "ButtonProps",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ container?: string; input?: string; button?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    placeholder: {
+      description: "Placeholder text for the input field",
+      type: "string",
+      required: false,
+      default: '"Type message..."',
+    },
+    size: {
+      description: "Size of the input and button components",
+      type: '"sm" | "md" | "lg" | "xl"',
+      required: false,
+      default: '"md"',
+    },
+  }}
+/>
+
+### TextInputComponent
+
+The `TextInputComponent` is the headless variant that accepts all callbacks and state as props. This allows you to use it with any framework or state management solution.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    const handleSend = async (message: string) => {
+      console.log("Sending message:", message);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    };
+
+    return (
+      <TextInputComponent
+        placeholder="Type your message..."
+        onSend={handleSend}
+        buttonLabel="Send Message"
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    debounceTime: {
+      description: "Time in milliseconds to debounce input changes",
+      type: "number",
+      required: false,
+      default: "300",
+    },
+    onSend: {
+      description: "Callback function called when a message is sent",
+      type: "(message: string) => Promise<void> | void",
+      required: false,
+      default: "undefined",
+    },
+    disabled: {
+      description: "Whether the input is disabled",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    multiline: {
+      description: "Whether to use a multiline textarea instead of single-line input",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    buttonLabel: {
+      description: "Custom label for the send button",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    buttonIcon: {
+      description: "Custom icon for the send button",
+      type: "React.ReactNode",
+      required: false,
+      default: "<SendIcon />",
+    },
+    buttonProps: {
+      description: "Props to pass to the send button",
+      type: "ButtonProps",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ container?: string; input?: string; button?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    placeholder: {
+      description: "Placeholder text for the input field",
+      type: "string",
+      required: false,
+      default: '"Type message..."',
+    },
+    size: {
+      description: "Size of the input and button components",
+      type: '"sm" | "md" | "lg" | "xl"',
+      required: false,
+      default: '"md"',
+    },
+  }}
+/>
+
+---
+
+## Usage Examples
+
+#### Custom Button Label
+
+You can customize the send button with a custom label.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    return (
+      <TextInputComponent
+        placeholder="Ask a question..."
+        buttonLabel="Ask Bot"
+        onSend={(message) => console.log("Asking:", message)}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+#### Custom Button Icon
+
+You can use a custom icon for the send button.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+  import { MessageCircle } from "lucide-react";
+
+  function Demo() {
+    return (
+      <TextInputComponent
+        placeholder="Send a message..."
+        buttonIcon={<CircleIcon size={16} />}
+        onSend={(message) => console.log("Sending:", message)}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+#### Multiline Input
+
+Enable multiline input for longer messages.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    return (
+      <TextInputComponent
+        placeholder="Type a longer message..."
+        multiline={true}
+        onSend={(message) => console.log("Sending:", message)}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom CSS classes to different parts of the component.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    return (
+      <TextInputComponent
+        placeholder="Styled input..."
+        classNames={{
+          container: "border-2 border-primary rounded-lg p-2",
+          input: "bg-gray-50 border-none focus:ring-2 focus:ring-primary",
+          button: "bg-primary text-white hover:bg-primary/90",
+        }}
+        onSend={(message) => console.log("Sending:", message)}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+#### Disabled State
+
+The component can be disabled and shows appropriate visual feedback.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    return (
+      <TextInputComponent
+        placeholder="This input is disabled..."
+        disabled={true}
+        onSend={(message) => console.log("Sending:", message)}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+#### Size
+
+You can use different sizes for the input and button components.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    return (
+      <TextInputComponent
+        placeholder="Type your message..."
+        size="lg"
+        onSend={(message) => console.log("Sending:", message)}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+#### Multiline Input
+
+The component can be configured for multiline or single-line input. When `multiline={false}`, it uses a single-line input field that prevents line breaks.
+
+<LiveComponent language="tsx">
+{`
+  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <TextInputComponent
+    placeholder="Press shift+enter to add a new line..."
+    multiline={true}
+    classNames={{
+      container: "w-full",
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Multiline Behavior
+
+The component dynamically switches between input types based on the `multiline` prop:
+
+- **`multiline={true}`**: Uses a `Textarea` component that allows multiple lines and supports Shift+Enter for new lines
+- **`multiline={false}`**: Uses a single-line `Input` component that prevents line breaks and only allows Enter to send the message

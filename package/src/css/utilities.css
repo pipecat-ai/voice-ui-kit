@@ -1,7 +1,9 @@
 @utility button-* {
-  height: --value(--button-size-*);
   padding-inline: calc(--value(--button-size-*) * var(--button-px-mul));
+  height: --value(--button-size-*);
   gap: calc(--value(--button-size-*) * var(--button-px-gap-mul));
+  box-sizing: border-box;
+  padding-block: calc(var(--spacing) * 2);
 
   /* Resize spacing when button contains SVG icon */
   &:has(> svg) {

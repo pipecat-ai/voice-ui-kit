@@ -26,6 +26,11 @@ It handles the common setup tasks that are typically the same across most applic
 
 ## Usage
 
+<Callout type="warning">
+  Parent / adjacent state changes will trigger component re-renders, which will recycle the Pipecat client instance.
+  We recommend using this component at the highest order in your application, and not nesting it inside other components.
+</Callout>
+
 The `PipecatAppBase` component can be used in two ways:
 
 ### 1. Render Prop Pattern (Function Children)

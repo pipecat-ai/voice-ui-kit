@@ -12,14 +12,14 @@ export interface TextareaProps
 }
 
 const textareaVariants = cva(
-  "field-sizing-content h-auto disabled:cursor-not-allowed",
+  "field-sizing-content disabled:cursor-not-allowed box-border h-auto",
   {
     variants: {
       size: {
-        sm: "py-1",
-        md: "py-1.5",
-        lg: "py-2",
-        xl: "py-2.5",
+        sm: "py-0.75",
+        md: "py-1.25",
+        lg: "py-2.25",
+        xl: "py-3.25",
       },
       multiline: {
         true: "resize-y",
@@ -33,7 +33,7 @@ function Textarea({
   className,
   size,
   variant,
-  rounded,
+  rounded = "size",
   multiline = true,
   ...props
 }: TextareaProps) {

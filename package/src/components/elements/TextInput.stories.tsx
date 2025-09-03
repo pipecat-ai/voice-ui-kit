@@ -26,6 +26,11 @@ export const Default: Story = () => (
 );
 Default.storyName = "Component";
 
+export const Multiline: Story = () => (
+  <TextInputComponent size="xl" onSend={simulateSend} multiline />
+);
+Multiline.storyName = "Multiline";
+
 export const WithButtonLabel: Story = () => (
   <TextInputComponent
     onSend={simulateSend}

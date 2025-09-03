@@ -8,7 +8,7 @@ import {
   usePipecatClientMediaDevices,
 } from "@pipecat-ai/client-react";
 import { ChevronDownIcon, VideoIcon, VideoOffIcon } from "lucide-react";
-import { DeviceDropDown } from "./DeviceDropDown";
+import { DeviceDropDownComponent } from "./DeviceDropDown";
 
 interface Props {
   buttonProps?: Partial<React.ComponentProps<typeof Button>>;
@@ -105,14 +105,13 @@ export const UserVideoComponent: React.FC<ComponentProps> = ({
             {isCamEnabled ? <VideoIcon /> : <VideoOffIcon />}
           </Button>
           {!noDevicePicker && (
-            <DeviceDropDown
+            <DeviceDropDownComponent
               availableDevices={availableCams}
               selectedDevice={selectedCam}
               updateDevice={updateCam}
               classNames={{
                 dropdownMenuCheckboxItem: classNames.dropdownMenuCheckboxItem,
                 dropdownMenuContent: classNames.dropdownMenuContent,
-                dropdownMenuTrigger: classNames.dropdownMenuTrigger,
               }}
               menuLabel="Camera device"
             >
@@ -123,7 +122,7 @@ export const UserVideoComponent: React.FC<ComponentProps> = ({
               >
                 <ChevronDownIcon />
               </Button>
-            </DeviceDropDown>
+            </DeviceDropDownComponent>
           )}
         </ButtonGroup>
       </div>
