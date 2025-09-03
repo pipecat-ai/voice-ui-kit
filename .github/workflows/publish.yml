@@ -45,6 +45,7 @@ jobs:
 
       - name: Bump version
         id: bump_version
+        working-directory: package
         run: |
           if [ "${{ github.event.inputs.version_type }}" = "rc" ]; then
             pnpm version prerelease --preid=rc
@@ -55,11 +56,15 @@ jobs:
       - name: Get version
         id: package_version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
+        with:
+          path: package
 
       - name: Build package
         run: pnpm build
+        working-directory: package
 
       - name: Publish to NPM
+        working-directory: package
         run: |
           if [ "${{ github.event.inputs.version_type }}" = "rc" ]; then
             pnpm publish --tag dev
