@@ -69,7 +69,11 @@ export const usePipecatConnectionState = (): PipecatConnectionStateResult => {
     useCallback((state: TransportState) => {
       if (state === "ready") {
         setConnectionState("connected");
-      } else if (["authenticating", "authenticated"].includes(state)) {
+      } else if (
+        ["authenticating", "authenticated", "connecting", "connected"].includes(
+          state,
+        )
+      ) {
         setConnectionState("connecting");
       } else {
         setConnectionState("disconnected");
