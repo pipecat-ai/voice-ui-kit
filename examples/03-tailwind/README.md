@@ -13,7 +13,12 @@ Example using `PipecatAppBase` helper component to simplify voice interface deve
 ## Quick Start
 
 ```bash
+# Build the voice-ui-kit package (required for workspace dependencies)
+cd ../..
+pnpm build
+
 # Install dependencies
+cd examples/03-tailwind
 pnpm install
 
 # Install Three.js (required for PlasmaVisualizer)

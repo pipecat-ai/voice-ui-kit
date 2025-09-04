@@ -13,7 +13,12 @@ Example using Vite build tool instead of Next.js, demonstrating how to integrate
 ## Quick Start
 
 ```bash
+# Build the voice-ui-kit package (required for workspace dependencies)
+cd ../..
+pnpm build
+
 # Install dependencies
+cd examples/04-vite
 pnpm install
 
 # Start development server
