@@ -7,6 +7,9 @@ import { create } from "zustand";
 interface ConversationState {
   messages: ConversationMessage[];
   messageCallbacks: Map<string, (message: ConversationMessage) => void>;
+  // Store separate text streams for LLM and TTS
+  llmTextStreams: Map<string, string>; // messageId -> accumulated LLM text
+  ttsTextStreams: Map<string, string>; // messageId -> accumulated TTS text
 
   // Actions
   registerMessageCallback: (
@@ -32,16 +35,21 @@ interface ConversationState {
     text: string | React.ReactNode,
     final: boolean,
   ) => void;
+  updateAssistantText: (
+    text: string,
+    final: boolean,
+    source: "llm" | "tts",
+  ) => void;
 }
 
-const sortByCreatedAt = (
+export const sortByCreatedAt = (
   a: ConversationMessage,
   b: ConversationMessage,
 ): number => {
   return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 };
 
-const isMessageEmpty = (message: ConversationMessage): boolean => {
+export const isMessageEmpty = (message: ConversationMessage): boolean => {
   const parts = message.parts || [];
   if (parts.length === 0) return true;
   return parts.every((p) =>
@@ -49,7 +57,7 @@ const isMessageEmpty = (message: ConversationMessage): boolean => {
   );
 };
 
-const filterEmptyMessages = (
+export const filterEmptyMessages = (
   messages: ConversationMessage[],
 ): ConversationMessage[] => {
   return messages.filter((message, index, array) => {
@@ -64,7 +72,7 @@ const filterEmptyMessages = (
   });
 };
 
-const mergeMessages = (
+export const mergeMessages = (
   messages: ConversationMessage[],
 ): ConversationMessage[] => {
   const mergedMessages: ConversationMessage[] = [];
@@ -115,9 +123,11 @@ const callAllMessageCallbacks = (
   });
 };
 
-export const useConversationStore = create<ConversationState>((set) => ({
+export const useConversationStore = create<ConversationState>()((set) => ({
   messages: [],
   messageCallbacks: new Map(),
+  llmTextStreams: new Map(),
+  ttsTextStreams: new Map(),
 
   registerMessageCallback: (id, callback) =>
     set((state) => {
@@ -133,7 +143,12 @@ export const useConversationStore = create<ConversationState>((set) => ({
       return newState;
     }),
 
-  clearMessages: () => set({ messages: [] }),
+  clearMessages: () =>
+    set({
+      messages: [],
+      llmTextStreams: new Map(),
+      ttsTextStreams: new Map(),
+    }),
 
   addMessage: (messageData) => {
     const now = new Date();
@@ -190,8 +205,13 @@ export const useConversationStore = create<ConversationState>((set) => ({
 
       const lastMessage = messages[lastMessageIndex];
 
-      if (isMessageEmpty(lastMessage)) {
-        // Remove empty message
+      // Check if message is empty in both parts and text streams
+      const hasTextInStreams =
+        state.llmTextStreams.get(lastMessage.createdAt) ||
+        state.ttsTextStreams.get(lastMessage.createdAt);
+
+      if (isMessageEmpty(lastMessage) && !hasTextInStreams) {
+        // Remove empty message only if it has no text in streams either
         messages.splice(lastMessageIndex, 1);
       } else {
         // Finalize message and its last part
@@ -270,19 +290,12 @@ export const useConversationStore = create<ConversationState>((set) => ({
     set((state) => {
       const messages = [...state.messages];
 
-      // Find last non-empty message
-      const lastNonEmptyIndex = messages
-        .map((m, idx) => ({ m, idx }))
-        .reverse()
-        .find(({ m }) => !isMessageEmpty(m))?.idx;
+      // Find last user message
+      const lastUserIndex = messages.findLastIndex((m) => m.role === "user");
 
-      if (
-        lastNonEmptyIndex !== undefined &&
-        lastNonEmptyIndex >= 0 &&
-        messages[lastNonEmptyIndex].role === "user"
-      ) {
+      if (lastUserIndex !== -1 && !messages[lastUserIndex].final) {
         // Update existing user message
-        const target = { ...messages[lastNonEmptyIndex] };
+        const target = { ...messages[lastUserIndex] };
         const parts: ConversationMessagePart[] = Array.isArray(target.parts)
           ? [...target.parts]
           : [];
@@ -307,7 +320,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
           updatedAt: now.toISOString(),
         };
 
-        messages[lastNonEmptyIndex] = updatedMessage;
+        messages[lastUserIndex] = updatedMessage;
 
         const processedMessages = mergeMessages(
           filterEmptyMessages(messages.sort(sortByCreatedAt)),
@@ -338,6 +351,67 @@ export const useConversationStore = create<ConversationState>((set) => ({
       );
       callAllMessageCallbacks(state.messageCallbacks, newMessage);
       return { messages: processedMessages };
+    });
+  },
+
+  updateAssistantText: (text, final, source) => {
+    const now = new Date();
+    set((state) => {
+      const messages = [...state.messages];
+      const llmTextStreams = new Map(state.llmTextStreams);
+      const ttsTextStreams = new Map(state.ttsTextStreams);
+
+      const lastAssistantIndex = messages.findLastIndex(
+        (msg) => msg.role === "assistant",
+      );
+
+      let messageId: string;
+
+      if (lastAssistantIndex === -1) {
+        // Create new assistant message
+        messageId = now.toISOString();
+        const newMessage: ConversationMessage = {
+          role: "assistant",
+          final,
+          parts: [],
+          createdAt: messageId,
+          updatedAt: messageId,
+        };
+        messages.push(newMessage);
+      } else {
+        // Update existing assistant message
+        const lastMessage = messages[lastAssistantIndex];
+        messageId = lastMessage.createdAt;
+
+        messages[lastAssistantIndex] = {
+          ...lastMessage,
+          final: final ? true : lastMessage.final,
+          updatedAt: now.toISOString(),
+        };
+      }
+
+      // Update the appropriate text stream
+      if (source === "llm") {
+        const currentText = llmTextStreams.get(messageId) || "";
+        llmTextStreams.set(messageId, currentText + text);
+      } else {
+        const currentText = ttsTextStreams.get(messageId) || "";
+        // Add space between TTS chunks for proper word separation
+        const separator =
+          currentText && !currentText.endsWith(" ") && !text.startsWith(" ")
+            ? " "
+            : "";
+        ttsTextStreams.set(messageId, currentText + separator + text);
+      }
+
+      // Don't filter out messages that have text in the text streams
+      const processedMessages = mergeMessages(messages.sort(sortByCreatedAt));
+
+      return {
+        messages: processedMessages,
+        llmTextStreams,
+        ttsTextStreams,
+      };
     });
   },
 }));
