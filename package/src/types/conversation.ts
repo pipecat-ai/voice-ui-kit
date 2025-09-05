@@ -13,3 +13,8 @@ export interface ConversationMessage {
   createdAt: string;
   updatedAt?: string;
 }
+
+/**
+ * Text mode for conversation display
+ */
+export type TextMode = "llm" | "tts";

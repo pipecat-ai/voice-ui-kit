@@ -27,8 +27,8 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     finalizeLastMessage,
     removeEmptyLastMessage,
     injectMessage,
-    updateLastMessage,
     upsertUserTranscript,
+    updateAssistantText,
   } = useConversationStore();
 
   const userStoppedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -42,7 +42,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     // Start a new assistant message only if there isn't one already in progress
     const store = useConversationStore.getState();
     const lastAssistantIndex = store.messages.findLastIndex(
-      (msg) => msg.role === "assistant",
+      (msg: ConversationMessage) => msg.role === "assistant",
     );
     const lastAssistant =
       lastAssistantIndex !== -1
@@ -62,41 +62,47 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   });
 
   useRTVIClientEvent(RTVIEvent.BotLlmText, (data) => {
-    const store = useConversationStore.getState();
-
-    const currentAssistant = store.messages.findLast(
-      (m) => m.role === "assistant",
-    );
-
-    const priorParts = [...(currentAssistant?.parts ?? [])];
-    const lastPart = priorParts.pop();
-    if (lastPart && !lastPart.final) {
-      updateLastMessage("assistant", {
-        final: false,
-        parts: [
-          ...priorParts,
-          {
-            ...lastPart,
-            text: lastPart.text + data.text,
-          },
-        ],
-      });
-    } else if (!lastPart) {
-      updateLastMessage("assistant", {
-        final: false,
-        parts: [
-          {
-            createdAt: new Date().toISOString(),
-            final: false,
-            text: data.text,
-          },
-        ],
-      });
-    }
+    updateAssistantText(data.text, false, "llm");
   });
 
   useRTVIClientEvent(RTVIEvent.BotLlmStopped, () => {
     finalizeLastMessage("assistant");
+  });
+
+  useRTVIClientEvent(RTVIEvent.BotTtsStarted, () => {
+    // Start a new assistant message for TTS if there isn't one already in progress
+    const store = useConversationStore.getState();
+    const lastAssistantIndex = store.messages.findLastIndex(
+      (msg: ConversationMessage) => msg.role === "assistant",
+    );
+    const lastAssistant =
+      lastAssistantIndex !== -1
+        ? store.messages[lastAssistantIndex]
+        : undefined;
+
+    if (!lastAssistant || lastAssistant.final) {
+      addMessage({
+        role: "assistant",
+        final: false,
+        parts: [],
+      });
+    }
+  });
+
+  useRTVIClientEvent(RTVIEvent.BotTtsText, (data) => {
+    updateAssistantText(data.text, false, "tts");
+  });
+
+  useRTVIClientEvent(RTVIEvent.BotTtsStopped, () => {
+    // Finalize the TTS text stream
+    const store = useConversationStore.getState();
+    const lastAssistant = store.messages.findLast(
+      (m: ConversationMessage) => m.role === "assistant",
+    );
+
+    if (lastAssistant && !lastAssistant.final) {
+      finalizeLastMessage("assistant");
+    }
   });
 
   useRTVIClientEvent(RTVIEvent.UserStartedSpeaking, () => {
@@ -119,7 +125,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     userStoppedTimeout.current = setTimeout(() => {
       const lastUser = useConversationStore
         .getState()
-        .messages.findLast((m) => m.role === "user");
+        .messages.findLast((m: ConversationMessage) => m.role === "user");
       const hasParts =
         Array.isArray(lastUser?.parts) && lastUser!.parts.length > 0;
       if (!lastUser || !hasParts) {
