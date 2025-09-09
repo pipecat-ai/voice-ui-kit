@@ -20,6 +20,9 @@ pnpm build
 cd examples/01-console
 pnpm install
 
+# Setup .env file
+cp env.example .env
+
 # Start development server
 pnpm dev
 ```

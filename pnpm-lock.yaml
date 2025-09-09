@@ -387,6 +387,9 @@ importers:
       tailwind-merge:
         specifier: ^3.3.0
         version: 3.3.1
+      zustand:
+        specifier: ^5.0.8
+        version: 5.0.8(@types/react@19.1.11)(react@19.1.1)
     devDependencies:
       '@daily-co/daily-js':
         specifier: ^0.80.0
