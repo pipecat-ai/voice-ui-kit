@@ -1,16 +1,27 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/buttongroup";
+import {
+  type ButtonSize,
+  type ButtonState,
+  type ButtonVariant,
+} from "@/components/ui/buttonVariants";
 import { cn } from "@/lib/utils";
 import {
   type OptionalMediaDeviceInfo,
   PipecatClientCamToggle,
   PipecatClientVideo,
   usePipecatClientMediaDevices,
+  usePipecatClientTransportState,
 } from "@pipecat-ai/client-react";
 import { ChevronDownIcon, VideoIcon, VideoOffIcon } from "lucide-react";
+import { ButtonGroup } from "../ui";
 import { DeviceDropDownComponent } from "./DeviceDropDown";
 
 interface Props {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  state?: ButtonState;
   buttonProps?: Partial<React.ComponentProps<typeof Button>>;
   classNames?: {
     container?: string;
@@ -22,11 +33,18 @@ interface Props {
     dropdownMenuCheckboxItem?: string;
     videoOffContainer?: string;
     videoOffText?: string;
+    activeText?: string;
+    inactiveText?: string;
   };
   dropdownButtonProps?: Partial<React.ComponentProps<typeof Button>>;
   noDevicePicker?: boolean;
   noVideo?: boolean;
   videoProps?: Partial<React.ComponentProps<typeof PipecatClientVideo>>;
+  noVideoText?: string | null;
+  noIcon?: boolean;
+  activeText?: string;
+  inactiveText?: string;
+  children?: React.ReactNode;
 }
 
 interface ComponentProps extends Props {
@@ -38,18 +56,28 @@ interface ComponentProps extends Props {
 }
 
 export const UserVideoComponent: React.FC<ComponentProps> = ({
-  buttonProps = {},
+  variant = "outline",
+  size = "md",
   classNames = {},
+  buttonProps = {},
   dropdownButtonProps = {},
   noDevicePicker = false,
   noVideo = false,
   videoProps = {},
-  onClick,
-  isCamEnabled,
+  isCamEnabled = false,
+  state,
   availableCams = [],
   selectedCam,
   updateCam,
+  noVideoText = "Video disabled",
+  noIcon = false,
+  activeText,
+  inactiveText,
+  children,
+  onClick,
 }) => {
+  const buttonState = state || (isCamEnabled ? "default" : "inactive");
+
   return (
     <div
       className={cn(
@@ -90,7 +118,11 @@ export const UserVideoComponent: React.FC<ComponentProps> = ({
               classNames.videoOffText,
             )}
           >
-            {isCamEnabled ? "Camera is on" : "Camera is off"}
+            {noVideo && noVideoText
+              ? noVideoText
+              : isCamEnabled
+                ? activeText || "Camera is on"
+                : inactiveText || "Camera is off"}
           </div>
         </div>
       )}
@@ -98,11 +130,18 @@ export const UserVideoComponent: React.FC<ComponentProps> = ({
         <ButtonGroup className={cn(classNames.buttongroup)}>
           <Button
             className={cn(classNames.button)}
-            variant="outline"
-            onClick={onClick}
+            variant={
+              !isCamEnabled && !buttonProps?.isLoading ? "secondary" : variant
+            }
+            size={size}
+            state={buttonState}
+            onClick={buttonProps?.isLoading ? undefined : onClick}
             {...buttonProps}
           >
-            {isCamEnabled ? <VideoIcon /> : <VideoOffIcon />}
+            {!noIcon &&
+              !buttonProps?.isLoading &&
+              (isCamEnabled ? <VideoIcon /> : <VideoOffIcon />)}
+            {children}
           </Button>
           {!noDevicePicker && (
             <DeviceDropDownComponent
@@ -117,10 +156,13 @@ export const UserVideoComponent: React.FC<ComponentProps> = ({
             >
               <Button
                 className={cn(classNames.dropdownMenuTrigger)}
-                variant="outline"
+                variant={variant}
+                size={size}
+                isIcon
+                disabled={buttonProps?.isLoading}
                 {...dropdownButtonProps}
               >
-                <ChevronDownIcon />
+                <ChevronDownIcon size={16} />
               </Button>
             </DeviceDropDownComponent>
           )}
@@ -134,16 +176,25 @@ export const UserVideoControl: React.FC<Props> = (props) => {
   const { availableCams, selectedCam, updateCam } =
     usePipecatClientMediaDevices();
 
+  const transportState = usePipecatClientTransportState();
+  const loading =
+    transportState === "disconnected" || transportState === "initializing";
+
   return (
     <PipecatClientCamToggle>
       {({ isCamEnabled, onClick }) => (
         <UserVideoComponent
-          {...props}
           isCamEnabled={isCamEnabled}
           onClick={onClick}
           availableCams={availableCams}
           selectedCam={selectedCam}
           updateCam={updateCam}
+          state={loading ? "default" : isCamEnabled ? "default" : "inactive"}
+          buttonProps={{
+            isLoading: loading,
+            ...props.buttonProps,
+          }}
+          {...props}
         />
       )}
     </PipecatClientCamToggle>
