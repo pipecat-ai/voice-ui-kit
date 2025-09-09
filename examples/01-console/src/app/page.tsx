@@ -11,12 +11,9 @@ export default function Home() {
     <ThemeProvider>
       <FullScreenContainer>
         <ConsoleTemplate
-          transportType="daily"
+          transportType="smallwebrtc"
           connectParams={{
-            endpoint: "/api/offer",
-            requestData: {
-              createDailyRoom: true
-            }
+            connectionUrl: "/api/offer",
           }}
           noUserVideo
         />
