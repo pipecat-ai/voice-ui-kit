@@ -7,6 +7,12 @@ type ParticipantType = Parameters<typeof usePipecatClientMediaTrack>[1];
 interface Props {
   backgroundColor?: string;
   barColor?: string;
+  noPeaks?: boolean;
+  peakLineColor?: string;
+  peakLineSpeed?: number;
+  peakLineThickness?: number;
+  peakOffset?: number;
+  peakFadeSpeed?: number;
   barCount?: number;
   barGap?: number;
   barLineCap?: "round" | "square";
@@ -21,6 +27,12 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
   ({
     backgroundColor = "transparent",
     barColor = "black",
+    noPeaks = true,
+    peakLineColor = "red",
+    peakLineSpeed = 0.2,
+    peakLineThickness = 2,
+    peakOffset = 0,
+    peakFadeSpeed = 0.02,
     barCount = 5,
     barGap = 12,
     barLineCap = "round",
@@ -32,6 +44,7 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
   }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const resolvedBarColorRef = useRef<string>("black");
+    const resolvedPeakLineColorRef = useRef<string>("black");
 
     useEffect(() => {
       function resolveColor(color: string) {
@@ -53,7 +66,8 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
         return color;
       }
       resolvedBarColorRef.current = resolveColor(barColor);
-    }, [barColor, className]);
+      resolvedPeakLineColorRef.current = resolveColor(peakLineColor);
+    }, [barColor, peakLineColor, className]);
 
     const track: MediaStreamTrack | null = usePipecatClientMediaTrack(
       "audio",
@@ -118,11 +132,24 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
         const startFreq = 700 * (Math.pow(10, melValue / 2595) - 1);
         const endFreq = 700 * (Math.pow(10, (melValue + melStep) / 2595) - 1);
 
-        return {
+        const band: {
+          startFreq: number;
+          endFreq: number;
+          smoothValue: number;
+          peakValue?: number;
+          peakOpacity?: number;
+        } = {
           startFreq,
           endFreq,
           smoothValue: 0,
         };
+
+        if (!noPeaks) {
+          band.peakValue = 0;
+          band.peakOpacity = 0;
+        }
+
+        return band;
       });
 
       const getFrequencyBinIndex = (frequency: number) => {
@@ -166,6 +193,7 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
             bandData.reduce((acc, val) => acc + val, 0) / bandData.length;
 
           const smoothingFactor = 0.2;
+          const fadeEpsilon = 0.5;
 
           if (bandValue < 1) {
             band.smoothValue = Math.max(
@@ -177,6 +205,32 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
               band.smoothValue +
               (bandValue - band.smoothValue) * smoothingFactor;
             isActive = true;
+          }
+
+          // Update peak value - moves up with the bar but returns more slowly
+          if (
+            !noPeaks &&
+            band.peakValue !== undefined &&
+            band.peakOpacity !== undefined
+          ) {
+            if (band.smoothValue > band.peakValue) {
+              band.peakValue = band.smoothValue;
+              band.peakOpacity = 1;
+            } else {
+              // Peak returns to the top of the bar more slowly
+              const peakSmoothingFactor = peakLineSpeed;
+              band.peakValue = Math.max(
+                band.peakValue - peakSmoothingFactor * 5,
+                band.smoothValue,
+              );
+              // Begin fading once the bar is effectively zeroed
+              if (band.smoothValue <= fadeEpsilon) {
+                band.peakOpacity = Math.max(
+                  0,
+                  band.peakOpacity - peakFadeSpeed,
+                );
+              }
+            }
           }
 
           const x = startX + i * (barWidth + barGap);
@@ -224,6 +278,76 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
             canvasCtx.stroke();
           } else {
             drawInactiveCircle(adjustedCircleRadius, resolvedBarColor, x, yTop);
+          }
+
+          // Draw the peak line (2px line at the top) - always draw when it exists
+          if (
+            !noPeaks &&
+            band.peakValue !== undefined &&
+            band.peakOpacity !== undefined &&
+            (band.peakValue > 0 || (peakOffset > 0 && band.peakOpacity > 0))
+          ) {
+            const peakHeight = Math.max(
+              minHeight,
+              Math.min((band.peakValue / 255) * barMaxHeight, barMaxHeight),
+            );
+
+            // Compute raw peak position by origin
+            let peakY;
+            switch (barOrigin) {
+              case "top":
+                peakY = adjustedCircleRadius + peakHeight;
+                break;
+              case "bottom":
+                peakY = canvasHeight - adjustedCircleRadius - peakHeight;
+                break;
+              case "center":
+              default:
+                peakY = canvasHeight / 2 - peakHeight / 2;
+                break;
+            }
+
+            // Visual tip offset due to lineCap (round/square extend by barWidth/2)
+            const capExtension =
+              barLineCap === "round" || barLineCap === "square"
+                ? barWidth / 2
+                : 0;
+
+            // Bar visual tip Y coordinate to clamp/offset against
+            const barTipY = ((): number => {
+              switch (barOrigin) {
+                case "top":
+                  return yBottom + capExtension; // bar grows downward
+                case "bottom":
+                  return yTop - capExtension; // bar grows upward
+                case "center":
+                default:
+                  return yTop - capExtension; // use upper tip as cap
+              }
+            })();
+
+            // Enforce a constant offset from the bar tip in the outward direction
+            if (barOrigin === "top") {
+              const desiredY = barTipY + peakOffset; // outward is increasing y
+              peakY = Math.max(peakY, desiredY);
+            } else {
+              const desiredY = barTipY - peakOffset; // outward is decreasing y
+              peakY = Math.min(peakY, desiredY);
+            }
+
+            // Draw the peak line, matching bar width exactly
+            const previousLineCap = canvasCtx.lineCap;
+            const previousAlpha = canvasCtx.globalAlpha;
+            canvasCtx.lineCap = "butt";
+            canvasCtx.globalAlpha = band.peakOpacity;
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(x, peakY);
+            canvasCtx.lineTo(x + barWidth, peakY);
+            canvasCtx.lineWidth = peakLineThickness;
+            canvasCtx.strokeStyle = resolvedPeakLineColorRef.current;
+            canvasCtx.stroke();
+            canvasCtx.lineCap = previousLineCap;
+            canvasCtx.globalAlpha = previousAlpha;
           }
         });
 
@@ -306,6 +430,11 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
       barWidth,
       track,
       barColor,
+      noPeaks,
+      peakLineSpeed,
+      peakLineThickness,
+      peakOffset,
+      peakFadeSpeed,
     ]);
 
     return (
