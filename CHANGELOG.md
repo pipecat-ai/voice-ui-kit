@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.3.0]
 
+- Changed: Restructured conversation message types to introduce `parts` for better transcription handling
+- Added: `usePipecatConversation` hook for deriving structured conversation streams from RTVI events
+- Added: Ability to switch between TTS and LLM text mode for testing and development
+- Added: Message injection capabilities via `injectMessage` function for programmatic message addition
+- Added: Message rendering with support for both string content and React components
 - Fixed: Color of the visualizer in `UserAudioControl` now uses `currentColor` vs. resolving from variable
 
 [0.2.2]
@@ -38,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Various visual enhancements, primitve additions and CSS variables in support of more flexible theming.
 
 To prep for shadcn registry components, utilities and variables are no longer built with a
-Tailwind prefix (`vkui`). A scoped export still exists in the package for instances where style isolation matters. 
+Tailwind prefix (`vkui`). A scoped export still exists in the package for instances where style isolation matters.
 
 - Change: switched to pnpm for better workspace management
 - Added: out-of-the-box themes e.g [05-theme](examples/05-theme)
@@ -51,15 +56,15 @@ Tailwind prefix (`vkui`). A scoped export still exists in the package for instan
 - Added: TW4 utilities for shadow classes to allow overrides in external themes.
 - Added: TW4 utilities for button sizing
 - Change: `AudioClientHelper` renamed to `PipecatAppBase`.
-    - Now accepts both React Node children as well as a functional list for prop injection. If passing renderables, client methods can be accessed directly on the context's client via Pipecat React hooks (e.g. `usePipecatClient`).
-    - Added `noThemeProvider` prop to optionally disable theme provider wrapping.
-    - Made connection handlers (`handleConnect`, `handleDisconnect`) compatible with both sync and async functions.
-    - Enhanced error handling and loading states for better developer experience.
-    - Returns the `client` object in child props.
-    - Fixed TypeScript component type definition to resolve JSX usage errors.
+  - Now accepts both React Node children as well as a functional list for prop injection. If passing renderables, client methods can be accessed directly on the context's client via Pipecat React hooks (e.g. `usePipecatClient`).
+  - Added `noThemeProvider` prop to optionally disable theme provider wrapping.
+  - Made connection handlers (`handleConnect`, `handleDisconnect`) compatible with both sync and async functions.
+  - Enhanced error handling and loading states for better developer experience.
+  - Returns the `client` object in child props.
+  - Fixed TypeScript component type definition to resolve JSX usage errors.
 - Change: `LoaderSpinner` component from `components/ui/loaders` has been renamed to `SpinLoader` to establish a naming convention for future loaders.
 - Change: `Cards` primitive no longer pads based on media queries for flexibility
 - Change: `css/components.css` and `css/utilities.css` split from main `index.css`
-- Fixed: `tailwind-merge` needs extensions for custom shadow-* class names, which have no been applied.
+- Fixed: `tailwind-merge` needs extensions for custom shadow-\* class names, which have no been applied.
 - Fixed: CSS nits to address border overlap for button groups when in dark mode.
 - Fixed: User audio control no longer shrinks when loading
