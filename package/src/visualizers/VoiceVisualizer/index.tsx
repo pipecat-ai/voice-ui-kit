@@ -33,10 +33,16 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const resolvedBarColorRef = useRef<string>("black");
 
-    // Resolve the color only when barColor changes
     useEffect(() => {
       function resolveColor(color: string) {
         if (!color) return "black";
+        if (color === "currentColor") {
+          if (canvasRef.current) {
+            const computedStyle = getComputedStyle(canvasRef.current);
+            return computedStyle.color || "black";
+          }
+          return "black";
+        }
         if (color.startsWith("--")) {
           return (
             getComputedStyle(document.documentElement)
@@ -47,7 +53,7 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
         return color;
       }
       resolvedBarColorRef.current = resolveColor(barColor);
-    }, [barColor]);
+    }, [barColor, className]);
 
     const track: MediaStreamTrack | null = usePipecatClientMediaTrack(
       "audio",

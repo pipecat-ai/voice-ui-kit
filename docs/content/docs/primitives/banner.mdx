@@ -6,10 +6,11 @@ component: Banner
 
 <LiveComponent language="tsx">
 {`
-  import { Banner, BannerIcon, BannerTitle, BannerClose, CircleAlertIcon } from "@pipecat-ai/voice-ui-kit";
+  import { Banner, BannerIcon, BannerTitle, BannerClose } from "@pipecat-ai/voice-ui-kit";
+  import { CircleAlert } from "lucide-react";
 
   <Banner className="animate-in fade-in duration-300" variant="destructive">
-    <BannerIcon icon={CircleAlertIcon} />
+    <BannerIcon icon={CircleAlert} />
     <BannerTitle>Unable to connect. Please check web console for errors.</BannerTitle>
     <BannerClose variant="destructive" />
   </Banner>

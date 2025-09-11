@@ -233,6 +233,52 @@ export const buttonRoundedOptions = [
   "none",
 ] as const;
 
+export const buttonAccentColorMapCls: Record<
+  (typeof buttonVariantOptions)[number],
+  Record<(typeof buttonStateOptions)[number], string>
+> = {
+  primary: {
+    default: "text-active",
+    inactive: "text-inactive-foreground",
+    active: "text-active",
+  },
+  secondary: {
+    default: "text-active",
+    inactive: "text-inactive-foreground",
+    active: "text-active",
+  },
+  outline: {
+    default: "text-active",
+    inactive: "text-inactive",
+    active: "text-active",
+  },
+  destructive: {
+    default: "text-background",
+    inactive: "text-background",
+    active: "text-background",
+  },
+  ghost: {
+    default: "text-active",
+    inactive: "text-border",
+    active: "text-active",
+  },
+  link: {
+    default: "text-active",
+    inactive: "text-inactive",
+    active: "text-active",
+  },
+  active: {
+    default: "text-active",
+    inactive: "text-inactive-foreground",
+    active: "text-active",
+  },
+  inactive: {
+    default: "text-inactive",
+    inactive: "text-inactive-foreground",
+    active: "text-inactive",
+  },
+};
+
 export const buttonAccentColorMap: Record<
   (typeof buttonVariantOptions)[number],
   Record<(typeof buttonStateOptions)[number], string>
@@ -278,4 +324,5 @@ export const buttonAccentColorMap: Record<
     active: "--color-inactive",
   },
 };
+
 export default buttonVariants;
