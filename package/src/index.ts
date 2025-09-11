@@ -2,6 +2,7 @@
 export * from "@/components/elements";
 export * from "@/components/panels";
 export * from "@/components/PipecatAppBase";
+export * from "@/components/ConversationProvider";
 export * from "@/components/ThemeModeToggle";
 export * from "@/components/ThemeProvider";
 export * from "@/components/ui";

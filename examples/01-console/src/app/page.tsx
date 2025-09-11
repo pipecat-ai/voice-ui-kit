@@ -15,7 +15,7 @@ export default function Home() {
           connectParams={{
             connectionUrl: "/api/offer",
           }}
-          noUserVideo={true}
+          noUserVideo
         />
       </FullScreenContainer>
     </ThemeProvider>
