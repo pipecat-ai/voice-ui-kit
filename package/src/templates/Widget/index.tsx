@@ -48,7 +48,7 @@ export interface WidgetTemplateProps {
 const TextInput = ({ debounceTime = 300 }: { debounceTime?: number }) => {
   const [isSending, setIsSending] = useState(false);
   const [message, setMessage] = useState("");
-  const connectionState = usePipecatConnectionState();
+  const { state } = usePipecatConnectionState();
 
   const handleSend = useCallback(() => {
     setIsSending(true);
@@ -77,13 +77,13 @@ const TextInput = ({ debounceTime = 300 }: { debounceTime?: number }) => {
         placeholder="Type message..."
         value={message}
         onChange={handleInputChange}
-        disabled={isSending || connectionState !== "connected"}
+        disabled={isSending || state !== "connected"}
         className="flex-1"
         size="lg"
       />
       <Button
         onClick={handleSend}
-        disabled={isSending || connectionState !== "connected"}
+        disabled={isSending || state !== "connected"}
         isLoading={isSending}
         size="lg"
         isIcon

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  buttonAccentColorMap,
+  buttonAccentColorMapCls,
   type ButtonSize,
   type ButtonState,
   type ButtonVariant,
@@ -105,8 +105,6 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
   } else {
     /** AUDIO ENABLED */
     const buttonState = state || (isMicEnabled ? "default" : "inactive");
-    const accentColor =
-      buttonAccentColorMap[variant || "primary"]?.[buttonState];
 
     buttonComp = (
       <>
@@ -129,7 +127,7 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
             </span>
           ) : null}
           {buttonState !== "inactive" && activeText ? (
-            <span className={cn("flex-1", classNames.activeText)}>
+            <span className={cn("flex-1 ", classNames.activeText)}>
               {activeText}
             </span>
           ) : null}
@@ -143,8 +141,11 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
               barMaxHeight={size === "lg" ? 24 : size === "xl" ? 36 : 20}
               barOrigin="center"
               barWidth={3}
-              barColor={accentColor}
-              className="mx-auto"
+              barColor="currentColor"
+              className={cn(
+                "mx-auto",
+                buttonAccentColorMapCls[variant || "primary"]?.[buttonState],
+              )}
               {...visualizerProps}
             />
           )}

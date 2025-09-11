@@ -185,7 +185,6 @@ export const TextOnly: Story<{
             noVisualizer
             noIcon
             activeText="Listening"
-            classNames={{ activeText: "text-foreground" }}
           />
           <UserAudioComponent
             variant={v as ButtonVariant}
@@ -196,7 +195,6 @@ export const TextOnly: Story<{
             noVisualizer
             noIcon
             inactiveText="Muted"
-            classNames={{ inactiveText: "text-muted-foreground" }}
           />
         </div>
       ))}
@@ -234,6 +232,7 @@ Connected.decorators = [
       const client = new PipecatClient({
         transport: new SmallWebRTCTransport(),
       });
+      client.initDevices();
       setClient(client);
     }, []);
 

@@ -40,7 +40,7 @@ export interface PipecatConnectionStateResult {
  *
  * **State Mapping:**
  * - `"ready"` → `"connected"`
- * - `"authenticating"` | `"authenticated"` | `"connecting"` → `"connecting"`
+ * - `"authenticating"` | `"authenticated"` | `"connecting"` | `"connected"` → `"connecting"`
  * - All other states → `"disconnected"`
  *
  * @returns {PipecatConnectionStateResult} Object containing the state and boolean flags

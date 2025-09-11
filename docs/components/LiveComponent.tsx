@@ -102,6 +102,8 @@ export function LiveComponent({
     const pcClient = new PipecatClient({
       transport: new SmallWebRTCTransport(),
     });
+
+    pcClient.initDevices();
     setClient(pcClient);
   }, [withPipecat, client, intent]);
 
