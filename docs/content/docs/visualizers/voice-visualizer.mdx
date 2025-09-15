@@ -1,0 +1,530 @@
+---
+title: Basic Visualizer
+description: Real-time audio spectrum visualizer with customizable bars and peak indicators
+component: VoiceVisualizer
+---
+
+The `VoiceVisualizer` component provides a real-time audio spectrum visualization that displays frequency data as animated bars. It integrates with the Pipecat Client SDK to automatically connect to audio streams and provides extensive customization options for visual appearance and behavior.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="w-64 h-32">
+    <VoiceVisualizer participantType="local" />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Props Reference
+
+<TypeTable
+  className="text-sm"
+  type={{
+    participantType: {
+      description: "Type of participant to visualize audio from",
+      type: '"local" | "remote" | "bot"',
+      required: true,
+      default: "undefined",
+    },
+    backgroundColor: {
+      description: "Background color of the visualizer canvas",
+      type: "string",
+      required: false,
+      default: '"transparent"',
+    },
+    barColor: {
+      description: "Color of the frequency bars",
+      type: "string",
+      required: false,
+      default: '"black"',
+    },
+    noPeaks: {
+      description: "Disable peak indicators (default: true for backward compatibility)",
+      type: "boolean",
+      required: false,
+      default: "true",
+    },
+    peakLineColor: {
+      description: "Color of the peak indicator lines",
+      type: "string",
+      required: false,
+      default: '"red"',
+    },
+    peakLineSpeed: {
+      description: "Speed at which peaks decay (higher = faster decay)",
+      type: "number",
+      required: false,
+      default: "0.2",
+    },
+    peakLineThickness: {
+      description: "Thickness of the peak indicator lines in pixels",
+      type: "number",
+      required: false,
+      default: "2",
+    },
+    peakOffset: {
+      description: "Offset distance of peaks from bar tips in pixels",
+      type: "number",
+      required: false,
+      default: "0",
+    },
+    peakFadeSpeed: {
+      description: "Speed at which peak opacity fades when bars are inactive",
+      type: "number",
+      required: false,
+      default: "0.02",
+    },
+    barCount: {
+      description: "Number of frequency bars to display",
+      type: "number",
+      required: false,
+      default: "5",
+    },
+    barGap: {
+      description: "Gap between bars in pixels",
+      type: "number",
+      required: false,
+      default: "12",
+    },
+    barLineCap: {
+      description: "Line cap style for the bars",
+      type: '"round" | "square"',
+      required: false,
+      default: '"round"',
+    },
+    barMaxHeight: {
+      description: "Maximum height of bars in pixels",
+      type: "number",
+      required: false,
+      default: "120",
+    },
+    barOrigin: {
+      description: "Anchor point from which bars grow",
+      type: '"top" | "bottom" | "center"',
+      required: false,
+      default: '"center"',
+    },
+    barWidth: {
+      description: "Width of each bar in pixels",
+      type: "number",
+      required: false,
+      default: "30",
+    },
+    className: {
+      description: "Additional CSS classes to apply to the canvas element",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Basic Usage
+
+The `VoiceVisualizer` component requires a `participantType` prop to specify which audio stream to visualize. It must be used within a `PipecatClientProvider` context.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="bg-gray-100 rounded-lg p-4">
+    <VoiceVisualizer 
+      participantType="local"
+      barCount={8}
+      barColor="blue"
+      barMaxHeight={120}
+    />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Visual Customization
+
+### Bar Appearance
+
+Customize the visual appearance of the frequency bars with various styling options.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Default Style</h4>
+      <div className="bg-gray-50 rounded p-4">
+        <VoiceVisualizer participantType="local" />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Custom Colors & Size</h4>
+      <div className="bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barColor="green"
+          barWidth={20}
+          barGap={8}
+          barMaxHeight={100}
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Square Line Caps</h4>
+      <div className="bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barLineCap="square"
+          barColor="purple"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Custom Bar Heights</h4>
+      <div className="space-y-4">
+        <div>
+          <p className="text-xs text-gray-600 mb-1">Short bars (60px)</p>
+          <div className="bg-gray-50 rounded p-4">
+            <VoiceVisualizer 
+              participantType="local"
+              barMaxHeight={60}
+              barColor="blue"
+            />
+          </div>
+        </div>
+        <div>
+          <p className="text-xs text-gray-600 mb-1">Medium bars (120px - default)</p>
+          <div className="bg-gray-50 rounded p-4">
+            <VoiceVisualizer 
+              participantType="local"
+              barMaxHeight={120}
+              barColor="green"
+            />
+          </div>
+        </div>
+        <div>
+          <p className="text-xs text-gray-600 mb-1">Tall bars (200px)</p>
+          <div className="bg-gray-50 rounded p-4">
+            <VoiceVisualizer 
+              participantType="local"
+              barMaxHeight={200}
+              barColor="red"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+### Bar Origins
+
+Control how bars grow from different anchor points.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Center Origin (Default)</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barOrigin="center"
+          barColor="blue"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Top Origin</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barOrigin="top"
+          barColor="green"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Bottom Origin</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barOrigin="bottom"
+          barColor="red"
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Peak Indicators
+
+The visualizer includes optional peak indicators that show the maximum amplitude reached by each frequency band. Peak indicators decay more slowly than the main bars, creating a visual "memory" of audio peaks.
+
+### Basic Peak Usage
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Peaks Disabled (Default)</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          noPeaks={true}
+          barColor="blue"
+          barOrigin="bottom"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Peaks Enabled</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          noPeaks={false}
+          barColor="blue"
+          peakLineColor="red"
+          barOrigin="bottom"
+          barLineCap="square"
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+### Peak Customization
+
+Customize peak appearance and behavior with various options.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Custom Peak Color & Thickness</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          noPeaks={false}
+          barColor="blue"
+          peakLineColor="yellow"
+          peakLineThickness={4}
+          barOrigin="top"
+          barLineCap="square"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Peak Offset</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          noPeaks={false}
+          barColor="green"
+          peakLineColor="orange"
+          peakOffset={5}
+          barOrigin="bottom"
+          barLineCap="square"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Fast Peak Decay</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          noPeaks={false}
+          barColor="purple"
+          peakLineColor="cyan"
+          peakLineSpeed={0.5}
+          peakFadeSpeed={0.05}
+          barOrigin="top"
+          barLineCap="square"
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Advanced Configuration
+
+### High Resolution Visualization
+
+For more detailed frequency analysis, increase the number of bars.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">High Resolution (20 bars)</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barCount={20}
+          barWidth={12}
+          barGap={4}
+          barColor="blue"
+          noPeaks={false}
+          peakLineColor="red"
+          barOrigin="bottom"
+          barLineCap="square"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Ultra High Resolution (32 bars)</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barCount={32}
+          barWidth={8}
+          barGap={2}
+          barColor="green"
+          noPeaks={false}
+          peakLineColor="yellow"
+          peakLineThickness={1}
+          barOrigin="top"
+          barLineCap="square"
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+### CSS Variable Integration
+
+Use CSS custom properties for dynamic theming.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">CSS Variables</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barColor="--color-blue-300"
+          noPeaks={false}
+          peakLineColor="--color-blue-500"
+          barOrigin="bottom"
+          barLineCap="square"
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+### Current Color Integration
+
+Use `currentColor` to make the visualizer inherit colors from CSS classes, perfect for theme integration and dynamic styling.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Red Theme</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barColor="currentColor"
+          noPeaks={false}
+          peakLineColor="currentColor"
+          barOrigin="bottom"
+          barLineCap="square"
+          className="text-red-500"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Green Theme</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barColor="currentColor"
+          noPeaks={false}
+          peakLineColor="currentColor"
+          barOrigin="top"
+          barLineCap="square"
+          className="text-green-600"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Purple Theme</h4>
+      <div className="h-32 bg-gray-50 rounded p-4">
+        <VoiceVisualizer 
+          participantType="local"
+          barColor="currentColor"
+          noPeaks={false}
+          peakLineColor="currentColor"
+          barOrigin="bottom"
+          barLineCap="square"
+          className="text-purple-600"
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Technical Details
+
+### Frequency Analysis
+
+The `VoiceVisualizer` uses the Web Audio API to analyze audio frequency data in real-time. It employs a Mel-scale inspired approach for frequency distribution, which provides more perceptually uniform spacing across the frequency spectrum.
+
+### Performance Considerations
+
+- The component uses `requestAnimationFrame` for smooth 60fps animations
+- Canvas rendering is optimized with 2x scaling for crisp visuals on high-DPI displays
+- Peak tracking is conditionally executed only when `noPeaks` is `false`
+- Color resolution is cached in refs to avoid repeated DOM queries
+
+### Browser Compatibility
+
+The component requires:
+- Web Audio API support
+- Canvas 2D context support
+- MediaStream API support
+
+Modern browsers (Chrome 14+, Firefox 25+, Safari 6+) are fully supported.

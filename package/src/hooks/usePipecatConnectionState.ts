@@ -40,7 +40,7 @@ export interface PipecatConnectionStateResult {
  *
  * **State Mapping:**
  * - `"ready"` → `"connected"`
- * - `"authenticating"` | `"authenticated"` | `"connecting"` → `"connecting"`
+ * - `"authenticating"` | `"authenticated"` | `"connecting"` | `"connected"` → `"connecting"`
  * - All other states → `"disconnected"`
  *
  * @returns {PipecatConnectionStateResult} Object containing the state and boolean flags
@@ -69,7 +69,11 @@ export const usePipecatConnectionState = (): PipecatConnectionStateResult => {
     useCallback((state: TransportState) => {
       if (state === "ready") {
         setConnectionState("connected");
-      } else if (["authenticating", "authenticated"].includes(state)) {
+      } else if (
+        ["authenticating", "authenticated", "connecting", "connected"].includes(
+          state,
+        )
+      ) {
         setConnectionState("connecting");
       } else {
         setConnectionState("disconnected");

@@ -12,6 +12,6 @@
         "---Templates---",
         "templates/console",
         "---Audio Visualizers---",
-        "visualizers/index"
+        "...visualizers"
     ]
 }

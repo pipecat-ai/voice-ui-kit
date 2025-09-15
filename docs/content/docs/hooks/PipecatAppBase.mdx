@@ -18,6 +18,7 @@ It handles the common setup tasks that are typically the same across most applic
 - Automatically disconnects and disposes the client when unmounting.
 - Surfaces error states to the child components.
 - Optionally disables theme provider based on `noThemeProvider` prop.
+- Optionally disables audio output for the bot based on `noAudioOutput` prop.
 
 <Callout>
   This component creates the `PipecatClientProvider` context for you. Child
@@ -144,6 +145,49 @@ export default function Home() {
 }
 ```
 
+### 5. Disable Audio Output
+
+You can disable audio output for the bot by setting `noAudioOutput={true}`:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="smallwebrtc"
+      connectParams={{
+        webrtcUrl: "/api/offer",
+      }}
+      noAudioOutput={true}
+    >
+      <YourCustomComponent />
+    </PipecatAppBase>
+  );
+}
+```
+
+### 6. Transport Options
+
+You can pass transport-specific configuration options:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="smallwebrtc"
+      connectParams={{
+        webrtcUrl: "/api/offer",
+      }}
+    >
+      <YourCustomComponent />
+    </PipecatAppBase>
+  );
+}
+```
+
 ### Props
 
 <TypeTable
@@ -159,6 +203,12 @@ export default function Home() {
         "The type of transport to use for the connection (smallwebrtc or daily)",
       type: '"smallwebrtc" | "daily"',
       required: true,
+    },
+    transportOptions: {
+      description:
+        "Optional configuration options for the transport (SmallWebRTC or Daily specific)",
+      type: "SmallWebRTCTransportConstructorOptions | DailyTransportConstructorOptions",
+      required: false,
     },
     clientOptions: {
       description:
@@ -182,6 +232,13 @@ export default function Home() {
     connectOnMount: {
       description:
         "Whether to automatically connect to the session when the component mounts",
+      type: "boolean",
+      default: "false",
+      required: false,
+    },
+    noAudioOutput: {
+      description:
+        "Whether to disable audio output for the bot. When true, the PipecatClientAudio component is not rendered.",
       type: "boolean",
       default: "false",
       required: false,
