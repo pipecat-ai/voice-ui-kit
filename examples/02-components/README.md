@@ -13,7 +13,12 @@ Low-level example demonstrating how to build a custom voice interface using indi
 ## Quick Start
 
 ```bash
+# Build the voice-ui-kit package (required for workspace dependencies)
+cd ../..
+pnpm build
+
 # Install dependencies
+cd examples/02-components
 pnpm install
 
 # Install Three.js (required for PlasmaVisualizer)

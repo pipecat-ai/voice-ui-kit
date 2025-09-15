@@ -8,7 +8,7 @@ export default {
 export const Default = () => (
   <WidgetTemplate
     connectParams={{
-      connectionUrl: "http://localhost:7860/api/offer",
+      webrtcUrl: "http://localhost:7860/api/offer",
     }}
   />
 );
