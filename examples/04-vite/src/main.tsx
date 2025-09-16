@@ -22,9 +22,9 @@ createRoot(document.getElementById("root")!).render(
     <FullScreenContainer>
       <PipecatAppBase
         connectParams={{
-          webrtcUrl: "/api/offer",
+          url: "https://hush.daily.co/demo",
         }}
-        transportType="smallwebrtc"
+        transportType="daily"
         noThemeProvider
       >
         {({
@@ -64,5 +64,5 @@ createRoot(document.getElementById("root")!).render(
         }
       </PipecatAppBase>
     </FullScreenContainer>
-  </StrictMode>,
+  </StrictMode>
 );
