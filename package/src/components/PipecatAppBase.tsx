@@ -162,7 +162,6 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
           transportOptions,
         );
 
-        console.log("Mic enabled:", micEnabled);
         const pcClient = new PipecatClient({
           enableCam: camEnabled,
           enableMic: micEnabled,
