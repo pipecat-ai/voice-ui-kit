@@ -41,6 +41,10 @@ export interface PipecatBaseProps {
   connectOnMount?: boolean;
   /** Disables audio output for the bot. Default: false */
   noAudioOutput?: boolean;
+  /** Whether to enable microphone by default. Default: true */
+  micEnabled?: boolean;
+  /** Whether to enable camera by default. Default: false */
+  camEnabled?: boolean;
 
   /**
    * Children can be either:
@@ -134,6 +138,8 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   connectOnMount = false,
   noAudioOutput = false,
   noThemeProvider = false,
+  micEnabled = true,
+  camEnabled = false,
   transportOptions,
   transportType,
   themeProps,
@@ -156,9 +162,10 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
           transportOptions,
         );
 
+        console.log("Mic enabled:", micEnabled);
         const pcClient = new PipecatClient({
-          enableCam: false,
-          enableMic: true,
+          enableCam: camEnabled,
+          enableMic: micEnabled,
           transport: transport,
           ...clientOptions,
         });

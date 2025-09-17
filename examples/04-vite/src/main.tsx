@@ -64,5 +64,5 @@ createRoot(document.getElementById("root")!).render(
         }
       </PipecatAppBase>
     </FullScreenContainer>
-  </StrictMode>,
+  </StrictMode>
 );
