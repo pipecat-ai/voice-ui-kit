@@ -1,0 +1,483 @@
+---
+title: Plasma Visualizer (WebGL)
+description: WebGL-powered plasma effect visualizer with real-time audio reactivity and customizable rings
+component: PlasmaVisualizer
+---
+
+<Callout>
+**⚠️ WebGL & Three.js Required**
+
+The `PlasmaVisualizer` component requires WebGL support and Three.js to be installed in your project. Make sure to install Three.js as a dependency:
+
+```bash
+npm install three
+# or
+yarn add three
+# or
+pnpm add three
+```
+</Callout>
+
+The `PlasmaVisualizer` component provides a stunning WebGL-powered plasma effect visualization that responds to audio input in real-time. It features customizable plasma effects, animated rings, and extensive configuration options for creating immersive audio-reactive experiences.
+
+<LiveComponent language="tsx" withConfirm>
+{`
+  import { PlasmaVisualizer } from "@pipecat-ai/voice-ui-kit/webgl";
+
+  <div className="w-full h-96 relative">
+    <PlasmaVisualizer />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Props Reference
+
+The `PlasmaVisualizer` component doesn't accept props directly. Instead, it automatically connects to the Pipecat client and responds to transport state changes. The component uses three predefined configurations:
+
+- **Default**: Disconnected state with subtle plasma effects
+- **Connected**: Ready state with enhanced effects
+- **Thinking**: Active state with dynamic ring animations
+
+---
+
+## Basic Usage
+
+The `PlasmaVisualizer` automatically integrates with the Pipecat client and responds to connection state changes.
+
+<LiveComponent language="tsx" withConfirm>
+{`
+  import { PlasmaVisualizer } from "@pipecat-ai/voice-ui-kit/webgl";
+
+  <div className="w-full h-96 relative bg-black rounded-lg overflow-hidden">
+    <PlasmaVisualizer />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Advanced Configuration
+
+For more control over the plasma effects, you can use the underlying `Plasma` component directly with custom configurations.
+
+### Custom Plasma Configuration
+
+<LiveComponent language="tsx" noInline withConfirm>
+{`
+import { Plasma } from "@pipecat-ai/voice-ui-kit/webgl";
+
+function CustomPlasmaExample() {
+  const plasmaRef = React.useRef(null);
+  const [config, setConfig] = React.useState({
+    intensity: 2.0,
+    radius: 1.5,
+    effectScale: 0.6,
+    ringCount: 4,
+    ringVisibility: 0.8,
+    ringDistance: 0.1,
+    ringBounce: 0.3,
+    ringThickness: 15,
+    ringVariance: 0.7,
+    ringAmplitude: 0.05,
+    ringSpeed: 2.0,
+    ringSegments: 6,
+    colorCycleSpeed: 1.0,
+    plasmaSpeed: 1.5,
+    useCustomColors: true,
+    color1: "#ff6b6b",
+    color2: "#4ecdc4",
+    color3: "#45b7d1",
+    backgroundColor: "transparent",
+    glowFalloff: 1.2,
+    glowThreshold: 0.1,
+  });
+
+  const updateConfig = (newConfig) => {
+    setConfig(newConfig);
+    plasmaRef.current?.updateConfig(newConfig);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="w-full h-96 relative bg-black rounded-lg overflow-hidden">
+        <Plasma
+          ref={plasmaRef}
+          initialConfig={config}
+          className="absolute inset-0"
+        />
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <label className="block font-medium mb-1">Intensity</label>
+          <input
+            type="range"
+            min="0.5"
+            max="3.0"
+            step="0.1"
+            value={config.intensity}
+            onChange={(e) => updateConfig({...config, intensity: parseFloat(e.target.value)})}
+            className="w-full"
+          />
+          <span className="text-gray-500">{config.intensity.toFixed(1)}</span>
+        </div>
+        
+        <div>
+          <label className="block font-medium mb-1">Radius</label>
+          <input
+            type="range"
+            min="0.5"
+            max="3.0"
+            step="0.1"
+            value={config.radius}
+            onChange={(e) => updateConfig({...config, radius: parseFloat(e.target.value)})}
+            className="w-full"
+          />
+          <span className="text-gray-500">{config.radius.toFixed(1)}</span>
+        </div>
+        
+        <div>
+          <label className="block font-medium mb-1">Ring Count</label>
+          <input
+            type="range"
+            min="0"
+            max="8"
+            step="1"
+            value={config.ringCount}
+            onChange={(e) => updateConfig({...config, ringCount: parseInt(e.target.value)})}
+            className="w-full"
+          />
+          <span className="text-gray-500">{config.ringCount}</span>
+        </div>
+        
+        <div>
+          <label className="block font-medium mb-1">Ring Visibility</label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.1"
+            value={config.ringVisibility}
+            onChange={(e) => updateConfig({...config, ringVisibility: parseFloat(e.target.value)})}
+            className="w-full"
+          />
+          <span className="text-gray-500">{config.ringVisibility.toFixed(1)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+render(<CustomPlasmaExample />);
+`}
+</LiveComponent>
+
+### Color Customization
+
+<LiveComponent language="tsx" noInline withConfirm>
+{`
+import { Plasma } from "@pipecat-ai/voice-ui-kit/webgl";
+
+function ColorExample() {
+  const plasmaRef = React.useRef(null);
+  const [colorScheme, setColorScheme] = React.useState('ocean');
+
+  const schemes = {
+    ocean: {
+      color1: "#22d3ee",
+      color2: "#34d399", 
+      color3: "#818cf8",
+    },
+    sunset: {
+      color1: "#ff6b6b",
+      color2: "#ffa726",
+      color3: "#ff5722",
+    },
+    forest: {
+      color1: "#4caf50",
+      color2: "#8bc34a",
+      color3: "#cddc39",
+    },
+    cosmic: {
+      color1: "#9c27b0",
+      color2: "#e91e63",
+      color3: "#ff4081",
+    },
+  };
+
+  const updateColorScheme = (scheme) => {
+    setColorScheme(scheme);
+    const newConfig = {
+      intensity: 1.8,
+      radius: 1.7,
+      ringCount: 3,
+      ringVisibility: 0.6,
+      ringBounce: 0.2,
+      ringThickness: 12,
+      ringVariance: 0.5,
+      ringAmplitude: 0.03,
+      ringSpeed: 1.5,
+      ringSegments: 5,
+      colorCycleSpeed: 0.8,
+      plasmaSpeed: 1.2,
+      useCustomColors: true,
+      ...schemes[scheme],
+      backgroundColor: "transparent",
+    };
+    plasmaRef.current?.updateConfig(newConfig);
+  };
+
+  const config = {
+    intensity: 1.8,
+    radius: 1.7,
+    ringCount: 3,
+    ringVisibility: 0.6,
+    ringBounce: 0.2,
+    ringThickness: 12,
+    ringVariance: 0.5,
+    ringAmplitude: 0.03,
+    ringSpeed: 1.5,
+    ringSegments: 5,
+    colorCycleSpeed: 0.8,
+    plasmaSpeed: 1.2,
+    useCustomColors: true,
+    ...schemes[colorScheme],
+    backgroundColor: "transparent",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        {Object.keys(schemes).map((scheme) => (
+          <button
+            key={scheme}
+            onClick={() => updateColorScheme(scheme)}
+            className={\`px-3 py-1 rounded text-sm capitalize \${
+              colorScheme === scheme 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 text-gray-700'
+            }\`}
+          >
+            {scheme}
+          </button>
+        ))}
+      </div>
+      
+      <div className="w-full h-96 relative bg-black rounded-lg overflow-hidden">
+        <Plasma
+          ref={plasmaRef}
+          initialConfig={config}
+          className="absolute inset-0"
+        />
+      </div>
+    </div>
+  );
+}
+
+render(<ColorExample />);
+`}
+</LiveComponent>
+
+### Audio-Reactive Configuration
+
+<LiveComponent language="tsx" noInline withConfirm>
+{`
+import { Plasma } from "@pipecat-ai/voice-ui-kit/webgl";
+
+function AudioReactiveExample() {
+  const plasmaRef = React.useRef(null);
+  const [audioTrack, setAudioTrack] = React.useState(null);
+  const [isConnected, setIsConnected] = React.useState(false);
+
+  const connectAudio = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setAudioTrack(stream.getAudioTracks()[0]);
+      setIsConnected(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+    }
+  };
+
+  const disconnectAudio = () => {
+    if (audioTrack) {
+      audioTrack.stop();
+      setAudioTrack(null);
+      setIsConnected(false);
+    }
+  };
+
+  const config = {
+    intensity: 2.2,
+    radius: 1.8,
+    effectScale: 0.55,
+    ringCount: 5,
+    ringVisibility: 0.7,
+    ringDistance: 0.05,
+    ringBounce: 0.4,
+    ringThickness: 18,
+    ringVariance: 0.8,
+    ringAmplitude: 0.08,
+    ringSpeed: 2.5,
+    ringSegments: 6,
+    colorCycleSpeed: 1.2,
+    plasmaSpeed: 2.0,
+    useCustomColors: true,
+    color1: "#ff0080",
+    color2: "#00ff80",
+    color3: "#8000ff",
+    backgroundColor: "transparent",
+    glowFalloff: 1.5,
+    glowThreshold: 0.05,
+    // Audio reactivity settings
+    audioEnabled: true,
+    audioSensitivity: 1.5,
+    audioSmoothing: 0.8,
+    frequencyBands: 32,
+    bassResponse: 1.5,
+    midResponse: 1.2,
+    trebleResponse: 1.0,
+    plasmaVolumeReactivity: 3.0,
+    volumeThreshold: 0.1,
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <button 
+          onClick={connectAudio}
+          disabled={isConnected}
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+        >
+          Connect Audio
+        </button>
+        <button 
+          onClick={disconnectAudio}
+          disabled={!isConnected}
+          className="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-50"
+        >
+          Disconnect Audio
+        </button>
+      </div>
+      
+      <div className="w-full h-96 relative bg-black rounded-lg overflow-hidden">
+        <Plasma
+          ref={plasmaRef}
+          initialConfig={config}
+          audioTrack={audioTrack}
+          className="absolute inset-0"
+        />
+      </div>
+      
+      <p className="text-sm text-gray-600">
+        Status: {isConnected ? 'Audio Connected - Try speaking!' : 'No Audio'}
+      </p>
+    </div>
+  );
+}
+
+render(<AudioReactiveExample />);
+`}
+</LiveComponent>
+
+---
+
+## Configuration Options
+
+The `Plasma` component accepts extensive configuration options for fine-tuning the visual effects:
+
+### Core Plasma Properties
+
+- **`intensity`**: Overall brightness and strength of the plasma effect (0.5-3.0)
+- **`radius`**: Size of the plasma effect (0.5-3.0)
+- **`effectScale`**: Scaling factor for the entire effect (0.1-2.0)
+- **`effectCenter`**: Center point of the effect (\{ x: number, y: number \})
+- **`blendMode`**: Color blending mode (0-5)
+- **`plasmaSpeed`**: Animation speed of the plasma (0.1-5.0)
+- **`rayLength`**: Length of plasma rays (0.1-2.0)
+
+### Ring Properties
+
+- **`ringCount`**: Number of animated rings (0-8)
+- **`ringVisibility`**: Opacity of rings (0-1)
+- **`ringDistance`**: Distance between rings (0-0.5)
+- **`ringSpread`**: Spacing between rings (0-0.2)
+- **`ringBounce`**: Bouncing animation intensity (0-1)
+- **`ringThickness`**: Thickness of ring lines (1-50)
+- **`ringVariance`**: Random variation in ring properties (0-1)
+- **`ringSharpness`**: Edge sharpness of rings (0-1)
+- **`ringAmplitude`**: Wave amplitude of rings (0-0.2)
+- **`ringSpeed`**: Animation speed of rings (0.1-5.0)
+- **`ringSegments`**: Number of segments per ring (1-20)
+- **`ringColorInheritance`**: How rings inherit plasma colors (0-1)
+
+### Color Properties
+
+- **`useCustomColors`**: Whether to use custom colors or rainbow mode
+- **`color1`**: Primary color (hex string)
+- **`color2`**: Secondary color (hex string)
+- **`color3`**: Tertiary color (hex string)
+- **`backgroundColor`**: Background color (hex string)
+- **`colorCycleSpeed`**: Speed of color transitions (0.1-3.0)
+
+### Glow Properties
+
+- **`glowFalloff`**: How quickly glow fades (0.1-3.0)
+- **`glowThreshold`**: Minimum glow intensity (0-1)
+
+### Audio Properties
+
+- **`audioEnabled`**: Enable audio reactivity
+- **`audioSensitivity`**: Audio input sensitivity (0.1-3.0)
+- **`audioSmoothing`**: Smoothing factor for audio data (0.1-1.0)
+- **`frequencyBands`**: Number of frequency bands to analyze (8-64)
+- **`bassResponse`**: Response to bass frequencies (0.1-3.0)
+- **`midResponse`**: Response to mid frequencies (0.1-3.0)
+- **`trebleResponse`**: Response to treble frequencies (0.1-3.0)
+- **`plasmaVolumeReactivity`**: How much volume affects plasma (0.1-5.0)
+- **`volumeThreshold`**: Minimum volume to trigger effects (0-1)
+
+---
+
+## Technical Details
+
+### WebGL Requirements
+
+The `PlasmaVisualizer` requires:
+- **WebGL 1.0 or 2.0** support in the browser
+- **Three.js** library installed as a dependency
+- **Modern browser** with WebGL context support
+
+### Performance Considerations
+
+- The component uses **WebGL shaders** for optimal performance
+- **Automatic pixel ratio detection** for crisp rendering on high-DPI displays
+- **Visibility-based rendering** - pauses when tab is not visible
+- **Context loss handling** - gracefully recovers from WebGL context loss
+- **ResizeObserver** for efficient canvas resizing
+
+### Browser Compatibility
+
+- **Chrome 9+**: Full support
+- **Firefox 4+**: Full support  
+- **Safari 5.1+**: Full support
+- **Edge 12+**: Full support
+
+### Audio Processing
+
+The component uses the **Web Audio API** for real-time audio analysis:
+- **FFT analysis** for frequency domain processing
+- **Multi-band filtering** for bass, mid, and treble response
+- **Smoothing algorithms** to prevent jarring visual changes
+- **Volume thresholding** to avoid noise-triggered effects
+
+### Shader Details
+
+The plasma effect is generated using custom GLSL fragment shaders that create:
+- **Simplex noise** for organic plasma movement
+- **Radial gradients** for the core plasma shape
+- **Ring wave functions** for animated ring effects
+- **Color blending** with multiple blend modes
+- **Audio-reactive parameters** that modify shader uniforms in real-time

@@ -4,6 +4,7 @@ import { PipecatClient } from "@pipecat-ai/client-js";
 import { PipecatClientProvider } from "@pipecat-ai/client-react";
 import { SmallWebRTCTransport } from "@pipecat-ai/small-webrtc-transport";
 import * as VoiceUIKit from "@pipecat-ai/voice-ui-kit";
+import * as VoiceUIKitWebGL from "@pipecat-ai/voice-ui-kit/webgl";
 import { CodeBlock, Pre as CodePre } from "fumadocs-ui/components/codeblock";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
@@ -26,6 +27,7 @@ type LiveComponentProps = {
   imports?: string | string[];
   previewOrientation?: "horizontal" | "vertical";
   withPipecat?: boolean;
+  withConfirm?: boolean;
 };
 
 function normalizeCodeIndentation(snippet: string): string {
@@ -85,10 +87,12 @@ export function LiveComponent({
   initialTab = "preview",
   height = "h-fit",
   withPipecat,
+  withConfirm,
 }: LiveComponentProps) {
   const { theme: themeFromProvider } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [intent, setIntent] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
   const [client, setClient] = useState<PipecatClient | null>(null);
 
   useEffect(() => {
@@ -121,7 +125,13 @@ export function LiveComponent({
     [displaySource]
   );
   const mergedScope = useMemo(
-    () => ({ React, ...VoiceUIKit, CircleIcon, ...(scope ?? {}) }),
+    () => ({
+      React,
+      ...VoiceUIKit,
+      ...VoiceUIKitWebGL,
+      CircleIcon,
+      ...(scope ?? {}),
+    }),
     [scope]
   );
 
@@ -138,7 +148,33 @@ export function LiveComponent({
     />
   );
 
-  if (withPipecat) {
+  if (withConfirm && !confirmed) {
+    previewComp = (
+      <div
+        className={`${h} ${themeFromProvider === "dark" ? "dark" : ""} ${
+          editorClassName ?? ""
+        }`}
+      >
+        <VoiceUIKit.Card
+          className="w-full h-full flex items-center justify-center text-center"
+          background="stripes"
+        >
+          <VoiceUIKit.CardHeader>
+            <VoiceUIKit.CardTitle>Interactive Example</VoiceUIKit.CardTitle>
+          </VoiceUIKit.CardHeader>
+          <VoiceUIKit.CardContent>
+            This example contains interactive controls and may use significant
+            resources. Click below to load the component.
+          </VoiceUIKit.CardContent>
+          <VoiceUIKit.CardContent>
+            <VoiceUIKit.Button onClick={() => setConfirmed(true)}>
+              Show Example
+            </VoiceUIKit.Button>
+          </VoiceUIKit.CardContent>
+        </VoiceUIKit.Card>
+      </div>
+    );
+  } else if (withPipecat && (!withConfirm || confirmed)) {
     if (!intent) {
       previewComp = (
         <div
@@ -174,6 +210,15 @@ export function LiveComponent({
         </PipecatClientProvider>
       );
     }
+  }
+
+  // If withConfirm is true and confirmed is true, and withPipecat is also true, wrap with PipecatClientProvider
+  if (withConfirm && confirmed && withPipecat && client) {
+    previewComp = (
+      <PipecatClientProvider client={client}>
+        {previewComp}
+      </PipecatClientProvider>
+    );
   }
 
   return (

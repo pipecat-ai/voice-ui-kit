@@ -137,7 +137,7 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
   children,
   onClick,
 }) => {
-  const buttonState = state || (isCamEnabled ? "default" : "inactive");
+  const buttonState = state || (isCamEnabled ? "active" : "inactive");
 
   return (
     <div
@@ -188,7 +188,12 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
         </div>
       )}
       <div className="absolute bottom-2 left-2">
-        <ButtonGroup className={cn(classNames.buttongroup)}>
+        <ButtonGroup
+          className={cn(
+            variant !== "outline" && "gap-[1px]",
+            classNames.buttongroup,
+          )}
+        >
           <Button
             className={cn(classNames.button)}
             variant={

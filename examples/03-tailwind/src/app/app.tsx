@@ -4,12 +4,12 @@ import {
   ConnectButton,
   ControlBar,
   ControlBarDivider,
-  LogoutIcon,
   type PipecatBaseChildProps,
   TranscriptOverlay,
   UserAudioControl,
 } from "@pipecat-ai/voice-ui-kit";
 import { PlasmaVisualizer } from "@pipecat-ai/voice-ui-kit/webgl";
+import { LogOutIcon } from "lucide-react";
 
 export const App = ({
   handleConnect,
@@ -27,15 +27,15 @@ export const App = ({
       {transportState === "ready" ? (
         <div className="relative z-10 h-1/2 flex flex-col w-full items-center justify-center">
           <ControlBar size="xl" shadow="xlong" withGradientBorder rounded="xl">
-            <UserAudioControl size="xl" variant="outline" />
+            <UserAudioControl size="lg" variant="outline" />
             <ControlBarDivider />
             <Button
-              size="xl"
+              size="lg"
               isIcon={true}
               variant="outline"
               onClick={() => handleDisconnect?.()}
             >
-              <LogoutIcon />
+              <LogOutIcon />
             </Button>
           </ControlBar>
         </div>

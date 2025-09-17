@@ -104,6 +104,7 @@ const WidgetPanel = (props: WidgetTemplateProps) => {
       )}
       shadow="xlong"
       size="lg"
+      rounded="xl"
     >
       <CardContent>
         <TextInput debounceTime={props.debounceTime} />
