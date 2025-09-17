@@ -14,14 +14,12 @@ import {
   ConnectButton,
   ControlBar,
   ErrorCard,
-  LoaderIcon,
-  LogoutIcon,
   PipecatLogo,
   TranscriptOverlay,
   UserAudioControl,
-  XIcon,
 } from "@pipecat-ai/voice-ui-kit";
 import { PlasmaVisualizer } from "@pipecat-ai/voice-ui-kit/webgl";
+import { LoaderIcon, LogOutIcon, XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export interface AppProps {
@@ -80,7 +78,7 @@ export const App = ({ connectParams, transportType }: AppProps) => {
           },
           onError: () => {
             setError(
-              "An error occured connecting to agent. It may be that the agent is at capacity. Please try again later.",
+              "An error occured connecting to agent. It may be that the agent is at capacity. Please try again later."
             );
           },
         },
@@ -106,7 +104,9 @@ export const App = ({ connectParams, transportType }: AppProps) => {
     } catch (err) {
       console.error("Connection error:", err);
       setError(
-        `Failed to start session: ${err instanceof Error ? err.message : String(err)}`,
+        `Failed to start session: ${
+          err instanceof Error ? err.message : String(err)
+        }`
       );
     }
   };
@@ -154,7 +154,7 @@ export const App = ({ connectParams, transportType }: AppProps) => {
                     variant="outline"
                     onClick={() => client?.disconnect()}
                   >
-                    <LogoutIcon />
+                    <LogOutIcon />
                   </Button>
                 </ControlBar>
               )}

@@ -1,3 +1,526 @@
 ---
 title: User Video Control
+description: Camera control component with device selection and video preview
+component: UserVideoControl
 ---
+
+The `UserVideoControl` component provides a comprehensive camera control interface that includes camera toggle functionality, device selection, and optional video preview. It integrates with the Pipecat Client SDK to automatically manage camera state and device selection.
+
+<LiveComponent language="tsx">
+{`
+  import { UserVideoComponent } from "@pipecat-ai/voice-ui-kit";
+
+  <UserVideoComponent
+    onClick={() => console.log("Toggle camera")}
+    availableCams={[
+      {deviceId: "cam1", label: "Built-in Camera"},
+      {deviceId: "cam2", label: "External USB Camera"},
+    ]}
+    selectedCam={{deviceId: "cam1", label: "Built-in Camera"}}
+    updateCam={(deviceId) => console.log("Selected:", deviceId)}
+    isCamEnabled={true}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### UserVideoControl
+
+The `UserVideoControl` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
+
+<Callout>
+You must call `initDevices` on the client before using the component.
+</Callout>
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserVideoControl />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    variant: {
+      description: "Visual style variant of the button",
+      type: '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "link" | "active" | "inactive"',
+      required: false,
+      default: '"outline"',
+    },
+    size: {
+      description: "Size of the button component",
+      type: '"sm" | "md" | "lg" | "xl"',
+      required: false,
+      default: '"md"',
+    },
+    state: {
+      description: "Button state for visual feedback",
+      type: '"default" | "active" | "inactive"',
+      required: false,
+      default: "undefined",
+    },
+    buttonProps: {
+      description: "Props to pass to the main button component",
+      type: "Partial<ButtonProps>",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ container?: string; video?: string; buttongroup?: string; button?: string; dropdownMenuTrigger?: string; dropdownMenuContent?: string; dropdownMenuCheckboxItem?: string; videoOffContainer?: string; videoOffText?: string; activeText?: string; inactiveText?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    dropdownButtonProps: {
+      description: "Props to pass to the dropdown trigger button",
+      type: "Partial<ButtonProps>",
+      required: false,
+      default: "undefined",
+    },
+    deviceDropDownProps: {
+      description: "Props to pass to the device dropdown component",
+      type: "Partial<DeviceDropDownComponentProps>",
+      required: false,
+      default: "undefined",
+    },
+    noDevicePicker: {
+      description: "Whether to hide the device selection dropdown",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noVideo: {
+      description: "Whether to hide the video element entirely",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    videoProps: {
+      description: "Props to pass to the PipecatClientVideo component",
+      type: "Partial<PipecatClientVideoProps>",
+      required: false,
+      default: "undefined",
+    },
+    noVideoText: {
+      description: "Text to display when video is disabled",
+      type: "string | null",
+      required: false,
+      default: '"Video disabled"',
+    },
+    noIcon: {
+      description: "Whether to hide the video icon in the button",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    activeText: {
+      description: "Text to display when camera is active",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    inactiveText: {
+      description: "Text to display when camera is inactive",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    children: {
+      description: "Additional content to render inside the button",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+### UserVideoComponent
+
+The `UserVideoComponent` is the headless variant that accepts all camera state and callbacks as props. This allows you to use it with any framework or state management solution.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { UserVideoComponent } from "@pipecat-ai/voice-ui-kit";
+
+  // Example with mock data
+  const mockCams = [
+    { deviceId: "cam1", label: "Built-in Camera" },
+    { deviceId: "cam2", label: "External USB Camera" },
+  ];
+
+  function Demo() {
+    const [isCamEnabled, setIsCamEnabled] = React.useState(false);
+    const [selectedCam, setSelectedCam] = React.useState(mockCams[0]);
+
+    return (
+      <UserVideoComponent
+        isCamEnabled={isCamEnabled}
+        onClick={() => setIsCamEnabled(!isCamEnabled)}
+        availableCams={mockCams}
+        selectedCam={selectedCam}
+        updateCam={(deviceId) => {
+          const cam = mockCams.find(c => c.deviceId === deviceId);
+          if (cam) setSelectedCam(cam);
+        }}
+        activeText="Camera is on"
+        inactiveText="Click to start"
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    onClick: {
+      description: "Callback function called when the video toggle button is clicked",
+      type: "() => void",
+      required: false,
+      default: "undefined",
+    },
+    isCamEnabled: {
+      description: "Whether the camera is currently enabled",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    availableCams: {
+      description: "Array of available camera devices",
+      type: "MediaDeviceInfo[]",
+      required: false,
+      default: "undefined",
+    },
+    selectedCam: {
+      description: "Currently selected camera device",
+      type: "OptionalMediaDeviceInfo",
+      required: false,
+      default: "undefined",
+    },
+    updateCam: {
+      description: "Callback function called when a camera device is selected",
+      type: "(deviceId: string) => void",
+      required: false,
+      default: "undefined",
+    },
+    variant: {
+      description: "Visual style variant of the button",
+      type: '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "link" | "active" | "inactive"',
+      required: false,
+      default: '"outline"',
+    },
+    size: {
+      description: "Size of the button component",
+      type: '"sm" | "md" | "lg" | "xl"',
+      required: false,
+      default: '"md"',
+    },
+    state: {
+      description: "Button state for visual feedback",
+      type: '"default" | "active" | "inactive"',
+      required: false,
+      default: "undefined",
+    },
+    buttonProps: {
+      description: "Props to pass to the main button component",
+      type: "Partial<ButtonProps>",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ container?: string; video?: string; buttongroup?: string; button?: string; dropdownMenuTrigger?: string; dropdownMenuContent?: string; dropdownMenuCheckboxItem?: string; videoOffContainer?: string; videoOffText?: string; activeText?: string; inactiveText?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    dropdownButtonProps: {
+      description: "Props to pass to the dropdown trigger button",
+      type: "Partial<ButtonProps>",
+      required: false,
+      default: "undefined",
+    },
+    deviceDropDownProps: {
+      description: "Props to pass to the device dropdown component",
+      type: "Partial<DeviceDropDownComponentProps>",
+      required: false,
+      default: "undefined",
+    },
+    noDevicePicker: {
+      description: "Whether to hide the device selection dropdown",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noVideo: {
+      description: "Whether to hide the video element entirely",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    videoProps: {
+      description: "Props to pass to the PipecatClientVideo component",
+      type: "Partial<PipecatClientVideoProps>",
+      required: false,
+      default: "undefined",
+    },
+    noVideoText: {
+      description: "Text to display when video is disabled",
+      type: "string | null",
+      required: false,
+      default: '"Video disabled"',
+    },
+    noIcon: {
+      description: "Whether to hide the video icon in the button",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    activeText: {
+      description: "Text to display when camera is active",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    inactiveText: {
+      description: "Text to display when camera is inactive",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    children: {
+      description: "Additional content to render inside the button",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage Examples
+
+#### Basic Usage
+
+The UserVideoControl component automatically manages camera state and device selection.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserVideoControl />
+`}
+</LiveComponent>
+
+#### Custom Text Labels
+
+You can customize the text displayed when the camera is active or inactive.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserVideoControl
+    activeText="Camera is on"
+    inactiveText="Click to start camera"
+  />
+`}
+</LiveComponent>
+
+#### Different Variants
+
+The component supports different visual variants to match your design system.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="flex gap-4">
+    <UserVideoControl variant="primary" />
+    <UserVideoControl variant="outline" />
+    <UserVideoControl variant="ghost" />
+  </div>
+`}
+</LiveComponent>
+
+#### Different Sizes
+
+You can use different sizes for the video control.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="flex gap-4 items-center">
+    <UserVideoControl size="sm" />
+    <UserVideoControl size="md" />
+    <UserVideoControl size="lg" />
+    <UserVideoControl size="xl" />
+  </div>
+`}
+</LiveComponent>
+
+#### Without Device Picker
+
+Hide the device selection dropdown for a simpler interface.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserVideoControl noDevicePicker />
+`}
+</LiveComponent>
+
+#### Without Video Preview
+
+Hide the video element for a minimal camera button.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserVideoControl noVideo />
+`}
+</LiveComponent>
+
+#### Disabled Video State
+
+Show a disabled state when video functionality is not available.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { UserVideoComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    return (
+      <UserVideoComponent
+        noVideo={true}
+        noVideoText="Camera not available"
+        isCamEnabled={false}
+        onClick={() => {}}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+#### Custom Video Configuration
+
+Customize the video element appearance and behavior.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserVideoControl
+    videoProps={{
+      className: "border-2 border-primary",
+      style: { borderRadius: "8px" }
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Custom Device Dropdown Configuration
+
+Customize the device dropdown behavior and appearance.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserVideoControl
+    deviceDropDownProps={{
+      menuLabel: "Select Camera",
+      placeholder: "Choose a camera...",
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom CSS classes to different parts of the component.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserVideoControl
+    classNames={{
+      container: "border-2 border-primary",
+      button: "bg-primary text-white",
+      videoOffContainer: "bg-muted/50",
+      activeText: "font-bold text-green-600",
+      inactiveText: "text-gray-500",
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Camera Toggle**: Click to enable/disable camera input
+- **Device Selection**: Built-in dropdown for selecting different camera devices
+- **Video Preview**: Optional real-time video preview display
+- **Loading States**: Automatic loading indicators during connection setup
+- **Accessible**: Includes proper ARIA labels and keyboard navigation
+- **Responsive**: Adapts to different screen sizes and container widths
+- **Theme Support**: Integrates with the Voice UI Kit theming system
+- **Flexible**: Available in both connected and headless variants
+
+## Integration
+
+The connected `UserVideoControl` component uses several hooks from the Pipecat Client React SDK:
+- `usePipecatClientMediaDevices` for device management
+- `usePipecatClientTransportState` for connection state
+- `PipecatClientCamToggle` for camera control
+
+This means it must be used within a `PipecatClientProvider` context to function properly.
+
+The component will automatically:
+- Fetch available camera devices
+- Display the currently selected camera
+- Handle device selection changes
+- Manage camera enable/disable state
+- Show appropriate loading states during connection setup
+- Update the Pipecat Client's camera configuration
+
+## Visual States
+
+The component displays different visual states based on the camera status:
+
+- **Inactive**: Shows camera off icon with inactive styling and placeholder text
+- **Active**: Shows camera on icon with active styling and video preview
+- **Loading**: Shows loading spinner during connection setup
+- **Disabled**: Shows disabled state when video is not available
+
+## Device Management
+
+The component includes a dropdown menu for device selection that:
+- Lists all available camera devices
+- Shows the currently selected device
+- Allows switching between devices
+- Can be hidden with the `noDevicePicker` prop
+- Integrates with the `DeviceDropDown` component
+
+## Video Preview
+
+The component can display a live video preview when the camera is enabled:
+- Shows the local camera feed using `PipecatClientVideo`
+- Automatically adjusts container size based on camera state
+- Can be hidden with the `noVideo` prop
+- Supports custom styling through `videoProps`
+- Displays placeholder text when camera is off or disabled

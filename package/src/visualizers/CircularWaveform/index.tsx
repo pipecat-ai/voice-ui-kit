@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   type CanvasWaveformOptions,
   CircularWaveformCanvas,
@@ -21,7 +21,7 @@ export interface CircularWaveformProps {
   debug?: boolean;
 }
 
-const CircularWaveform = ({
+export const CircularWaveform: React.FC<CircularWaveformProps> = ({
   size,
   audioTrack = null,
   isThinking = false,
@@ -34,7 +34,7 @@ const CircularWaveform = ({
   numBars = 64,
   barWidth = 4,
   debug = false,
-}: CircularWaveformProps) => {
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const waveformRef = useRef<CircularWaveformCanvas | null>(null);
@@ -215,4 +215,3 @@ const CircularWaveform = ({
 };
 
 CircularWaveform.displayName = "CircularWaveform";
-export default CircularWaveform;

@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import type { PipecatBaseChildProps } from "@pipecat-ai/voice-ui-kit";
@@ -16,6 +16,36 @@ import {
 } from "@pipecat-ai/voice-ui-kit";
 
 import "./index.css";
+
+export const App = ({
+  client,
+  handleConnect,
+  handleDisconnect,
+}: PipecatBaseChildProps) => {
+  useEffect(() => {
+    client?.initDevices();
+  }, [client]);
+
+  return (
+    <Card size="lg" shadow="xlong" rounded="xl">
+      <CardContent className="flex flex-col gap-4">
+        <VoiceVisualizer
+          participantType="bot"
+          className="bg-accent rounded-lg"
+        />
+        <Divider />
+        <div className="flex flex-col gap-4">
+          <UserAudioControl size="lg" />
+          <ConnectButton
+            size="lg"
+            onConnect={handleConnect}
+            onDisconnect={handleDisconnect}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -38,31 +68,14 @@ createRoot(document.getElementById("root")!).render(
           ) : error ? (
             <ErrorCard>{error}</ErrorCard>
           ) : (
-            <Card
-              size="lg"
-              shadow="xlong"
-              noGradientBorder={false}
-              rounded="xl"
-            >
-              <CardContent className="flex flex-col gap-4">
-                <VoiceVisualizer
-                  participantType="bot"
-                  className="bg-accent rounded-lg"
-                />
-                <Divider />
-                <div className="flex flex-col gap-4">
-                  <UserAudioControl size="lg" />
-                  <ConnectButton
-                    size="lg"
-                    onConnect={handleConnect}
-                    onDisconnect={handleDisconnect}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <App
+              client={client}
+              handleConnect={handleConnect}
+              handleDisconnect={handleDisconnect}
+            />
           )
         }
       </PipecatAppBase>
     </FullScreenContainer>
-  </StrictMode>,
+  </StrictMode>
 );

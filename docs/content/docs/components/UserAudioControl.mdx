@@ -82,6 +82,12 @@ You must call `initDevices` on the client before using the component.
       required: false,
       default: "undefined",
     },
+    deviceDropDownProps: {
+      description: "Props to pass to the device dropdown component",
+      type: "Partial<DeviceDropDownComponentProps>",
+      required: false,
+      default: "undefined",
+    },
     noDevicePicker: {
       description: "Whether to hide the device selection dropdown",
       type: "boolean",
@@ -243,6 +249,12 @@ The `UserAudioComponent` is the headless variant that accepts all microphone sta
     dropdownButtonProps: {
       description: "Props to pass to the dropdown trigger button",
       type: "Partial<ButtonProps>",
+      required: false,
+      default: "undefined",
+    },
+    deviceDropDownProps: {
+      description: "Props to pass to the device dropdown component",
+      type: "Partial<DeviceDropDownComponentProps>",
       required: false,
       default: "undefined",
     },
@@ -428,6 +440,23 @@ Customize the audio visualizer appearance and behavior.
       barGap: 1,
       barMaxHeight: 30,
       barWidth: 2,
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Custom Device Dropdown Configuration
+
+Customize the device dropdown behavior and appearance.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserAudioControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioControl
+    deviceDropDownProps={{
+      menuLabel: "Select Microphone",
+      placeholder: "Choose a microphone...",
     }}
   />
 `}

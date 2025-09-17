@@ -1,6 +1,11 @@
 "use client";
 
+import {
+  DeviceDropDownComponent,
+  type DeviceDropDownComponentProps,
+} from "@/components/elements/DeviceDropDown";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/buttongroup";
 import {
   buttonAccentColorMapCls,
   type ButtonSize,
@@ -16,51 +21,104 @@ import {
   usePipecatClientTransportState,
 } from "@pipecat-ai/client-react";
 import { ChevronDownIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { ButtonGroup } from "../ui";
-import { DeviceDropDownComponent } from "./DeviceDropDown";
 
+/**
+ * Base props interface for UserAudioControl components.
+ * Provides styling, behavior, and customization options for audio controls.
+ */
 interface Props {
+  /** Visual style variant for the control button */
   variant?: ButtonVariant;
+  /** Size of the control button */
   size?: ButtonSize;
+  /** State of the control button (default, inactive, etc.) */
   state?: ButtonState;
+  /** Additional props to pass to the main control button */
   buttonProps?: Partial<React.ComponentProps<typeof Button>>;
+  /** Custom CSS classes for different parts of the component */
   classNames?: {
+    /** CSS classes for the main control button */
     button?: string;
+    /** CSS classes for the button group */
     buttongroup?: string;
+    /** CSS classes for the dropdown menu trigger button */
     dropdownMenuTrigger?: string;
+    /** CSS classes for the dropdown menu content */
     dropdownMenuContent?: string;
+    /** CSS classes for dropdown menu checkbox items */
     dropdownMenuCheckboxItem?: string;
+    /** CSS classes for active state text */
     activeText?: string;
+    /** CSS classes for inactive state text */
     inactiveText?: string;
   };
+  /** Additional props to pass to the dropdown button */
   dropdownButtonProps?: Partial<React.ComponentProps<typeof Button>>;
+  /** Additional props to pass to the device dropdown component */
+  deviceDropDownProps?: Partial<DeviceDropDownComponentProps>;
+  /** Whether to hide the device picker dropdown */
   noDevicePicker?: boolean;
+  /** Whether to hide the voice visualizer */
   noVisualizer?: boolean;
+  /** Additional props to pass to the VoiceVisualizer component */
   visualizerProps?: Partial<React.ComponentProps<typeof VoiceVisualizer>>;
+  /** Whether to disable audio functionality entirely */
   noAudio?: boolean;
+  /** Custom text to display when audio is disabled */
   noAudioText?: string | null;
+  /** Whether to hide the microphone icon in the button */
   noIcon?: boolean;
+  /** Text to display when microphone is active */
   activeText?: string;
+  /** Text to display when microphone is inactive */
   inactiveText?: string;
+  /** Custom content to render inside the button */
   children?: React.ReactNode;
 }
 
+/**
+ * Props interface for the headless UserAudioComponent.
+ * Includes device data and callbacks for external state management.
+ */
 interface ComponentProps extends Props {
+  /** Callback function called when the microphone toggle button is clicked */
   onClick?: () => void;
+  /** Whether the microphone is currently enabled */
   isMicEnabled?: boolean;
+  /** Array of available microphone devices */
   availableMics?: MediaDeviceInfo[];
+  /** Currently selected microphone device */
   selectedMic?: OptionalMediaDeviceInfo;
+  /** Callback function called when a microphone device is selected */
   updateMic?: (deviceId: string) => void;
 }
 
 const btnClasses = "flex-1 w-full z-10 justify-start";
 
+/**
+ * Headless UserAudioComponent that accepts all device data and callbacks as props.
+ * This component can be used with any framework or state management solution.
+ *
+ * @example
+ * ```tsx
+ * <UserAudioComponent
+ *   isMicEnabled={isMicrophoneOn}
+ *   onClick={handleMicrophoneToggle}
+ *   availableMics={microphones}
+ *   selectedMic={currentMicrophone}
+ *   updateMic={handleMicrophoneChange}
+ *   variant="outline"
+ *   size="lg"
+ * />
+ * ```
+ */
 export const UserAudioComponent: React.FC<ComponentProps> = ({
   variant = "secondary",
   size = "md",
   classNames = {},
   buttonProps = {},
   dropdownButtonProps = {},
+  deviceDropDownProps = {},
   noDevicePicker = false,
   noVisualizer = false,
   visualizerProps = {},
@@ -160,6 +218,7 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
               dropdownMenuContent: classNames.dropdownMenuContent,
               dropdownMenuCheckboxItem: classNames.dropdownMenuCheckboxItem,
             }}
+            {...deviceDropDownProps}
           >
             <Button
               className={cn(
@@ -186,6 +245,22 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
   );
 };
 
+/**
+ * Connected UserAudioControl component that integrates with the Pipecat Client SDK.
+ * This component automatically manages microphone detection, selection, and updates.
+ * Must be used within a PipecatClientProvider context.
+ *
+ * @example
+ * ```tsx
+ * <UserAudioControl
+ *   variant="outline"
+ *   size="lg"
+ *   noDevicePicker={false}
+ *   activeText="Microphone is on"
+ *   inactiveText="Microphone is off"
+ * />
+ * ```
+ */
 export const UserAudioControl: React.FC<Props> = (props) => {
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();

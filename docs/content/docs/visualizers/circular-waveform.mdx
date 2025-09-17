@@ -1,0 +1,658 @@
+---
+title: Circular Waveform
+description: Real-time circular audio spectrum visualizer with dynamic rotation and color transitions
+component: CircularWaveform
+---
+
+The `CircularWaveform` component provides a real-time circular audio spectrum visualization that displays frequency data as animated bars arranged in a circle. It features dynamic rotation that responds to audio activity, smooth color transitions, and multiple visualization states for different interaction modes.
+
+<LiveComponent language="tsx">
+{`
+  import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="w-96 h-96">
+    <CircularWaveform 
+      audioTrack={null}
+      isThinking={false}
+    />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Props Reference
+
+<TypeTable
+  className="text-sm"
+  type={{
+    size: {
+      description: "Fixed size of the circular visualizer in pixels (responsive if omitted)",
+      type: "number",
+      required: false,
+      default: "undefined",
+    },
+    isThinking: {
+      description: "Whether the visualizer is in thinking mode (shows traveling pulse animation)",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    audioTrack: {
+      description: "MediaStreamTrack to visualize audio from (typically from microphone)",
+      type: "MediaStreamTrack | null",
+      required: false,
+      default: "null",
+    },
+    className: {
+      description: "Additional CSS classes to apply to the container",
+      type: "string",
+      required: false,
+      default: '""',
+    },
+    color1: {
+      description: "Primary color for the visualization bars (used for low activity)",
+      type: "string",
+      required: false,
+      default: "#00D3F2",
+    },
+    color2: {
+      description: "Secondary color for the visualization bars (used for high activity)",
+      type: "string",
+      required: false,
+      default: "#E12AFB",
+    },
+    backgroundColor: {
+      description: "Background color of the canvas",
+      type: "string",
+      required: false,
+      default: "transparent",
+    },
+    sensitivity: {
+      description: "Audio sensitivity factor (0.5-2.0) - higher values make visualization more responsive to quiet sounds",
+      type: "number",
+      required: false,
+      default: "1",
+    },
+    rotationEnabled: {
+      description: "Whether the visualization should rotate",
+      type: "boolean",
+      required: false,
+      default: "true",
+    },
+    numBars: {
+      description: "Number of bars in the circular visualization",
+      type: "number",
+      required: false,
+      default: "64",
+    },
+    barWidth: {
+      description: "Width of each individual bar in pixels",
+      type: "number",
+      required: false,
+      default: "4",
+    },
+    debug: {
+      description: "Whether to display debug information in console",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+  }}
+/>
+
+---
+
+## Basic Usage
+
+The `CircularWaveform` component can be used in different states depending on your application's needs. It automatically adapts its visualization based on the provided props.
+
+<LiveComponent language="tsx">
+{`
+  import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Idle State</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={false}
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Thinking State</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Visual Customization
+
+### Color Schemes
+
+Customize the visual appearance with different color combinations that transition based on audio activity.
+
+<LiveComponent language="tsx">
+{`
+  import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Default Colors</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          color1="#00D3F2"
+          color2="#E12AFB"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Blue to Green</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          color1="#3B82F6"
+          color2="#10B981"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Orange to Red</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          color1="#F59E0B"
+          color2="#EF4444"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Purple to Pink</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          color1="#8B5CF6"
+          color2="#EC4899"
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+### Bar Configuration
+
+Adjust the number and appearance of bars for different visual effects.
+
+<LiveComponent language="tsx">
+{`
+  import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Few Bars (32)</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          numBars={32}
+          barWidth={6}
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Default Bars (64)</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          numBars={64}
+          barWidth={4}
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Many Bars (128)</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          numBars={128}
+          barWidth={2}
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+### Rotation Control
+
+Control the rotation behavior of the visualization.
+
+<LiveComponent language="tsx">
+{`
+  import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Rotation Enabled (Default)</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={false}
+          rotationEnabled={true}
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Rotation Disabled</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={false}
+          rotationEnabled={false}
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Audio Integration
+
+### Basic Audio Connection
+
+Connect the visualizer to an audio track for real-time visualization.
+
+<LiveComponent language="tsx" noInline withPipecat>
+{`
+import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+function AudioExample() {
+  const [audioTrack, setAudioTrack] = React.useState(null);
+  const [isConnected, setIsConnected] = React.useState(false);
+
+  const connectAudio = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setAudioTrack(stream.getAudioTracks()[0]);
+      setIsConnected(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+    }
+  };
+
+  const disconnectAudio = () => {
+    if (audioTrack) {
+      audioTrack.stop();
+      setAudioTrack(null);
+      setIsConnected(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <button 
+          onClick={connectAudio}
+          disabled={isConnected}
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+        >
+          Connect Audio
+        </button>
+        <button 
+          onClick={disconnectAudio}
+          disabled={!isConnected}
+          className="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-50"
+        >
+          Disconnect Audio
+        </button>
+      </div>
+      
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={audioTrack}
+          isThinking={false}
+          color1="#00D3F2"
+          color2="#E12AFB"
+        />
+      </div>
+      
+      <p className="text-sm text-gray-600">
+        Status: {isConnected ? 'Audio Connected' : 'No Audio'}
+      </p>
+    </div>
+  );
+}
+
+render(<AudioExample />);
+`}
+</LiveComponent>
+
+### Sensitivity Adjustment
+
+Fine-tune the audio sensitivity for different environments and use cases.
+
+<LiveComponent language="tsx" noInline withPipecat>
+{`
+import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+function SensitivityExample() {
+  const [audioTrack, setAudioTrack] = React.useState(null);
+  const [sensitivity, setSensitivity] = React.useState(1);
+
+  React.useEffect(() => {
+    const connectAudio = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setAudioTrack(stream.getAudioTracks()[0]);
+      } catch (error) {
+        console.error('Error accessing microphone:', error);
+      }
+    };
+    connectAudio();
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium mb-2">
+          Sensitivity: {sensitivity.toFixed(1)}
+        </label>
+        <input
+          type="range"
+          min="0.5"
+          max="2.0"
+          step="0.1"
+          value={sensitivity}
+          onChange={(e) => setSensitivity(parseFloat(e.target.value))}
+          className="w-full"
+        />
+        <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <span>Less Sensitive</span>
+          <span>More Sensitive</span>
+        </div>
+      </div>
+      
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={audioTrack}
+          isThinking={false}
+          sensitivity={sensitivity}
+          color1="#00D3F2"
+          color2="#E12AFB"
+        />
+      </div>
+    </div>
+  );
+}
+
+render(<SensitivityExample />);
+`}
+</LiveComponent>
+
+---
+
+## State Management
+
+### Thinking State
+
+The thinking state shows a traveling pulse animation that moves around the circle, perfect for indicating processing or waiting states.
+
+<LiveComponent language="tsx" noInline>
+{`
+import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+function ThinkingExample() {
+  const [isThinking, setIsThinking] = React.useState(false);
+
+  return (
+    <div className="space-y-4">
+      <button 
+        onClick={() => setIsThinking(!isThinking)}
+        className="px-4 py-2 bg-purple-500 text-white rounded"
+      >
+        {isThinking ? 'Stop Thinking' : 'Start Thinking'}
+      </button>
+      
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={isThinking}
+          color1="#8B5CF6"
+          color2="#EC4899"
+        />
+      </div>
+    </div>
+  );
+}
+
+render(<ThinkingExample />);
+`}
+</LiveComponent>
+
+### Dynamic State Transitions
+
+Combine different states for complex interaction patterns.
+
+<LiveComponent language="tsx" noInline withPipecat>
+{`
+import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+function StateTransitionExample() {
+  const [audioTrack, setAudioTrack] = React.useState(null);
+  const [isThinking, setIsThinking] = React.useState(false);
+  const [currentState, setCurrentState] = React.useState('idle');
+
+  React.useEffect(() => {
+    const connectAudio = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setAudioTrack(stream.getAudioTracks()[0]);
+      } catch (error) {
+        console.error('Error accessing microphone:', error);
+      }
+    };
+    connectAudio();
+  }, []);
+
+  const cycleStates = () => {
+    const states = ['idle', 'thinking', 'audio'];
+    const currentIndex = states.indexOf(currentState);
+    const nextState = states[(currentIndex + 1) % states.length];
+    
+    setCurrentState(nextState);
+    setIsThinking(nextState === 'thinking');
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <button 
+          onClick={cycleStates}
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Cycle States
+        </button>
+      </div>
+      
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={currentState === 'audio' ? audioTrack : null}
+          isThinking={isThinking}
+          color1="#00D3F2"
+          color2="#E12AFB"
+        />
+      </div>
+      
+      <p className="text-sm text-gray-600">
+        Current State: <span className="font-medium">{currentState}</span>
+      </p>
+    </div>
+  );
+}
+
+render(<StateTransitionExample />);
+`}
+</LiveComponent>
+
+---
+
+## Advanced Configuration
+
+### Custom Sizing
+
+Control the size of the visualizer with fixed dimensions or let it be responsive.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Small (200px)</h4>
+      <div className="w-52 h-52 bg-gray-50 rounded-lg p-2">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          size={200}
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Medium (320px)</h4>
+      <div className="w-80 h-80 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          size={320}
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Large (480px)</h4>
+      <div className="w-96 h-96 bg-gray-50 rounded-lg p-6">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          size={480}
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+### Background Customization
+
+Add custom backgrounds to integrate with your design system.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-8">
+    <div>
+      <h4 className="text-sm font-medium mb-2">Transparent Background</h4>
+      <div className="w-64 h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          backgroundColor="transparent"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">White Background</h4>
+      <div className="w-64 h-64 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          backgroundColor="white"
+        />
+      </div>
+    </div>
+    
+    <div>
+      <h4 className="text-sm font-medium mb-2">Dark Background</h4>
+      <div className="w-64 h-64 bg-gray-50 rounded-lg p-4">
+        <CircularWaveform 
+          audioTrack={null}
+          isThinking={true}
+          backgroundColor="rgba(0, 0, 0, 0.8)"
+          color1="#60A5FA"
+          color2="#F472B6"
+        />
+      </div>
+    </div>
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Technical Details
+
+### Audio Processing
+
+The `CircularWaveform` uses the Web Audio API to analyze audio frequency data in real-time. It employs advanced audio processing techniques including:
+
+- **Voice-optimized filtering**: Emphasizes speech frequencies (200-4000 Hz)
+- **Dynamic range compression**: Ensures consistent visualization across different volume levels
+- **Frequency smoothing**: Creates smooth transitions between frequency bands
+- **Temporal smoothing**: Prevents jarring jumps in visualization
+
+### Performance Considerations
+
+- The component uses `requestAnimationFrame` for smooth 60fps animations
+- Canvas rendering is optimized with 2x scaling for crisp visuals on high-DPI displays
+- Audio processing is optimized with downsampling and efficient algorithms
+- Memory usage is minimized with reusable data buffers
+
+### Browser Compatibility
+
+The component requires:
+- Web Audio API support
+- Canvas 2D context support
+- MediaStream API support
+
+Modern browsers (Chrome 14+, Firefox 25+, Safari 6+) are fully supported.
+
+### State Behavior
+
+The visualizer has four distinct states:
+
+- **IDLE**: Minimal animation with subtle bar movement
+- **THINKING**: Traveling pulse animation that moves around the circle
+- **AUDIO**: Real-time audio-reactive visualization with dynamic rotation
+- **COMPLETE**: Static state (currently unused)
+
+The rotation speed dynamically responds to audio activity, spinning faster during speech and slowing down during silence.

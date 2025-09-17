@@ -1,3 +1,357 @@
 ---
 title: Transcript Overlay
+description: Real-time speech transcript display component with smooth animations
+component: TranscriptOverlay
 ---
+
+The `TranscriptOverlay` component displays real-time speech transcripts as an animated overlay. It automatically listens to Pipecat Client events to show speech transcripts from either the local user or remote bot, with smooth fade-in and fade-out animations.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { TranscriptOverlayComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    const [transcript, setTranscript] = React.useState([]);
+    const [turnEnd, setTurnEnd] = React.useState(false);
+    const [isSpeaking, setIsSpeaking] = React.useState(false);
+    const [fadeInDuration, setFadeInDuration] = React.useState(300);
+    const [fadeOutDuration, setFadeOutDuration] = React.useState(1000);
+
+    const phrases = [
+      "Hello, welcome to our voice application!",
+      "I can help you with various tasks today.",
+      "What would you like to know about our services?",
+      "Let me search for that information for you.",
+      "I found some relevant details that might help.",
+    ];
+
+    const startSpeech = () => {
+      setIsSpeaking(true);
+      setTurnEnd(false);
+      setTranscript([]);
+      
+      const selectedPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+      const words = selectedPhrase.split(" ").filter(word => word && word.trim().length > 0);
+      let wordIndex = 0;
+      
+      const interval = setInterval(() => {
+        if (wordIndex < words.length) {
+          const word = words[wordIndex];
+          if (word) {
+            setTranscript(prev => [...prev, word]);
+            wordIndex++;
+          } else {
+            wordIndex++;
+          }
+        } else {
+          clearInterval(interval);
+        }
+      }, 200);
+    };
+
+    const endSpeech = () => {
+      setIsSpeaking(false);
+      setTurnEnd(true);
+    };
+
+    const clearTranscript = () => {
+      setTranscript([]);
+      setTurnEnd(false);
+      setIsSpeaking(false);
+    };
+
+    return (
+      <div className="space-y-4 w-full">
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={startSpeech}
+            disabled={isSpeaking}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+          >
+            Simulate Speech
+          </button>
+          <button
+            onClick={endSpeech}
+            disabled={!isSpeaking}
+            className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-50"
+          >
+            Simulate Turn End
+          </button>
+          <button
+            onClick={clearTranscript}
+            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          >
+            Clear
+          </button>
+        </div>
+        
+        <div className="flex gap-4 text-sm">
+          <div>
+            <label className="block text-xs font-medium mb-1">Fade In (ms)</label>
+            <input
+              type="number"
+              value={fadeInDuration}
+              onChange={(e) => setFadeInDuration(Number(e.target.value))}
+              className="w-20 px-2 py-1 border rounded text-xs"
+              min="100"
+              max="2000"
+              step="100"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1">Fade Out (ms)</label>
+            <input
+              type="number"
+              value={fadeOutDuration}
+              onChange={(e) => setFadeOutDuration(Number(e.target.value))}
+              className="w-20 px-2 py-1 border rounded text-xs"
+              min="100"
+              max="3000"
+              step="100"
+            />
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 rounded-lg p-4 min-h-[80px] w-full flex items-center justify-center">
+          {transcript.length > 0 ? (
+            <TranscriptOverlayComponent
+              words={transcript}
+              turnEnd={turnEnd}
+              className="w-full text-center"
+              fadeInDuration={fadeInDuration}
+              fadeOutDuration={fadeOutDuration}
+            />
+          ) : (
+            <p className="text-gray-500 text-sm">
+              Click 'Simulate Speech' to see the transcript build up word by word
+            </p>
+          )}
+        </div>
+        
+        <div className="text-sm text-gray-600">
+          <p><strong>Status:</strong> {isSpeaking ? "Speaking..." : turnEnd ? "Speech ended" : "Ready"}</p>
+          <p><strong>Transcript:</strong> "{transcript.join(" ")}"</p>
+        </div>
+      </div>
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+### TranscriptOverlay
+
+<TypeTable
+  className="text-sm"
+  type={{
+    participant: {
+      description: "Whether to display local (user) or remote (bot) transcripts",
+      type: '"local" | "remote"',
+      required: false,
+      default: '"remote"',
+    },
+    className: {
+      description: "Additional CSS classes to apply to the component",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    size: {
+      description: "Size variant of the transcript overlay",
+      type: '"sm" | "md" | "lg"',
+      required: false,
+      default: '"md"',
+    },
+    fadeInDuration: {
+      description: "Duration of the fade-in animation in milliseconds",
+      type: "number",
+      required: false,
+      default: "300",
+    },
+    fadeOutDuration: {
+      description: "Duration of the fade-out animation in milliseconds",
+      type: "number",
+      required: false,
+      default: "1000",
+    },
+  }}
+/>
+
+### TranscriptOverlayComponent
+
+The `TranscriptOverlayComponent` is the headless variant that accepts an array of words and animation state as props. This allows you to use it with any framework or state management solution.
+
+<TypeTable
+  className="text-sm"
+  type={{
+    words: {
+      description: "Array of words to display as individual animated spans",
+      type: "string[]",
+      required: true,
+      default: "undefined",
+    },
+    className: {
+      description: "Additional CSS classes to apply to the component",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    size: {
+      description: "Size variant of the transcript overlay",
+      type: '"sm" | "md" | "lg"',
+      required: false,
+      default: '"md"',
+    },
+    turnEnd: {
+      description: "Whether the current speech turn has ended (triggers fade-out animation)",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    fadeInDuration: {
+      description: "Duration of the fade-in animation in milliseconds",
+      type: "number",
+      required: false,
+      default: "300",
+    },
+    fadeOutDuration: {
+      description: "Duration of the fade-out animation in milliseconds",
+      type: "number",
+      required: false,
+      default: "1000",
+    },
+  }}
+/>
+
+---
+
+## Usage Examples
+
+
+#### Connected Component Usage
+
+The `TranscriptOverlay` component automatically integrates with Pipecat Client events:
+
+```tsx
+import { TranscriptOverlay } from "@pipecat-ai/voice-ui-kit";
+
+// Display bot speech transcripts
+<TranscriptOverlay participant="remote" />
+
+// Display user speech transcripts
+<TranscriptOverlay participant="local" />
+
+// With custom styling and size
+<TranscriptOverlay 
+  participant="remote"
+  size="lg"
+  className="bg-blue-500/20 border border-blue-300 rounded-lg p-4"
+/>
+
+// With custom animation durations
+<TranscriptOverlay 
+  participant="remote"
+  fadeInDuration={500}
+  fadeOutDuration={1500}
+/>
+```
+
+#### Headless Component Usage
+
+The `TranscriptOverlayComponent` allows manual control over transcript display:
+
+```tsx
+import { TranscriptOverlayComponent } from "@pipecat-ai/voice-ui-kit";
+
+// Basic usage with word array
+<TranscriptOverlayComponent
+  words={["Hello", "world", "this", "is", "a", "test"]}
+/>
+
+// With turn end animation
+<TranscriptOverlayComponent
+  words={["Speech", "has", "ended"]}
+  turnEnd={true}
+/>
+
+// With custom styling and animations
+<TranscriptOverlayComponent
+  words={["Custom", "styling", "example"]}
+  size="lg"
+  fadeInDuration={200}
+  fadeOutDuration={800}
+  className="max-w-md"
+/>
+```
+
+#### Multiple Transcript Overlays
+
+You can display both user and bot transcripts simultaneously:
+
+```tsx
+import { TranscriptOverlay } from "@pipecat-ai/voice-ui-kit";
+
+<div className="space-y-4">
+  <div>
+    <h4 className="text-sm font-medium mb-2">Bot Speech</h4>
+    <TranscriptOverlay participant="remote" />
+  </div>
+  <div>
+    <h4 className="text-sm font-medium mb-2">User Speech</h4>
+    <TranscriptOverlay participant="local" />
+  </div>
+</div>
+```
+
+---
+
+## Integration
+
+The `TranscriptOverlay` component uses several hooks from the Pipecat Client React SDK:
+- `usePipecatClientTransportState` for connection state monitoring
+- `useRTVIClientEvent` for listening to speech events
+
+This means it must be used within a `PipecatClientProvider` context to function properly.
+
+The component listens to these events:
+- `RTVIEvent.BotTtsText` - Receives text chunks as the bot speaks
+- `RTVIEvent.BotStoppedSpeaking` - Triggers when the bot stops speaking
+- `RTVIEvent.BotTtsStopped` - Triggers when TTS stops
+
+The component automatically:
+- Accumulates transcript text as speech progresses
+- Clears the transcript when a new speech turn begins
+- Triggers fade-out animations when speech ends
+- Only displays when the transport state is "ready"
+
+## Visual States
+
+The component displays different visual states based on the speech status:
+
+- **Hidden**: Component is not rendered when no transcript is available or transport is not ready
+- **Active**: Shows transcript text with fade-in animation as speech progresses
+- **Fading**: Shows fade-out animation when speech turn ends
+
+## Animation Behavior
+
+The component includes sophisticated animation handling:
+
+- **Word-by-Word Fade-in**: Each word appears with a smooth fade-in animation (300ms duration by default)
+- **Fade-out**: Text disappears with a fade-out animation (1000ms duration) when speech ends
+- **Line-Wrapped Backgrounds**: Background wraps around each line of text, creating separate blocks for multi-line transcripts
+- **Text Balance**: Uses CSS `text-balance` for optimal text wrapping
+- **Box Decoration**: Applies background styling to text content for better readability
+- **Customizable Timing**: Both fade-in and fade-out durations can be customized
+
+## How It Works
+
+The TranscriptOverlay component demonstrates how real-time speech transcripts work:
+
+1. **Event Listening**: The component listens for Pipecat Client events related to speech
+2. **Text Accumulation**: As speech progresses, text chunks are received and accumulated
+3. **Real-time Display**: The growing transcript is displayed with smooth animations
+4. **Turn Management**: When speech ends, the component triggers fade-out animations
+5. **Cleanup**: The transcript is cleared when new speech begins
+
+This creates a natural, real-time experience where users can see speech being transcribed as it happens, with smooth visual feedback for the start and end of each speech turn.
