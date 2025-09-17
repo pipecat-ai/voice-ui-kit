@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.3.0]
 
+- Added: `UserAudioControl` and `UserVideoControl` now accept `deviceDropDownProps` that can be used to configure drop down
 - Added: `VoiceVisualizer` can now optionally render with bar peaks
 - Changed: Restructured conversation message types to introduce `parts` for better transcription handling
 - Added: `usePipecatConversation` hook for deriving structured conversation streams from RTVI events
