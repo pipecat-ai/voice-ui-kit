@@ -10,11 +10,22 @@ async function buildCSS() {
     const sourceCssPath = path.resolve(process.cwd(), "src/css/index.css");
     const sourceCss = fs.readFileSync(sourceCssPath, "utf-8");
 
+    // Read and append dark theme
+    const darkThemePath = path.resolve(
+      process.cwd(),
+      "src/css/themes/dark.css"
+    );
+    const darkThemeCss = fs.existsSync(darkThemePath)
+      ? fs.readFileSync(darkThemePath, "utf-8")
+      : "";
+
+    const combinedCss = sourceCss + "\n" + darkThemeCss;
+
     const result = await postcss([
       tailwindcss({
         content: ["src/**/*.{js,ts,jsx,tsx}"],
       }),
-    ]).process(sourceCss, { from: sourceCssPath });
+    ]).process(combinedCss, { from: sourceCssPath });
 
     // Write main CSS file
     const cssPath = path.resolve(process.cwd(), "dist/voice-ui-kit.css");
@@ -33,6 +44,7 @@ async function buildCSS() {
     const scopedResult = await postcss([
       prefixer({
         prefix: ".vkui-root",
+        exclude: [/^\.dark$/],
       }),
     ]).process(result.css, { from: undefined });
 
@@ -66,17 +78,17 @@ async function buildThemes() {
     return;
   }
 
-  // Read all CSS files in the themes directory
+  // Read all CSS files in the themes directory (excluding dark.css as it's bundled)
   const themeFiles = fs
     .readdirSync(themesDir)
-    .filter((file) => file.endsWith(".css"));
+    .filter((file) => file.endsWith(".css") && file !== "dark.css");
 
   if (themeFiles.length === 0) {
-    console.log("📁 No theme files found, skipping theme build");
+    console.log("📁 No additional theme files found, skipping theme build");
     return;
   }
 
-  console.log(`🎨 Processing ${themeFiles.length} theme(s)...`);
+  console.log(`🎨 Processing ${themeFiles.length} additional theme(s)...`);
 
   for (const themeFile of themeFiles) {
     const themeName = path.basename(themeFile, ".css");

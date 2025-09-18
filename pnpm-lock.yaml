@@ -33,12 +33,12 @@ importers:
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
+      postcss-nested:
+        specifier: ^7.0.2
+        version: 7.0.2(postcss@8.5.6)
       postcss-prefix-selector:
         specifier: ^2.1.1
         version: 2.1.1(postcss@8.5.6)
-      postcss-prefixwrap:
-        specifier: ^1.55.0
-        version: 1.56.2(postcss@8.5.6)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -4421,15 +4421,16 @@ packages:
       yaml:
         optional: true
 
+  postcss-nested@7.0.2:
+    resolution: {integrity: sha512-5osppouFc0VR9/VYzYxO03VaDa3e8F23Kfd6/9qcZTUI8P58GIYlArOET2Wq0ywSl2o2PjELhYOFI4W7l5QHKw==}
+    engines: {node: '>=18.0'}
+    peerDependencies:
+      postcss: ^8.2.14
+
   postcss-prefix-selector@2.1.1:
     resolution: {integrity: sha512-ZBgf427Et6+XnrnJ9VXtJEKCjJwTvn2wn/qMg+wvvlRhIeFIAxdbrlZZ0CSsWYMJfcyPLBh8ogj5O1kb/Mcx3g==}
     peerDependencies:
       postcss: ^8.0.0
-
-  postcss-prefixwrap@1.56.2:
-    resolution: {integrity: sha512-PnIsMX/VTtLYUrZe8Cex4vqXVvl5PUKbDbD52Wcp94ObZkt05oehCuOVvsUeig0eQoGOhTDBHfR8nnIkjf1/uA==}
-    peerDependencies:
-      postcss: '*'
 
   postcss-selector-parser@7.1.0:
     resolution: {integrity: sha512-8sLjZwK0R+JlxlYcTuVnyT2v+htpdrjDOKuMcOVdYjt52Lh8hWRYpxBPoKx/Zg+bcjc3wx6fmQevMmUztS/ccA==}
@@ -10058,11 +10059,12 @@ snapshots:
       postcss: 8.5.6
       tsx: 4.20.5
 
-  postcss-prefix-selector@2.1.1(postcss@8.5.6):
+  postcss-nested@7.0.2(postcss@8.5.6):
     dependencies:
       postcss: 8.5.6
+      postcss-selector-parser: 7.1.0
 
-  postcss-prefixwrap@1.56.2(postcss@8.5.6):
+  postcss-prefix-selector@2.1.1(postcss@8.5.6):
     dependencies:
       postcss: 8.5.6
 
