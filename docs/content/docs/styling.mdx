@@ -11,6 +11,7 @@ Under the hood it uses [Tailwind CSS](https://tailwindcss.com/) v4 and is design
 - `@pipecat-ai/voice-ui-kit/styles` - The default theme
 - `@pipecat-ai/voice-ui-kit/styles.scoped` - The default theme, scoped to a `.vkui-root` class
 - Dark mode support
+- Custom variant / theme support
 - ShadUI compatibility (components registry coming soon!)
  - Optional utilities: `@pipecat-ai/voice-ui-kit/utilities` for helpful extras (see below)
 
@@ -95,13 +96,13 @@ Developers can approach customization in a few different ways:
     }
     
     /* Dark mode specific overrides */
-    .dark {
+    [data-theme="dark"] {
       --color-primary: #60a5fa;
       --color-background: #0f172a;
     }
     
     /* Component-specific overrides */
-    .my-theme {
+    button {
       --color-active: #10b981;
       --color-active-foreground: #ffffff;
     }
@@ -109,7 +110,7 @@ Developers can approach customization in a few different ways:
     
     ```tsx
     // Apply theme to specific components
-    <div className="my-theme">
+    <div data-theme="dark">
       <Button variant="active">Success Action</Button>
     </div>
     ```
@@ -210,37 +211,42 @@ export function ThemeToggle() {
 
 ### Create a custom theme 
 
-```css title="my-theme.css"
-@custom-variant mytheme (&:is(.mytheme *));
+Creating a custom theme is easy. You can use the `@custom-variant` directive, override the design tokens and add your own custom classes.
 
-@theme {
-  /* Optional: local keyframes, shadows, etc. */
+To support scoping, here is the recommended way to create a custom theme:
+
+```css title="custom-theme.css"
+@custom-variant theme-custom {
+  &:where([data-theme="custom"] *) {
+    @slot;
+  }
 }
-
-.mytheme {
-  --font-sans: system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-
-  --color-background: #000;
-  --color-foreground: #e5e7eb;
-  --color-primary: #22c55e;
-  --color-secondary: #14532d;
-  --color-border: #22c55e;
-  --color-input: #0f172a;
-  --color-accent: color-mix(in srgb, var(--color-primary) 10%, transparent);
-  --color-accent-foreground: var(--color-foreground);
+@layer base {
+  .vkui-root[data-theme="custom"],
+  :root[data-theme="custom"]:not(:has(.vkui-root)),
+  :root:not(:has(.vkui-root)) [data-theme="custom"] {
+    --font-sans: system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --color-background: #000;
+    --color-foreground: #e5e7eb;
+    --color-primary: #22c55e;
+    --color-secondary: #14532d;
+    --color-border: #22c55e;
+    --color-input: #0f172a;
+    --color-accent: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    --color-accent-foreground: var(--color-foreground);
 }
 ```
 
-Apply it by toggling a class on a root container (or `html` if you prefer global):
+Apply it by toggling the data-theme attribute (e.g. `data-theme="custom"`):
 
 ```tsx
 import "@pipecat-ai/voice-ui-kit/styles";
-import "./my-theme.css";
+import "./custom-theme.css";
 
 export function App() {
   return (
-    <div className="mytheme">
+    <div data-theme="custom">
       {/* app */}
     </div>
   );
@@ -296,9 +302,8 @@ export default function App() {
 
 function ScopedRoot() {
   const { resolvedTheme } = useTheme();
-  // IMPORTANT: when using scoped styles, put the theme class on `.vkui-root`
   return (
-    <div className={`vkui-root ${resolvedTheme}`}>
+    <div className="vkui-root" data-theme={resolvedTheme}>
       <YourApp />
     </div>
   );
@@ -307,10 +312,6 @@ function ScopedRoot() {
 
   </Tab>
 </Tabs>
-
-<Callout>
-If you're using the scoped import (`@pipecat-ai/voice-ui-kit/styles.scoped`), set the theme class on the `.vkui-root` element instead of `html`.
-</Callout>
 
 ## Themes
 
