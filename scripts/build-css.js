@@ -66,10 +66,10 @@ async function buildThemes() {
     return;
   }
 
-  // Read all CSS files in the themes directory
+  // Read all CSS files in the themes directory, excluding dark.css
   const themeFiles = fs
     .readdirSync(themesDir)
-    .filter((file) => file.endsWith(".css"));
+    .filter((file) => file.endsWith(".css") && file !== "dark.css");
 
   if (themeFiles.length === 0) {
     console.log("📁 No theme files found, skipping theme build");

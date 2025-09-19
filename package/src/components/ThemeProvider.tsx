@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ThemeProviderContext } from "./ThemeProviderContext";
 
-// Allow arbitrary theme names while keeping a special "system" value
 export type Theme = "system" | (string & {});
 
 export type ThemeProviderProps = {
@@ -19,7 +18,6 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Initialize from localStorage or fall back to defaultTheme
     if (typeof window !== "undefined" && !disableStorage) {
       const storedTheme = localStorage.getItem(storageKey) as Theme;
       return storedTheme || defaultTheme;
@@ -37,7 +35,6 @@ export function ThemeProvider({
     setMounted(true);
   }, []);
 
-  // Track system theme only when using system mode
   useEffect(() => {
     if (!mounted || theme !== "system") return;
 
@@ -49,17 +46,13 @@ export function ThemeProvider({
       setSystemPrefersDark(event.matches);
     };
 
-    // Initialize with current value
     updateFromList(mediaQueryList);
-
-    // Subscribe to changes (with cross-browser support)
     if ("addEventListener" in mediaQueryList) {
       mediaQueryList.addEventListener("change", handleChange);
       return () => {
         mediaQueryList.removeEventListener("change", handleChange);
       };
     } else {
-      // Fallback for older browsers
       // @ts-expect-error addListener is deprecated but still present in some environments
       mediaQueryList.addListener(handleChange);
       return () => {
@@ -72,7 +65,6 @@ export function ThemeProvider({
   useEffect(() => {
     if (!mounted || disableStorage) return;
 
-    // Only store in localStorage if theme is not system, otherwise remove it
     if (theme !== "system") {
       localStorage.setItem(storageKey, theme);
     } else {
@@ -89,34 +81,26 @@ export function ThemeProvider({
     if (!mounted) return;
 
     const root = window.document.documentElement;
-    // Track and remove previously applied theme class to avoid buildup
-    const previousThemeClass = previousThemeRef.current;
-    if (previousThemeClass) {
-      root.classList.remove(previousThemeClass);
+    const appliedTheme = String(resolvedTheme);
+
+    if (appliedTheme === "light") {
+      root.removeAttribute("data-theme");
+    } else {
+      root.setAttribute("data-theme", appliedTheme);
     }
-
-    const appliedThemeClass = String(resolvedTheme);
-
-    root.classList.add(appliedThemeClass);
-    previousThemeRef.current = appliedThemeClass;
   }, [resolvedTheme, mounted]);
 
-  // Update theme when defaultTheme changes (if needed)
   useEffect(() => {
     if (!mounted) return;
-    // Check if localStorage has a value before updating from defaultTheme
     if (!disableStorage) {
       const storedTheme = localStorage.getItem(storageKey);
       if (!storedTheme && theme !== defaultTheme) {
         setTheme(defaultTheme);
       }
     } else if (theme !== defaultTheme) {
-      // When storage is disabled, reflect defaultTheme changes immediately
       setTheme(defaultTheme);
     }
   }, [defaultTheme, mounted, storageKey, disableStorage, theme]);
-
-  const previousThemeRef = useRef<string | null>(null);
 
   const setThemeStable = useCallback((newTheme: Theme) => {
     setTheme(newTheme);

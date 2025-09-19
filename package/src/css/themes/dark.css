@@ -1,0 +1,77 @@
+@custom-variant theme-dark {
+  &:where([data-theme="dark"] *) {
+    @slot;
+  }
+}
+
+@layer base {
+  .vkui-root[data-theme="dark"],
+  :root[data-theme="dark"]:not(:has(.vkui-root)),
+  :root:not(:has(.vkui-root)) [data-theme="dark"] {
+    --color-background: oklch(0.141 0.005 285.823);
+    --color-foreground: oklch(0.985 0 0);
+    --color-card: oklch(0.21 0.006 285.885);
+    --color-card-foreground: oklch(0.985 0 0);
+    --color-popover: oklch(0.21 0.006 285.885);
+    --color-popover-foreground: oklch(0.985 0 0);
+    --color-primary: oklch(0.92 0.004 286.32);
+    --color-primary-foreground: oklch(0.21 0.006 285.885);
+    --color-secondary: oklch(0.274 0.006 286.033);
+    --color-secondary-foreground: oklch(0.985 0 0);
+    --color-muted: oklch(0.274 0.006 286.033);
+    --color-muted-foreground: oklch(0.705 0.015 286.067);
+    --color-accent: oklch(0.274 0.006 286.033);
+    --color-accent-foreground: oklch(0.985 0 0);
+    --color-destructive: oklch(57.7% 0.245 27.325);
+    --color-destructive-foreground: oklch(97.1% 0.013 17.38);
+    --color-warning: oklch(79.5% 0.184 86.047);
+    --color-warning-foreground: oklch(27.9% 0.077 45.635);
+    --color-border: oklch(1 0 0 / 10%);
+    --color-input: oklch(1 0 0 / 15%);
+    --color-ring: oklch(0.552 0.016 285.938);
+    --color-subtle: oklch(44.2% 0.017 285.786);
+    --color-elbow: var(--color-ring);
+    --color-active: oklch(0.7019 0.15768 160.4375);
+    --color-active-foreground: oklch(0.9793 0.0207 166.11);
+    --color-active-ring: oklch(0.7019 0.15768 160.4375 / 40%);
+    --color-active-accent: oklch(0.7019 0.15768 160.4375 / 20%);
+    --color-inactive: oklch(0.7022 0.1892 22.23);
+    --color-inactive-foreground: oklch(0.9705 0.0129 17.38);
+    --color-inactive-ring: oklch(0.7022 0.1892 22.23 / 20%);
+    --color-inactive-accent: oklch(0.7022 0.1892 22.23 / 10%);
+    --color-agent: oklch(58.5% 0.233 277.117);
+    --color-agent-foreground: color-mix(
+      in oklch,
+      var(--color-agent) 20%,
+      white
+    );
+    --color-client: oklch(62.3% 0.214 259.815);
+    --color-client-foreground: color-mix(
+      in oklch,
+      var(--color-client) 20%,
+      white
+    );
+    --color-chart-1: oklch(0.488 0.243 264.376);
+    --color-chart-2: oklch(0.696 0.17 162.48);
+    --color-chart-3: oklch(0.769 0.188 70.08);
+    --color-chart-4: oklch(0.627 0.265 303.9);
+    --color-chart-5: oklch(0.645 0.246 16.439);
+
+    --shadow-long:
+      0px 89px 36px rgb(0 0 0 / 0.85), 0px 50px 30px rgb(0 0 0 / 0.9),
+      0px 22px 22px rgb(0 0 0 / 0.92), 0px 6px 12px rgb(0 0 0 / 0.95);
+    --shadow-short:
+      0px 10px 15px -3px rgb(0 0 0 / 0.9), 0px 4px 6px -2px rgb(0 0 0 / 0.85);
+    --shadow-xshort:
+      0px 7px 3px rgb(0 0 0 / 0.8), 0px 4px 2px rgb(0 0 0 / 0.85),
+      0px 2px 2px rgb(0 0 0 / 0.9), 0px 0px 1px rgb(0 0 0 / 0.92);
+
+    --background-image-cardGradientBorder:
+      linear-gradient(90deg, var(--color-background), var(--color-background)),
+      linear-gradient(
+        0deg,
+        color-mix(in oklch, var(--color-border) 90%, white),
+        var(--color-border)
+      );
+  }
+}

@@ -5,9 +5,9 @@ import "./theme.css";
 export const Provider: GlobalProvider = ({ children, globalState }) => {
   useEffect(() => {
     if (globalState.theme === "dark") {
-      document.documentElement.classList.add("dark");
+      document.documentElement.setAttribute("data-theme", "dark");
     } else {
-      document.documentElement.classList.remove("dark");
+      document.documentElement.removeAttribute("data-theme");
     }
   }, [globalState.theme]);
   return children;
