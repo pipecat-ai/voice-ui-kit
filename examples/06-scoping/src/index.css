@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@import "@pipecat-ai/voice-ui-kit/styles.scoped";
+
+html,
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
