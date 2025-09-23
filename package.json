@@ -1,31 +1,28 @@
 {
-  "name": "voice-ui-kit-monorepo",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@pipecat-ai/voice-ui-kit",
+  "version": "1.0.0",
   "type": "module",
-  "workspaces": [
-    "package",
-    "docs",
-    "examples/*"
-  ],
+  "private": true,
   "dependencies": {
+    "@daily-co/daily-js": "^0.80.0",
     "@pipecat-ai/client-js": "^1.2.0",
     "@pipecat-ai/client-react": "^1.0.1",
-    "@daily-co/daily-js": "^0.80.0",
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.544.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tailwindcss": "^4.1.12"
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.12",
-    "typescript": "^5.8.3",
-    "postcss": "^8.5.6",
-    "postcss-prefix-selector": "^2.1.1",
-    "postcss-prefixwrap": "^1.55.0"
+    "@ladle/react": "^5.0.3",
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/node": "^24.5.2",
+    "globals": "^16.4.0",
+    "typescript": "^5.8.3"
   },
   "scripts": {
-    "build": "pnpm --filter=@pipecat-ai/voice-ui-kit build",
-    "dev": "pnpm --filter=@pipecat-ai/voice-ui-kit dev",
-    "dev:docs": "pnpm --filter=@pipecat-ai/voice-ui-kit-docs dev"
+    "dev": "npm exec ladle serve"
   }
 }

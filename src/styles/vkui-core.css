@@ -1,0 +1,228 @@
+/* VKUI Core Utilities and Components */
+
+/* Button sizing utilities */
+@utility button-* {
+  padding-inline: calc(--value(--button-size- *) * var(--button-px-mul));
+  height: --value(--button-size- *);
+  gap: calc(--value(--button-size- *) * var(--button-px-gap-mul));
+  box-sizing: border-box;
+  padding-block: calc(var(--spacing) * 2);
+
+  /* Resize spacing when button contains SVG icon */
+  &:has(> svg) {
+    padding-inline: calc(--value(--button-size- *) * var(--button-px-icon-mul));
+  }
+}
+
+@utility button-icon-* {
+  height: --value(--button-size- *);
+  width: --value(--button-size- *);
+  padding-inline: calc(--value(--button-size- *) * var(--button-px-icon-mul));
+}
+
+/* Background pattern utilities */
+@utility bg-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    color-mix(
+        in srgb,
+        currentColor calc(var(--scanlines-opacity) * 100%),
+        transparent
+      )
+      2px,
+    color-mix(
+        in srgb,
+        currentColor calc(var(--scanlines-opacity) * 100%),
+        transparent
+      )
+      4px
+  );
+  background-clip: padding-box;
+}
+
+@utility bg-scanlines-vertical {
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    color-mix(
+        in srgb,
+        currentColor calc(var(--scanlines-opacity) * 100%),
+        transparent
+      )
+      2px,
+    color-mix(
+        in srgb,
+        currentColor calc(var(--scanlines-opacity) * 100%),
+        transparent
+      )
+      4px
+  );
+  background-clip: padding-box;
+}
+
+@utility bg-grid {
+  --grid-color: color-mix(
+    in srgb,
+    currentColor calc(var(--grid-opacity) * 100%),
+    transparent
+  );
+  background-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent var(--grid-size),
+      var(--grid-color) var(--grid-size),
+      var(--grid-color) calc(var(--grid-size) + var(--grid-border-width))
+    ),
+    linear-gradient(
+      to right,
+      transparent 0,
+      transparent var(--grid-size),
+      var(--grid-color) var(--grid-size),
+      var(--grid-color) calc(var(--grid-size) + var(--grid-border-width))
+    );
+  background-size: 100% calc(var(--grid-size) + var(--grid-border-width)),
+    calc(var(--grid-size) + var(--grid-border-width)) 100%;
+  background-repeat: repeat;
+  background-position: 0 0;
+  background-clip: padding-box;
+}
+
+@utility bg-stripes {
+  --stripe-color: color-mix(
+    in srgb,
+    currentColor calc(var(--grid-opacity) * 100%),
+    transparent
+  );
+  position: relative;
+  overflow: hidden;
+
+  & > [data-slot^="card-"] {
+    margin-inline: var(--stripe-inset);
+  }
+
+  & > [data-slot^="card-"]:first-child {
+    margin-top: var(--stripe-inset);
+  }
+
+  & > [data-slot^="card-"]:last-child {
+    margin-bottom: var(--stripe-inset);
+  }
+
+  &:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent var(--stripe-gap-size),
+      var(--stripe-color) var(--stripe-gap-size),
+      var(--stripe-color) var(--stripe-size)
+    );
+    mask-image: linear-gradient(
+        to right,
+        black 0,
+        black var(--stripe-border-size),
+        transparent var(--stripe-border-size),
+        transparent calc(100% - var(--stripe-border-size)),
+        black calc(100% - var(--stripe-border-size))
+      ),
+      linear-gradient(
+        to bottom,
+        black 0,
+        black var(--stripe-border-size),
+        transparent var(--stripe-border-size),
+        transparent calc(100% - var(--stripe-border-size)),
+        black calc(100% - var(--stripe-border-size))
+      );
+    mask-composite: add;
+    -webkit-mask-composite: source-over;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+@layer vkui-components {
+  .mono-upper {
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
+    letter-spacing: var(--tracking-wider);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .borderclip {
+    background-clip: padding-box, border-box;
+  }
+
+  .elbow {
+    position: relative;
+    overflow: visible;
+
+    &:before {
+      content: "";
+      position: absolute;
+      inset: calc(var(--elbow-offset) * -1);
+      background: 
+          /* Top-left corner: horizontal part */ linear-gradient(
+            var(--color-elbow),
+            var(--color-elbow)
+          )
+          top 0 left 0 / var(--elbow-size) var(--elbow-width) no-repeat,
+        /* Top-left corner: vertical part */
+          linear-gradient(var(--color-elbow), var(--color-elbow)) top 0 left 0 /
+          var(--elbow-width) var(--elbow-size) no-repeat,
+        /* Top-right corner: horizontal part */
+          linear-gradient(var(--color-elbow), var(--color-elbow)) top 0 right 0 /
+          var(--elbow-size) var(--elbow-width) no-repeat,
+        /* Top-right corner: vertical part */
+          linear-gradient(var(--color-elbow), var(--color-elbow)) top 0 right 0 /
+          var(--elbow-width) var(--elbow-size) no-repeat,
+        /* Bottom-left corner: horizontal part */
+          linear-gradient(var(--color-elbow), var(--color-elbow)) bottom 0 left
+          0 / var(--elbow-size) var(--elbow-width) no-repeat,
+        /* Bottom-left corner: vertical part */
+          linear-gradient(var(--color-elbow), var(--color-elbow)) bottom 0 left
+          0 / var(--elbow-width) var(--elbow-size) no-repeat,
+        /* Bottom-right corner: horizontal part */
+          linear-gradient(var(--color-elbow), var(--color-elbow)) bottom 0 right
+          0 / var(--elbow-size) var(--elbow-width) no-repeat,
+        /* Bottom-right corner: vertical part */
+          linear-gradient(var(--color-elbow), var(--color-elbow)) bottom 0 right
+          0 / var(--elbow-width) var(--elbow-size) no-repeat;
+      pointer-events: none;
+      opacity: var(--elbow-opacity);
+    }
+  }
+
+  .loader-stripes {
+    --loader-stripe-color: currentColor;
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--loader-stripe-color),
+      var(--loader-stripe-color) var(--loader-stripe-width),
+      var(--color-background) var(--loader-stripe-width),
+      var(--color-background) calc(var(--loader-stripe-width) * 2)
+    );
+    background-size: calc(var(--loader-stripe-width) * 2.828427125)
+      calc(var(--loader-stripe-width) * 2.828427125);
+    animation: scroll var(--loader-stripe-speed) linear infinite;
+    overflow: hidden;
+    background-clip: padding-box;
+  }
+}
+
+/* Animation keyframes needed by utilities */
+@keyframes scroll {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: calc(var(--loader-stripe-width) * 2.828427125) 0;
+  }
+}

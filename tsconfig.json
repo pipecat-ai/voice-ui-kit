@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./src/*"],
+        "@/registry/*": ["./registry/*"],
+      },
+      "target": "ES2022",
+      "lib": ["ES2023", "DOM", "DOM.Iterable"],
+      "module": "ESNext",
+      "skipLibCheck": true,
+
+      "moduleResolution": "node",
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true,
+      "noEmit": false,
+      "jsx": "react-jsx",
+
+      "strict": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "noFallthroughCasesInSwitch": true,
+      "noUncheckedSideEffectImports": true
+    },
+    "include": ["src/**/*", "registry/**/*", "scripts/**/*"],
+    "exclude": ["node_modules", "apps/www/public", "**/*.test.*"]
+}
