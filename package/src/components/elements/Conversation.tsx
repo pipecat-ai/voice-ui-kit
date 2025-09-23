@@ -1,13 +1,9 @@
-import Thinking from "@/components/elements/Thinking";
 import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
 import { usePipecatClientTransportState } from "@pipecat-ai/client-react";
-import {
-  ConversationMessage,
-  ConversationMessagePart,
-  TextMode,
-} from "@/types/conversation";
-import { Fragment, memo, useCallback, useEffect, useRef } from "react";
+import { TextMode } from "@/types/conversation";
+import { memo, useCallback, useEffect, useRef } from "react";
+import { MessageContainer } from "./MessageContainer";
 
 /**
  * Props for the Conversation component
@@ -89,11 +85,11 @@ export interface ConversationProps {
  */
 export const Conversation: React.FC<ConversationProps> = memo(
   ({
-    assistantLabel = "assistant",
+    assistantLabel,
     classNames = {},
-    clientLabel = "user",
+    clientLabel,
     noAutoscroll = false,
-    systemLabel = "system",
+    systemLabel,
     textMode = "llm",
   }) => {
     const transportState = usePipecatClientTransportState();
@@ -156,52 +152,6 @@ export const Conversation: React.FC<ConversationProps> = memo(
       return () => scrollElement.removeEventListener("scroll", handleScroll);
     }, [updateScrollState]);
 
-    /**
-     * Maps message roles to their display labels
-     * @returns Object mapping role keys to display labels
-     */
-    const roleLabelMap = useCallback(
-      () => ({
-        user: clientLabel,
-        assistant: assistantLabel,
-        system: systemLabel,
-      }),
-      [assistantLabel, clientLabel, systemLabel],
-    );
-
-    const renderMessageParts = (message: ConversationMessage) => {
-      const parts = Array.isArray(message.parts) ? message.parts : [];
-      return (
-        <div className={cn("flex flex-col gap-2", classNames.messageContent)}>
-          {parts.map((part: ConversationMessagePart, idx: number) => {
-            const nextPart = idx < parts.length - 1 ? parts[idx + 1] : null;
-            const isText = typeof part.text === "string";
-            const nextIsText = nextPart && typeof nextPart.text === "string";
-            return (
-              <Fragment key={idx}>
-                {isText ? part.text : part.text}
-                {isText && nextIsText ? " " : null}
-              </Fragment>
-            );
-          })}
-          {parts.length === 0 ||
-          parts.every(
-            (part) => typeof part.text === "string" && part.text.trim() === "",
-          ) ? (
-            <Thinking className={classNames.thinking} />
-          ) : null}
-          <div
-            className={cn(
-              "self-end text-xs text-gray-500 mb-1",
-              classNames.time,
-            )}
-          >
-            {new Date(message.createdAt).toLocaleTimeString()}
-          </div>
-        </div>
-      );
-    };
-
     // Show messages first if they exist, regardless of connection state
     if (messages.length > 0) {
       return (
@@ -219,22 +169,20 @@ export const Conversation: React.FC<ConversationProps> = memo(
             )}
           >
             {messages.map((message, index) => (
-              <Fragment key={index}>
-                <div
-                  className={cn(
-                    "font-semibold font-mono text-xs leading-6 w-max",
-                    {
-                      "text-client": message.role === "user",
-                      "text-agent": message.role === "assistant",
-                      "text-subtle": message.role === "system",
-                    },
-                    classNames.role,
-                  )}
-                >
-                  {roleLabelMap()[message.role] || message.role}
-                </div>
-                {renderMessageParts(message)}
-              </Fragment>
+              <MessageContainer
+                key={index}
+                message={message}
+                assistantLabel={assistantLabel}
+                clientLabel={clientLabel}
+                systemLabel={systemLabel}
+                classNames={{
+                  container: classNames.message,
+                  messageContent: classNames.messageContent,
+                  thinking: classNames.thinking,
+                  time: classNames.time,
+                  role: classNames.role,
+                }}
+              />
             ))}
           </div>
         </div>
