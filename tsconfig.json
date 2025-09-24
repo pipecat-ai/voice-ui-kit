@@ -3,7 +3,7 @@
       "baseUrl": ".",
       "paths": {
         "@/*": ["./src/*"],
-        "@/registry/*": ["./registry/*"],
+        "@/registry/*": ["packages/registry/*"],
       },
       "target": "ES2022",
       "lib": ["ES2023", "DOM", "DOM.Iterable"],
@@ -22,6 +22,6 @@
       "noFallthroughCasesInSwitch": true,
       "noUncheckedSideEffectImports": true
     },
-    "include": ["src/**/*", "registry/**/*", "scripts/**/*"],
+    "include": ["src/**/*", "packages/registry/**/*", "scripts/**/*"],
     "exclude": ["node_modules", "apps/www/public", "**/*.test.*"]
 }

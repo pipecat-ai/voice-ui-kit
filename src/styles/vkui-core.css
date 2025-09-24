@@ -1,5 +1,3 @@
-/* VKUI Core Utilities and Components */
-
 /* Button sizing utilities */
 @utility button-* {
   padding-inline: calc(--value(--button-size- *) * var(--button-px-mul));
@@ -156,7 +154,7 @@
     text-transform: uppercase;
   }
 
-  .borderclip {
+  .border-clip {
     background-clip: padding-box, border-box;
   }
 
@@ -211,18 +209,8 @@
     );
     background-size: calc(var(--loader-stripe-width) * 2.828427125)
       calc(var(--loader-stripe-width) * 2.828427125);
-    animation: scroll var(--loader-stripe-speed) linear infinite;
+    animation: vkui-scroll var(--loader-stripe-speed) linear infinite;
     overflow: hidden;
     background-clip: padding-box;
-  }
-}
-
-/* Animation keyframes needed by utilities */
-@keyframes scroll {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: calc(var(--loader-stripe-width) * 2.828427125) 0;
   }
 }
