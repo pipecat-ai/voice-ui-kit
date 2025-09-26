@@ -13,7 +13,7 @@ import { BotVideoPanel } from "@/components/panels/BotVideoPanel";
 import ConversationPanel from "@/components/panels/ConversationPanel";
 import { EventsPanel } from "@/components/panels/EventsPanel";
 import { InfoPanel } from "@/components/panels/InfoPanel";
-import { PipecatAppBase } from "@/components/PipecatAppBase";
+import { PipecatAppBase, PipecatBaseProps } from "@/components/PipecatAppBase";
 import ThemeModeToggle from "@/components/ThemeModeToggle";
 import {
   Banner,
@@ -35,17 +35,9 @@ import {
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePipecatConversation } from "@/hooks/usePipecatConversation";
-import type {
-  DailyTransportOptions,
-  SmallWebRTCTransportOptions,
-} from "@/lib/transports";
 import { cn } from "@/lib/utils";
 import { type ConversationMessage } from "@/types/conversation";
-import {
-  type PipecatClientOptions,
-  RTVIEvent,
-  type TransportConnectionParams,
-} from "@pipecat-ai/client-js";
+import { type PipecatClientOptions, RTVIEvent } from "@pipecat-ai/client-js";
 import { useRTVIClientEvent } from "@pipecat-ai/client-react";
 import {
   BotIcon,
@@ -62,11 +54,8 @@ import React, { memo, useEffect, useRef, useState } from "react";
 import { AutoInitDevices } from "./AutoInitDevices";
 import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
 
-// Type aliases for backward compatibility
-type DailyTransportConstructorOptions = DailyTransportOptions;
-type SmallWebRTCTransportConstructorOptions = SmallWebRTCTransportOptions;
-
-export interface ConsoleTemplateProps {
+export interface ConsoleTemplateProps
+  extends Omit<PipecatBaseProps, "children"> {
   /** Disables RTVI related functionality. Default: false */
   noRTVI?: boolean;
   /** Specifies the RTVI version in use by the server. Default: null */
@@ -83,17 +72,6 @@ export interface ConsoleTemplateProps {
   noBotVideo?: boolean;
   /** Disables automatic initialization of devices. Default: false */
   noAutoInitDevices?: boolean;
-
-  /** Type of transport to use for the RTVI client. Default: "daily" */
-  transportType?: "daily" | "smallwebrtc";
-  /** Options for configuring the transport. */
-  transportOptions?:
-    | SmallWebRTCTransportConstructorOptions
-    | DailyTransportConstructorOptions;
-  /** Parameters for connecting to the transport. */
-  connectParams?: TransportConnectionParams;
-  /** Options for configuring the RTVI client. */
-  clientOptions?: Partial<PipecatClientOptions>;
 
   /** Theme to use for the UI. Default: "system" */
   theme?: string;
@@ -191,16 +169,20 @@ const defaultTransportOptions: React.ComponentProps<
 
 export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo((props) => {
   const {
-    transportType = "smallwebrtc",
-    transportOptions = defaultTransportOptions,
-    connectParams,
     clientOptions = defaultClientOptions,
+    connectParams,
+    startBotParams,
+    startBotResponseTransformer,
     theme,
+    transportOptions = defaultTransportOptions,
+    transportType = "smallwebrtc",
   } = props;
 
   return (
     <PipecatAppBase
       connectParams={connectParams}
+      startBotParams={startBotParams}
+      startBotResponseTransformer={startBotResponseTransformer}
       transportType={transportType}
       clientOptions={clientOptions}
       transportOptions={transportOptions}

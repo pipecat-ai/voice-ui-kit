@@ -7,6 +7,7 @@ import {
 import { ConversationProvider } from "@/components/ConversationProvider";
 import { createTransport } from "@/lib/transports";
 import {
+  APIRequest,
   PipecatClient,
   type PipecatClientOptions,
   type TransportConnectionParams,
@@ -17,14 +18,20 @@ import {
 } from "@pipecat-ai/client-react";
 import type { DailyTransportConstructorOptions } from "@pipecat-ai/daily-transport";
 import type { SmallWebRTCTransportConstructorOptions } from "@pipecat-ai/small-webrtc-transport";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 /**
  * Props for the PipecatAppBase component.
  */
 export interface PipecatBaseProps {
-  /** Connection parameters for the Pipecat client */
-  connectParams: TransportConnectionParams;
+  /** Optional parameters for connect(). Only used when no startBotParams are provided. */
+  connectParams?: TransportConnectionParams;
+  /** Optional parameters for startBot. */
+  startBotParams?: APIRequest;
+  /** Callback function to transform the startBot response before connecting. */
+  startBotResponseTransformer?: (
+    response: TransportConnectionParams,
+  ) => TransportConnectionParams;
   /** Type of transport to use for the connection */
   transportType: "smallwebrtc" | "daily";
   /** Options for configuring the transport. */
@@ -67,7 +74,15 @@ export interface PipecatBaseChildProps {
   handleDisconnect?: () => void | Promise<void>;
   /** Error message if connection fails */
   error?: string | null;
+  /** Response returned from starting the bot. */
+  rawStartBotResponse?: TransportConnectionParams | unknown;
+  /** Transformed start bot response. */
+  transformedStartBotResponse?: TransportConnectionParams | unknown;
 }
+
+const defaultStartBotResponseTransformer = (
+  response: TransportConnectionParams,
+) => response;
 
 /**
  * PipecatAppBase component that provides a configured Pipecat client with audio capabilities.
@@ -103,7 +118,7 @@ export interface PipecatBaseChildProps {
  *
  * // Using with direct React nodes
  * <PipecatAppBase
- *   connectParams={...}
+ *   startBotParams={...}
  *   transportType="daily"
  * >
  *   <YourComponent />
@@ -111,7 +126,7 @@ export interface PipecatBaseChildProps {
  *
  * // Using with noThemeProvider to disable theme wrapping
  * <PipecatAppBase
- *   connectParams={...}
+ *   startBotParams={...}
  *   transportType="daily"
  *   noThemeProvider={true}
  * >
@@ -130,10 +145,12 @@ export interface PipecatBaseChildProps {
  */
 export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   clientOptions,
-  connectParams,
   connectOnMount = false,
+  connectParams,
   noAudioOutput = false,
   noThemeProvider = false,
+  startBotParams,
+  startBotResponseTransformer = defaultStartBotResponseTransformer,
   transportOptions,
   transportType,
   themeProps,
@@ -141,6 +158,32 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
 }) => {
   const [client, setClient] = useState<PipecatClient | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [rawStartBotResponse, setRawStartBotResponse] = useState<
+    TransportConnectionParams | unknown
+  >(null);
+
+  const startAndConnect = useCallback(
+    async (client: PipecatClient) => {
+      try {
+        if (startBotParams) {
+          const response = await client.startBot({
+            requestData: {},
+            ...startBotParams,
+          });
+          setRawStartBotResponse(response);
+          await client.connect(startBotResponseTransformer(response));
+        } else {
+          await client.connect(connectParams ?? {});
+        }
+      } catch (err) {
+        console.error("Connection error:", err);
+        setError(
+          `Failed to start session: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    },
+    [connectParams, startBotParams, startBotResponseTransformer],
+  );
 
   /**
    * Initializes the Pipecat client with the specified transport type.
@@ -166,7 +209,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
         setClient(pcClient);
 
         if (connectOnMount) {
-          await pcClient.connect(connectParams);
+          await startAndConnect(pcClient);
         }
       } catch (error) {
         console.error("Failed to initialize transport:", error);
@@ -181,7 +224,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   }, [
     clientOptions,
     connectOnMount,
-    connectParams,
+    startAndConnect,
     transportOptions,
     transportType,
   ]);
@@ -200,14 +243,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
     }
     setError(null);
 
-    try {
-      await client.connect(connectParams);
-    } catch (err) {
-      console.error("Connection error:", err);
-      setError(
-        `Failed to start session: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
+    await startAndConnect(client);
   };
 
   /**
@@ -218,6 +254,14 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
     if (!client) return;
     await client.disconnect();
   };
+
+  const transformedStartBotResponse = useMemo(
+    () =>
+      rawStartBotResponse
+        ? startBotResponseTransformer(rawStartBotResponse)
+        : null,
+    [rawStartBotResponse, startBotResponseTransformer],
+  );
 
   /**
    * Show loading state while client is being initialized.
@@ -234,6 +278,8 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
     handleConnect,
     handleDisconnect,
     error,
+    rawStartBotResponse,
+    transformedStartBotResponse,
   };
 
   // Only create PipecatClientProvider when client is fully initialized
