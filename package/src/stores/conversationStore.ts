@@ -40,6 +40,7 @@ interface ConversationState {
     final: boolean,
     source: "llm" | "tts",
   ) => void;
+  startAssistantLlmStream: () => void;
 }
 
 export const sortByCreatedAt = (
@@ -411,6 +412,60 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         messages: processedMessages,
         llmTextStreams,
         ttsTextStreams,
+      };
+    });
+  },
+
+  startAssistantLlmStream: () => {
+    set((state) => {
+      const messages = [...state.messages];
+      const llmTextStreams = new Map(state.llmTextStreams);
+      const now = new Date();
+
+      const lastIndex = messages.length - 1;
+      // Get the last assistant message
+      const lastAssistantIndex = messages.findLastIndex(
+        (msg) => msg.role === "assistant",
+      );
+      const lastAssistant =
+        lastAssistantIndex !== -1 ? messages[lastAssistantIndex] : undefined;
+
+      // Check if the last assistant message is final
+      if (!lastAssistant || lastIndex !== lastAssistantIndex) {
+        // Create a new assistant message
+        const newMessage: ConversationMessage = {
+          role: "assistant",
+          final: false,
+          parts: [],
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
+        };
+        messages.push(newMessage);
+      } else if (lastIndex === lastAssistantIndex) {
+        // The last assistant message is not final, so we need to add a space
+        // to the LLM stream to separate it from the previous content
+        const messageId = lastAssistant.createdAt;
+        const currentText = llmTextStreams.get(messageId) || "";
+
+        // Add a space if the current text doesn't end with one
+        if (currentText && !currentText.endsWith(" ")) {
+          llmTextStreams.set(messageId, currentText + " ");
+        }
+
+        messages[lastAssistantIndex] = {
+          ...lastAssistant,
+          final: false,
+          updatedAt: now.toISOString(),
+        };
+      }
+
+      const processedMessages = mergeMessages(
+        filterEmptyMessages(messages.sort(sortByCreatedAt)),
+      );
+
+      return {
+        messages: processedMessages,
+        llmTextStreams,
       };
     });
   },
