@@ -162,12 +162,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
             classNames.container,
           )}
         >
-          <div
-            className={cn(
-              "grid grid-cols-[min-content_1fr] gap-x-4 gap-y-2",
-              classNames.message,
-            )}
-          >
+          <div className={cn(classNames.message)}>
             {messages.map((message, index) => (
               <MessageContainer
                 key={index}
