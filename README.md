@@ -1,9 +1,9 @@
 # Pipecat Voice UI Kit
+
 ![NPM Version](https://img.shields.io/npm/v/@pipecat-ai/voice-ui-kit)
 [![Docs](https://img.shields.io/badge/documentation-blue)](https://voiceuikit.pipecat.ai)
 
 <img width="100%" src="image.png" />
-
 
 Components, hooks and template apps for building React voice AI applications quickly. Designed to support and accelerate [Pipecat AI](https://github.com/pipecat-ai/pipecat) development.
 
@@ -18,7 +18,6 @@ Components, hooks and template apps for building React voice AI applications qui
 - 📱 **Responsive design** – Optimized for desktop, tablet, and mobile devices
 
 - ⭐ **Example apps** – Real-world implementations demonstrating best practices
-
 
 ## Quickstart
 
