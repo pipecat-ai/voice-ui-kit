@@ -10,29 +10,39 @@ export default {
 
 export const Default = () => {
   const injectMessageRef = useRef<
-    ((message: Pick<ConversationMessage, "role" | "content">) => void) | null
+    ((message: Pick<ConversationMessage, "role" | "parts">) => void) | null
   >(null);
   const [isReady, setIsReady] = useState(false);
 
   const handleInjectUserMessage = useCallback(() => {
     injectMessageRef.current?.({
       role: "user",
-      content: "Hello! This is a test message from the user.",
+      parts: [
+        {
+          text: "Hello! This is a test message from the user.",
+          final: true,
+          createdAt: new Date().toISOString(),
+        },
+      ],
     });
   }, []);
 
   const handleInjectAssistantMessage = useCallback(() => {
     injectMessageRef.current?.({
       role: "assistant",
-      content: "Hi there! This is a test response from the assistant.",
+      parts: [
+        {
+          text: "Hi there! This is a test response from the assistant.",
+          final: true,
+          createdAt: new Date().toISOString(),
+        },
+      ],
     });
   }, []);
 
   const handleOnInjectMessage = useCallback(
     (
-      injectFn: (
-        message: Pick<ConversationMessage, "role" | "content">,
-      ) => void,
+      injectFn: (message: Pick<ConversationMessage, "role" | "parts">) => void,
     ) => {
       injectMessageRef.current = injectFn;
       setIsReady(true);
