@@ -29,6 +29,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     injectMessage,
     upsertUserTranscript,
     updateAssistantText,
+    startAssistantLlmStream,
   } = useConversationStore();
 
   const userStoppedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -39,24 +40,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   });
 
   useRTVIClientEvent(RTVIEvent.BotLlmStarted, () => {
-    // Start a new assistant message only if there isn't one already in progress
-    const store = useConversationStore.getState();
-    const lastAssistantIndex = store.messages.findLastIndex(
-      (msg: ConversationMessage) => msg.role === "assistant",
-    );
-    const lastAssistant =
-      lastAssistantIndex !== -1
-        ? store.messages[lastAssistantIndex]
-        : undefined;
-
-    if (!lastAssistant || lastAssistant.final) {
-      addMessage({
-        role: "assistant",
-        final: false,
-        parts: [],
-      });
-    }
-
+    startAssistantLlmStream();
     // Nudge a reset counter so any consumer logic can infer fresh turn if needed
     assistantStreamResetRef.current += 1;
   });

@@ -35,7 +35,7 @@ export const MessageContent = ({ classNames = {}, message }: Props) => {
   return (
     <div className={cn("flex flex-col gap-2", classNames.messageContent)}>
       {parts.map((part: ConversationMessagePart, idx: number) => {
-        const nextPart = idx < parts.length - 1 ? parts[idx + 1] : null;
+        const nextPart = parts?.[idx + 1] ?? null;
         const isText = typeof part.text === "string";
         const nextIsText = nextPart && typeof nextPart.text === "string";
         return (
