@@ -18,7 +18,7 @@ import {
 } from "@pipecat-ai/client-react";
 import type { DailyTransportConstructorOptions } from "@pipecat-ai/daily-transport";
 import type { SmallWebRTCTransportConstructorOptions } from "@pipecat-ai/small-webrtc-transport";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 /**
  * Props for the PipecatAppBase component.
@@ -31,7 +31,7 @@ export interface PipecatBaseProps {
   /** Callback function to transform the startBot response before connecting. */
   startBotResponseTransformer?: (
     response: TransportConnectionParams,
-  ) => TransportConnectionParams;
+  ) => TransportConnectionParams | Promise<TransportConnectionParams>;
   /** Type of transport to use for the connection */
   transportType: "smallwebrtc" | "daily";
   /** Options for configuring the transport. */
@@ -161,6 +161,8 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   const [rawStartBotResponse, setRawStartBotResponse] = useState<
     TransportConnectionParams | unknown
   >(null);
+  const [transformedStartBotResponse, setTransformedStartBotResponse] =
+    useState<TransportConnectionParams | unknown>(null);
 
   const startAndConnect = useCallback(
     async (client: PipecatClient) => {
@@ -171,7 +173,10 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
             ...startBotParams,
           });
           setRawStartBotResponse(response);
-          await client.connect(startBotResponseTransformer(response));
+          const transformedResponse =
+            await startBotResponseTransformer(response);
+          await client.connect(transformedResponse);
+          setTransformedStartBotResponse(transformedResponse);
         } else {
           await client.connect(connectParams ?? {});
         }
@@ -254,14 +259,6 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
     if (!client) return;
     await client.disconnect();
   };
-
-  const transformedStartBotResponse = useMemo(
-    () =>
-      rawStartBotResponse
-        ? startBotResponseTransformer(rawStartBotResponse)
-        : null,
-    [rawStartBotResponse, startBotResponseTransformer],
-  );
 
   /**
    * Show loading state while client is being initialized.
