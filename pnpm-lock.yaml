@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@daily-co/daily-js':
-        specifier: ^0.80.0
-        version: 0.80.0
+        specifier: ^0.84.0
+        version: 0.84.0
       '@pipecat-ai/client-js':
         specifier: ^1.4.0
         version: 1.4.0
@@ -635,6 +635,10 @@ packages:
 
   '@daily-co/daily-js@0.83.1':
     resolution: {integrity: sha512-KXA3zrSnNPZONwhip4TI6ayD3huumI1QBD/xPAjFArvHuFFB7t0QTOS2oxH1bXvdOBJ6XnY08vdlJslTVi2/2w==}
+    engines: {node: '>=10.0.0'}
+
+  '@daily-co/daily-js@0.84.0':
+    resolution: {integrity: sha512-/ynXrMDDkRXhLlHxiFNf9QU5yw4ZGPr56wNARgja/Tiid71UIniundTavCNF5cMb2I1vNoMh7oEJ/q8stg/V7g==}
     engines: {node: '>=10.0.0'}
 
   '@dimforge/rapier3d-compat@0.12.0':
@@ -6209,6 +6213,14 @@ snapshots:
       events: 3.3.0
 
   '@daily-co/daily-js@0.83.1':
+    dependencies:
+      '@babel/runtime': 7.28.4
+      '@sentry/browser': 8.55.0
+      bowser: 2.12.1
+      dequal: 2.0.3
+      events: 3.3.0
+
+  '@daily-co/daily-js@0.84.0':
     dependencies:
       '@babel/runtime': 7.28.4
       '@sentry/browser': 8.55.0

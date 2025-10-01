@@ -45,7 +45,7 @@
     "LICENSE"
   ],
   "peerDependencies": {
-    "@daily-co/daily-js": ">=0.80.0",
+    "@daily-co/daily-js": ">=0.84.0",
     "@pipecat-ai/client-js": ">=1.4.0",
     "@pipecat-ai/client-react": ">=1.0.1",
     "@pipecat-ai/daily-transport": ">=1.2.1",
@@ -57,7 +57,7 @@
   "peerDependenciesMeta": {
     "@daily-co/daily-js": {
       "optional": false,
-      "version": "^0.80.0"
+      "version": "^0.84.0"
     },
     "@pipecat-ai/client-js": {
       "optional": false,
