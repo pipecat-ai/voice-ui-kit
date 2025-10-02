@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bumped: Pipecat Client and Transport dependencies
 - Added: Updated `PipecatAppBase` and Console template with support for latest Pipecat Client API
-- Added: Console template support for multiple participants
+- Added: Console template now shows session ID from transport
 - Fixed: `Conversation` component layout fixed in some instances
 
 [0.3.0]
