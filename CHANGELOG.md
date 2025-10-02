@@ -5,6 +5,15 @@ All notable changes to **Voice UI Kit** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+[0.4.0]
+
+**IMPORTANT:** This is the last release before `1.0.0`, which will introduce breaking changes. The upcoming major version will add a component registry (via ShadCN) and significantly change the library developer experience. Most primitive components will be removed in `1.0.0`, so please plan your upgrade path accordingly. A migration guide will be provided to assist upgrading.
+
+- Bumped: Pipecat Client and Transport dependencies
+- Added: Updated `PipecatAppBase` and Console template with support for latest Pipecat Client API
+- Added: Console template support for multiple participants
+- Fixed: `Conversation` component layout fixed in some instances
+
 [0.3.0]
 
 - Added: `TranscriptOverlay` animation durations are now configurable via props
