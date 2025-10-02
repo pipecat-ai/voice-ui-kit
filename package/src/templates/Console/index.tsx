@@ -264,6 +264,7 @@ const ConsoleUI = ({
   const [isInfoPanelCollapsed, setIsInfoPanelCollapsed] = useState(false);
   const [isEventsPanelCollapsed, setIsEventsPanelCollapsed] = useState(false);
   const [participantId, setParticipantId] = useState("");
+  const [sessionId, setSessionId] = useState("");
 
   const infoPanelRef = useRef<ImperativePanelHandle>(null);
 
@@ -287,6 +288,12 @@ const ConsoleUI = ({
   });
   useRTVIClientEvent(RTVIEvent.ServerMessage, (data) => {
     onServerMessage?.(data);
+  });
+  useRTVIClientEvent(RTVIEvent.BotStarted, (data) => {
+    const sessionData = data as { sessionId?: string };
+    if (sessionData?.sessionId) {
+      setSessionId(sessionData.sessionId);
+    }
   });
 
   return (
@@ -457,7 +464,10 @@ const ConsoleUI = ({
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent side="left">
-                              <SessionInfo participantId={participantId} />
+                              <SessionInfo
+                                participantId={participantId}
+                                sessionId={sessionId}
+                              />
                             </PopoverContent>
                           </Popover>
                         )}
@@ -470,6 +480,7 @@ const ConsoleUI = ({
                         noUserAudio={noUserAudio}
                         noUserVideo={noUserVideo}
                         participantId={participantId}
+                        sessionId={sessionId}
                       />
                     )}
                   </ResizablePanel>
@@ -521,6 +532,7 @@ const ConsoleUI = ({
                 noUserAudio={noUserAudio}
                 noUserVideo={noUserVideo}
                 participantId={participantId}
+                sessionId={sessionId}
               />
             </TabsContent>
             <TabsContent value="events" className="flex-1 overflow-auto">
