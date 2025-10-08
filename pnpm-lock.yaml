@@ -15,8 +15,8 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
       '@pipecat-ai/client-react':
-        specifier: ^1.0.1
-        version: 1.0.1(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.4.0)(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: ^1.1.0
+        version: 1.1.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.4.0)(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -419,8 +419,8 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
       '@pipecat-ai/client-react':
-        specifier: ^1.0.1
-        version: 1.0.1(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.4.0)(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: ^1.1.0
+        version: 1.1.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.4.0)(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@pipecat-ai/daily-transport':
         specifier: ^1.4.0
         version: 1.4.0(@pipecat-ai/client-js@1.4.0)
@@ -1453,8 +1453,8 @@ packages:
   '@pipecat-ai/client-js@1.4.0':
     resolution: {integrity: sha512-HOWz4OWXbIetkywwrfVuEiEpU8FVFksmyP/rSWHSQGu/V2MJflAXfFt2tQmtu8RiQCA7C1qurfZGsxeccYmJXw==}
 
-  '@pipecat-ai/client-react@1.0.1':
-    resolution: {integrity: sha512-ziW7OnBB/FGN/TLHB00KJcVU+6HToS82CSpJJrqm9dBP54hFxQ/iTjkmTnDyMRftv57HTPqbw4klqhjvJDLANQ==}
+  '@pipecat-ai/client-react@1.1.0':
+    resolution: {integrity: sha512-OfXd2vd8ooOE1I/7SwVnSPXz2UC/L2GlAMYVO40ClzoeeJidywcNfbqTO2ZDxcxvFf15tv4O9aAM3uPo4Ou13A==}
     peerDependencies:
       '@pipecat-ai/client-js': '*'
       react: '>=18'
@@ -6954,7 +6954,7 @@ snapshots:
       typed-emitter: 2.1.0
       uuid: 10.0.0
 
-  '@pipecat-ai/client-react@1.0.1(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.4.0)(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+  '@pipecat-ai/client-react@1.1.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.4.0)(@types/react@19.1.16)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
       '@pipecat-ai/client-js': 1.4.0
       jotai: 2.15.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@types/react@19.1.16)(react@19.1.1)
