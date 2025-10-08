@@ -63,6 +63,8 @@ export interface UserVideoControlBaseProps {
     activeText?: string;
     /** CSS classes for inactive state text */
     inactiveText?: string;
+    /** CSS classes for the button group wrapper */
+    buttongroupWrapper?: string;
   };
   /** Additional props to pass to the dropdown button */
   dropdownButtonProps?: Partial<React.ComponentProps<typeof Button>>;
@@ -211,9 +213,12 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
       )}
 
       <div
-        className={cn({
-          "absolute bottom-2 left-2": !noVideo,
-        })}
+        className={cn(
+          {
+            "absolute bottom-2 left-2": !noVideo,
+          },
+          classNames.buttongroupWrapper,
+        )}
       >
         <ButtonGroup
           className={cn(
