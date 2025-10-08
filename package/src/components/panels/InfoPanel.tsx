@@ -32,6 +32,8 @@ export const InfoPanel: React.FC<Props> = ({
   const noDevices = noAudioOutput && noUserAudio && noUserVideo;
   const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
 
+  const { isCamEnabled } = usePipecatClientCamControl();
+
   if (noInfoPanel) return null;
 
   return (
@@ -53,7 +55,7 @@ export const InfoPanel: React.FC<Props> = ({
           </PanelHeader>
           <PanelContent>
             {!noUserAudio && <UserAudioControl />}
-            {!noUserVideo && <UserVideoControl />}
+            {!noUserVideo && <UserVideoControl noVideo={!isCamEnabled} />}
             {!noAudioOutput && <AudioOutput />}
           </PanelContent>
         </>

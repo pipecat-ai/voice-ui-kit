@@ -38,7 +38,10 @@ import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
 import { type ConversationMessage } from "@/types/conversation";
 import { type PipecatClientOptions, RTVIEvent } from "@pipecat-ai/client-js";
-import { useRTVIClientEvent } from "@pipecat-ai/client-react";
+import {
+  usePipecatClientCamControl,
+  useRTVIClientEvent,
+} from "@pipecat-ai/client-react";
 import {
   BotIcon,
   ChevronsLeftRightEllipsisIcon,
@@ -269,6 +272,7 @@ const ConsoleUI = ({
   const infoPanelRef = useRef<ImperativePanelHandle>(null);
 
   const { injectMessage } = usePipecatConversation();
+  const { isCamEnabled } = usePipecatClientCamControl();
 
   // Expose injectMessage to parent if requested
   useEffect(() => {
@@ -451,7 +455,9 @@ const ConsoleUI = ({
                               side="left"
                             >
                               {!noUserAudio && <UserAudioControl />}
-                              {!noUserVideo && <UserVideoControl />}
+                              {!noUserVideo && (
+                                <UserVideoControl noVideo={!isCamEnabled} />
+                              )}
                               {!noAudioOutput && <UserAudioOutputControl />}
                             </PopoverContent>
                           </Popover>

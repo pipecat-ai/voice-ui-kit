@@ -19,7 +19,12 @@ import {
   usePipecatClientMediaDevices,
   usePipecatClientTransportState,
 } from "@pipecat-ai/client-react";
-import { ChevronDownIcon, VideoIcon, VideoOffIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  LoaderCircle,
+  VideoIcon,
+  VideoOffIcon,
+} from "lucide-react";
 
 /**
  * Base props interface for UserVideoControl components.
@@ -116,7 +121,7 @@ export interface UserVideoComponentProps extends UserVideoControlBaseProps {
  * ```
  */
 export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
-  variant = "outline",
+  variant = "secondary",
   size = "md",
   classNames = {},
   buttonProps = {},
@@ -139,55 +144,77 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
 }) => {
   const buttonState = state || (isCamEnabled ? "active" : "inactive");
 
+  // Determine button content and styling based on state
+  const getButtonContent = () => {
+    if (buttonProps?.isLoading) {
+      return (
+        <>
+          {!buttonProps?.isLoading && (
+            <>
+              {!noIcon && <VideoOffIcon />}
+              {noVideoText && <span className="flex-1">{noVideoText}</span>}
+              {children}
+            </>
+          )}
+        </>
+      );
+    }
+
+    return (
+      <>
+        {!noIcon && (isCamEnabled ? <VideoIcon /> : <VideoOffIcon />)}
+        {!noVideo && buttonState === "inactive" && inactiveText ? (
+          <span className={cn("flex-1", classNames.inactiveText)}>
+            {inactiveText}
+          </span>
+        ) : null}
+        {!noVideo && buttonState !== "inactive" && activeText ? (
+          <span className={cn("flex-1", classNames.activeText)}>
+            {activeText}
+          </span>
+        ) : null}
+        {children}
+      </>
+    );
+  };
+
   return (
     <div
       className={cn(
-        "bg-muted rounded-xl relative",
+        "relative",
         {
-          "aspect-video": isCamEnabled && !noVideo,
-          "h-12": !isCamEnabled || noVideo,
+          "aspect-video bg-primary rounded-md": !noVideo,
         },
         classNames.container,
       )}
     >
       {!noVideo && (
-        <PipecatClientVideo
-          className={cn(
-            "rounded-xl",
-            {
-              hidden: !isCamEnabled,
-            },
-            classNames.video,
-          )}
-          participant="local"
-          {...videoProps}
-        />
-      )}
-      {(!isCamEnabled || noVideo) && (
-        <div
-          className={cn(
-            "absolute h-full left-28 flex items-center justify-start rounded-xl",
-            {
-              "left-16": noDevicePicker,
-            },
-            classNames.videoOffContainer,
-          )}
-        >
-          <div
+        <>
+          <PipecatClientVideo
             className={cn(
-              "text-muted-foreground font-mono text-sm",
-              classNames.videoOffText,
+              "rounded-md w-full h-full object-cover aspect-video",
+              {
+                hidden: !isCamEnabled,
+              },
+              classNames.video,
             )}
-          >
-            {noVideo && noVideoText
-              ? noVideoText
-              : isCamEnabled
-                ? activeText || "Camera is on"
-                : inactiveText || "Camera is off"}
-          </div>
-        </div>
+            participant="local"
+            {...videoProps}
+          />
+
+          {buttonProps?.isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <LoaderCircle className="animate-spin" size={24} />
+            </div>
+          )}
+        </>
       )}
-      <div className="absolute bottom-2 left-2">
+
+      <div
+        className={cn({
+          "absolute bottom-2 left-2": !noVideo,
+        })}
+      >
         <ButtonGroup
           className={cn(
             variant !== "outline" && "gap-[1px]",
@@ -195,19 +222,25 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
           )}
         >
           <Button
-            className={cn(classNames.button)}
-            variant={
-              !isCamEnabled && !buttonProps?.isLoading ? "secondary" : variant
-            }
+            className={cn(
+              {
+                "w-fit! hover:opacity-100! hover:bg-muted hover:text-muted-foreground":
+                  !noVideo,
+                "flex-1 w-full z-10": noVideo,
+                "rounded-e-none": noVideo && !noDevicePicker,
+                "bg-active text-active-foreground": isCamEnabled,
+              },
+              classNames.button,
+            )}
+            variant={variant}
             size={size}
             state={buttonState}
             onClick={buttonProps?.isLoading ? undefined : onClick}
+            isIcon={!noVideo}
+            disabled={buttonProps?.isLoading}
             {...buttonProps}
           >
-            {!noIcon &&
-              !buttonProps?.isLoading &&
-              (isCamEnabled ? <VideoIcon /> : <VideoOffIcon />)}
-            {children}
+            {getButtonContent()}
           </Button>
           {!noDevicePicker && (
             <DeviceDropDownComponent
@@ -222,14 +255,21 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
               {...deviceDropDownProps}
             >
               <Button
-                className={cn(classNames.dropdownMenuTrigger)}
+                className={cn(
+                  {
+                    "hover:opacity-100! hover:bg-primary hover:text-primary-foreground":
+                      !noVideo,
+                    "flex-none z-0 rounded-s-none border-l-0": noVideo,
+                  },
+                  classNames.dropdownMenuTrigger,
+                )}
                 variant={variant}
                 size={size}
                 isIcon
                 disabled={buttonProps?.isLoading}
                 {...dropdownButtonProps}
               >
-                <ChevronDownIcon size={16} />
+                <ChevronDownIcon size={noVideo ? 16 : 12} />
               </Button>
             </DeviceDropDownComponent>
           )}
