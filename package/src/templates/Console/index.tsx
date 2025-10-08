@@ -56,6 +56,7 @@ import { type ImperativePanelHandle } from "react-resizable-panels";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { AutoInitDevices } from "./AutoInitDevices";
 import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
+import UserScreenControl from "../../components/elements/UserScreenControl";
 
 export interface ConsoleTemplateProps
   extends Omit<PipecatBaseProps, "children"> {
@@ -67,6 +68,8 @@ export interface ConsoleTemplateProps
   noUserAudio?: boolean;
   /** Disables user video input entirely. Default: false */
   noUserVideo?: boolean;
+  /** Disables user screen control entirely. Default: false */
+  noScreenControl?: boolean;
   /** Disables audio output for the bot. Default: false */
   noAudioOutput?: boolean;
   /** Disables audio visualization for the bot. Default: false */
@@ -224,6 +227,7 @@ const ConsoleUI = ({
   // serverRTVIVersion,
   noUserAudio = false,
   noUserVideo = false,
+  noScreenControl = false,
   noAudioOutput = false,
   noBotAudio = false,
   noBotVideo = false,
@@ -281,7 +285,8 @@ const ConsoleUI = ({
 
   const noBotArea = noBotAudio && noBotVideo;
   const noConversationPanel = noConversation && noMetrics;
-  const noDevices = noAudioOutput && noUserAudio && noUserVideo;
+  const noDevices =
+    noAudioOutput && noUserAudio && noUserVideo && noScreenControl;
   const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
 
   useRTVIClientEvent(RTVIEvent.ParticipantConnected, (p) => {
@@ -458,6 +463,7 @@ const ConsoleUI = ({
                               {!noUserVideo && (
                                 <UserVideoControl noVideo={!isCamEnabled} />
                               )}
+                              {!noScreenControl && <UserScreenControl />}
                               {!noAudioOutput && <UserAudioOutputControl />}
                             </PopoverContent>
                           </Popover>
@@ -485,6 +491,7 @@ const ConsoleUI = ({
                         noStatusInfo={noStatusInfo}
                         noUserAudio={noUserAudio}
                         noUserVideo={noUserVideo}
+                        noScreenControl={noScreenControl}
                         participantId={participantId}
                         sessionId={sessionId}
                       />
@@ -537,6 +544,7 @@ const ConsoleUI = ({
                 noAudioOutput={noAudioOutput}
                 noUserAudio={noUserAudio}
                 noUserVideo={noUserVideo}
+                noScreenControl={noScreenControl}
                 participantId={participantId}
                 sessionId={sessionId}
               />

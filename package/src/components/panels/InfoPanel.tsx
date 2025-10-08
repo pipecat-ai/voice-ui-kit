@@ -2,6 +2,7 @@ import { ClientStatus } from "@/components/elements/ClientStatus";
 import { SessionInfo } from "@/components/elements/SessionInfo";
 import UserAudioControl from "@/components/elements/UserAudioControl";
 import AudioOutput from "@/components/elements/UserAudioOutputControl";
+import UserScreenControl from "@/components/elements/UserScreenControl";
 import UserVideoControl from "@/components/elements/UserVideoControl";
 import {
   Panel,
@@ -9,6 +10,7 @@ import {
   PanelHeader,
   PanelTitle,
 } from "@/components/ui/panel";
+import { usePipecatClientCamControl } from "@pipecat-ai/client-react";
 
 interface Props {
   noAudioOutput?: boolean;
@@ -16,6 +18,7 @@ interface Props {
   noStatusInfo?: boolean;
   noUserAudio?: boolean;
   noUserVideo?: boolean;
+  noScreenControl?: boolean;
   participantId?: string;
   sessionId?: string;
 }
@@ -26,10 +29,12 @@ export const InfoPanel: React.FC<Props> = ({
   noStatusInfo = false,
   noUserAudio = false,
   noUserVideo = false,
+  noScreenControl = false,
   participantId,
   sessionId,
 }) => {
-  const noDevices = noAudioOutput && noUserAudio && noUserVideo;
+  const noDevices =
+    noAudioOutput && noUserAudio && noUserVideo && noScreenControl;
   const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
 
   const { isCamEnabled } = usePipecatClientCamControl();
@@ -56,6 +61,7 @@ export const InfoPanel: React.FC<Props> = ({
           <PanelContent>
             {!noUserAudio && <UserAudioControl />}
             {!noUserVideo && <UserVideoControl noVideo={!isCamEnabled} />}
+            {!noScreenControl && <UserScreenControl />}
             {!noAudioOutput && <AudioOutput />}
           </PanelContent>
         </>
