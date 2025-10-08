@@ -1,0 +1,14 @@
+{
+    "name": "registry",
+    "version": "1.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "echo 'Building registry...'",
+        "build": "echo 'Building registry...'"
+    },
+    "devDependencies": {
+        "@types/node": "^24.5.2",
+        "typescript": "^5.8.3"
+    }
+}

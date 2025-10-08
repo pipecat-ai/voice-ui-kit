@@ -1,28 +1,17 @@
 {
-  "name": "@pipecat-ai/voice-ui-kit",
+  "name": "voice-ui-kit",
   "version": "1.0.0",
-  "type": "module",
   "private": true,
-  "dependencies": {
-    "@daily-co/daily-js": "^0.80.0",
-    "@pipecat-ai/client-js": "^1.2.0",
-    "@pipecat-ai/client-react": "^1.0.1",
-    "@radix-ui/react-slot": "^1.2.3",
-    "class-variance-authority": "^0.7.1",
-    "lucide-react": "^0.544.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.13"
-  },
-  "devDependencies": {
-    "@ladle/react": "^5.0.3",
-    "@tailwindcss/vite": "^4.1.13",
-    "@types/node": "^24.5.2",
-    "globals": "^16.4.0",
-    "typescript": "^5.8.3"
+  "packageManager": "pnpm@10.15.1",
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
-    "dev": "npm exec ladle serve"
+    "dev": "turbo run dev",
+    "registry:build": "turbo run build"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.2"
   }
 }

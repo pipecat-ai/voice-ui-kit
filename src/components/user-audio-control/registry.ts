@@ -2,7 +2,7 @@ import { RegistryEntry } from "@/registry/schema";
 
 export const UserAudioControl: RegistryEntry = {
   name: "user-audio-control",
-  type: "registry:ui",
+  type: "registry:component",
   description: "Audio control component for user voice input and playback",
   files: [
     {

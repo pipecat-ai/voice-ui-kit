@@ -22,11 +22,6 @@ export const coreConfig: RegistryEntry = {
     },
   ],
   dependencies: ["clsx", "tailwind-merge"],
-  tailwind: {
-    css: {
-      imports: ["./styles/vkui-core.css", "./styles/vkui-theme.css"],
-    },
-  },
   cssVars: {
     light: {},
     dark: {},

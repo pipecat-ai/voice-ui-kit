@@ -1,0 +1,13 @@
+{
+    "name": "@pipecat-ai/voice-ui-kit",
+    "version": "1.0.0",
+    "description": "Voice UI Kit Registry",
+    "bin": {
+        "voice-ui-kit-registry": "index.js"
+    },
+    "files": [
+        "index.js",
+        "README.md",
+        "LICENSE"
+    ]
+}

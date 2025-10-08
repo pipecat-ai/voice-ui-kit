@@ -1,0 +1,9 @@
+{
+    "$schema": "https://ui.shadcn.com/schema/registry.json",
+    "name": "acme",
+    "homepage": "https://acme.com",
+    "items": []
+}
+
+import { registryItemSchema
+} from "shadcn/schema"
