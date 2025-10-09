@@ -1,5 +1,5 @@
-import { RTVIEvent, TransportState } from "@pipecat-ai/client-js";
-import { useRTVIClientEvent } from "@pipecat-ai/client-react";
+import { RTVIEvent, type TransportState } from "@pipecat-ai/client-js";
+import { usePipecatClient, useRTVIClientEvent } from "@pipecat-ai/client-react";
 import { useCallback, useState } from "react";
 
 /**
@@ -27,6 +27,19 @@ export interface PipecatConnectionStateResult {
   isDisconnected: boolean;
 }
 
+const deriveState = (state: TransportState): PipecatConnectionState => {
+  if (state === "ready") {
+    return "connected";
+  } else if (
+    ["authenticating", "authenticated", "connecting", "connected"].includes(
+      state,
+    )
+  ) {
+    return "connecting";
+  } else {
+    return "disconnected";
+  }
+};
 /**
  * Hook that provides a simplified connection state for Pipecat transport.
  *
@@ -61,23 +74,16 @@ export interface PipecatConnectionStateResult {
  * ```
  */
 export const usePipecatConnectionState = (): PipecatConnectionStateResult => {
+  const client = usePipecatClient();
   const [connectionState, setConnectionState] =
-    useState<PipecatConnectionState>("disconnected");
+    useState<PipecatConnectionState>(
+      deriveState(client?.state ?? "disconnected"),
+    );
 
   useRTVIClientEvent(
     RTVIEvent.TransportStateChanged,
     useCallback((state: TransportState) => {
-      if (state === "ready") {
-        setConnectionState("connected");
-      } else if (
-        ["authenticating", "authenticated", "connecting", "connected"].includes(
-          state,
-        )
-      ) {
-        setConnectionState("connecting");
-      } else {
-        setConnectionState("disconnected");
-      }
+      setConnectionState(deriveState(state));
     }, []),
   );
 
