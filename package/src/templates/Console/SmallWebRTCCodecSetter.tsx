@@ -1,16 +1,12 @@
 import { usePipecatClient } from "@pipecat-ai/client-react";
 import { PipecatBaseProps } from "../../components/PipecatAppBase";
 import { useEffect } from "react";
+import { SmallWebRTCTransport } from "@pipecat-ai/small-webrtc-transport";
 
 interface Props {
   audioCodec?: string;
   transportType: PipecatBaseProps["transportType"];
   videoCodec?: string;
-}
-
-interface SmallWebRTCTransportWithCodecs {
-  setAudioCodec: (codec: string | null) => void;
-  setVideoCodec: (codec: string | null) => void;
 }
 
 export const SmallWebRTCCodecSetter = ({
@@ -23,8 +19,10 @@ export const SmallWebRTCCodecSetter = ({
   useEffect(
     function updateSmallWebRTCCodecs() {
       if (!client || transportType !== "smallwebrtc") return;
-      const transport =
-        client.transport as unknown as SmallWebRTCTransportWithCodecs;
+      const transport = client.transport as unknown as SmallWebRTCTransport;
+
+      if (!(transport instanceof SmallWebRTCTransport)) return;
+
       if (audioCodec) {
         transport.setAudioCodec(audioCodec);
       }

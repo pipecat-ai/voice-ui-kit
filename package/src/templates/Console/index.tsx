@@ -313,20 +313,8 @@ const ConsoleUI = ({
         transportType={transportType}
         videoCodec={videoCodec}
       />
-      {error && (
-        <Banner
-          variant="destructive"
-          className="animate-in fade-in duration-300"
-        >
-          <BannerIcon icon={CircleAlertIcon} />
-          <BannerTitle>
-            Unable to connect. Please check web console for errors.
-          </BannerTitle>
-          <BannerClose variant="destructive" />
-        </Banner>
-      )}
-      <div className="grid grid-cols-1 grid-rows-[min-content_1fr] sm:grid-rows-[min-content_1fr_auto] h-full w-full overflow-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-[150px_1fr_150px] gap-2 items-center justify-center p-2 bg-background sm:relative top-0 w-full z-10">
+      <div className="flex flex-col h-full w-full overflow-auto">
+        <div className="h-min grid grid-cols-2 sm:grid-cols-[150px_1fr_150px] gap-2 items-center justify-center p-2 bg-background sm:relative top-0 w-full z-10">
           {noLogo ? (
             <span className="h-6" />
           ) : (
@@ -363,7 +351,19 @@ const ConsoleUI = ({
             />
           </div>
         </div>
-        <div className="hidden sm:block">
+        {error && (
+          <Banner
+            variant="destructive"
+            className="h-min animate-in fade-in duration-300"
+          >
+            <BannerIcon icon={CircleAlertIcon} />
+            <BannerTitle>
+              Unable to connect. Please check web console for errors.
+            </BannerTitle>
+            <BannerClose variant="destructive" />
+          </Banner>
+        )}
+        <div className="hidden sm:block h-full">
           <ResizablePanelGroup direction="vertical" className="h-full">
             <ResizablePanel defaultSize={70} minSize={50}>
               <ResizablePanelGroup direction="horizontal">
@@ -516,7 +516,7 @@ const ConsoleUI = ({
           defaultValue={
             noBotArea ? (noConversationPanel ? "info" : "conversation") : "bot"
           }
-          className="flex flex-col gap-0 sm:hidden overflow-hidden"
+          className="flex flex-col gap-0 h-full sm:hidden overflow-hidden"
         >
           <div className="flex flex-col overflow-hidden flex-1">
             {!noBotArea && (
