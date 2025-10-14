@@ -17,4 +17,5 @@ export * from "./Thinking";
 export * from "./TranscriptOverlay";
 export * from "./UserAudioControl";
 export * from "./UserAudioOutputControl";
+export * from "./UserScreenControl";
 export * from "./UserVideoControl";

@@ -17,7 +17,10 @@ import {
   PipecatClientProvider,
 } from "@pipecat-ai/client-react";
 import type { DailyTransportConstructorOptions } from "@pipecat-ai/daily-transport";
-import type { SmallWebRTCTransportConstructorOptions } from "@pipecat-ai/small-webrtc-transport";
+import type {
+  SmallWebRTCTransport,
+  SmallWebRTCTransportConstructorOptions,
+} from "@pipecat-ai/small-webrtc-transport";
 import React, { useCallback, useEffect, useState } from "react";
 
 /**
@@ -173,6 +176,20 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
             ...startBotParams,
           });
           setRawStartBotResponse(response);
+          if (transportType === "smallwebrtc") {
+            // Check if response has ICEServers
+            if (
+              typeof response === "object" &&
+              response !== null &&
+              "iceConfig" in response
+            ) {
+              const iceConfig = response.iceConfig as {
+                iceServers: RTCIceServer[];
+              };
+              (client.transport as SmallWebRTCTransport).iceServers =
+                iceConfig.iceServers;
+            }
+          }
           const transformedResponse =
             await startBotResponseTransformer(response);
           await client.connect(transformedResponse);
@@ -187,7 +204,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
         );
       }
     },
-    [connectParams, startBotParams, startBotResponseTransformer],
+    [connectParams, startBotParams, startBotResponseTransformer, transportType],
   );
 
   /**
