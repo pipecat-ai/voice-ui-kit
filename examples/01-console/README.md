@@ -14,6 +14,7 @@ A minimal example showing how to use the `ConsoleTemplate` component with Next.j
 ```bash
 # Build the voice-ui-kit package (required for workspace dependencies)
 cd ../..
+pnpm i
 pnpm build
 
 # Install dependencies

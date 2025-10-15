@@ -43,37 +43,47 @@ npm i @fontsource-variable/geist @fontsource-variable/geist-mono
 
 # Launch and browse the Storybook:
 
+Install and build workspace dependencies:
+
 ```bash
-npm run dev
+pnpm i
+pnpm build
+```
+
+Launch the Storybook:
+
+```bash
+pnpm run dev
 ```
 
 # Run example apps
 
-Install workspace dependencies:
+Install and build workspace dependencies:
 
 ```bash
-npm i
+pnpm i
+pnpm build
 ```
 
-Navigate to example directory:
+Navigate to example directory to run the example:
 
 ```bash
 cd examples/01-console
-npm i
-npm run dev
+pnpm i
+pnpm dev
 ```
 
 ### Use the console template to chat with a Pipecat Bot:
 
 ```typescript
 // Optional: recommended fonts
-import "@fontsource-variable/geist";
-import "@fontsource-variable/geist-mono";
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
 
 // Styles
-import "@pipecat-ai/voice-ui-kit/styles";
+import '@pipecat-ai/voice-ui-kit/styles';
 
-import { ConsoleTemplate, ThemeProvider } from "@pipecat-ai/voice-ui-kit";
+import { ConsoleTemplate, ThemeProvider } from '@pipecat-ai/voice-ui-kit';
 
 // Render Console template in full screen container
 export default function App() {
@@ -83,7 +93,7 @@ export default function App() {
         <ConsoleTemplate
           transportType="smallwebrtc"
           connectParams={{
-            webrtcUrl: "/api/offer",
+            webrtcUrl: '/api/offer',
           }}
         />
       </div>

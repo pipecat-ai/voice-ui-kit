@@ -15,6 +15,7 @@ Example demonstrating how to implement custom themes with the Voice UI Kit, feat
 ```bash
 # Build the voice-ui-kit package (required for workspace dependencies)
 cd ../..
+pnpm i
 pnpm build
 
 # Install dependencies

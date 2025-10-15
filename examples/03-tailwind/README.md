@@ -15,6 +15,7 @@ Example using `PipecatAppBase` helper component to simplify voice interface deve
 ```bash
 # Build the voice-ui-kit package (required for workspace dependencies)
 cd ../..
+pnpm i
 pnpm build
 
 # Install dependencies
