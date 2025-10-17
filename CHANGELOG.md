@@ -5,8 +5,11 @@ All notable changes to **Voice UI Kit** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 **IMPORTANT:** This is the last release before `1.0.0`, which will introduce breaking changes. The upcoming major version will add a component registry (via ShadCN) and significantly change the library developer experience. Most primitive components will be removed in `1.0.0`, so please plan your upgrade path accordingly. A migration guide will be provided to assist upgrading.
+
+[0.4.2]
+
+- Fixed: bug that accidentally required installation of `@pipecat-ai/small-webrtc-transport` even though it wasn't used.
 
 [0.4.1]
 
@@ -14,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed: bug in `usePipecatConnectionState` where state would not update if component was conditionally rendered after the client connected.
 - Added: `UserScreenControl` and `UserScreenControlComponent` for managing screen media.
 - Changed: `InfoPanel` and `Console` template modified to implement `UserScreenControl` (if supported).
-
 
 [0.4.0]
 
