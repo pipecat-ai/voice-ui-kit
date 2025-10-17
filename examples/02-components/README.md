@@ -15,6 +15,7 @@ Low-level example demonstrating how to build a custom voice interface using indi
 ```bash
 # Build the voice-ui-kit package (required for workspace dependencies)
 cd ../..
+pnpm i
 pnpm build
 
 # Install dependencies
