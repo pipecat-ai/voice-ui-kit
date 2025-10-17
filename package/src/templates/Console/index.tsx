@@ -308,11 +308,13 @@ const ConsoleUI = ({
   return (
     <>
       {!noAutoInitDevices && <AutoInitDevices />}
-      <SmallWebRTCCodecSetter
-        audioCodec={audioCodec}
-        transportType={transportType}
-        videoCodec={videoCodec}
-      />
+      {transportType === "smallwebrtc" && (
+        <SmallWebRTCCodecSetter
+          audioCodec={audioCodec}
+          transportType={transportType}
+          videoCodec={videoCodec}
+        />
+      )}
       <div className="flex flex-col h-full w-full overflow-auto">
         <div className="h-min grid grid-cols-2 sm:grid-cols-[150px_1fr_150px] gap-2 items-center justify-center p-2 bg-background sm:relative top-0 w-full z-10">
           {noLogo ? (
