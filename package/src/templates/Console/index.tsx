@@ -6,7 +6,6 @@ import type { ConversationProps } from "@/components/elements/Conversation";
 import PipecatLogo from "@/components/elements/PipecatLogo";
 import { SessionInfo } from "@/components/elements/SessionInfo";
 import UserAudioControl from "@/components/elements/UserAudioControl";
-import UserAudioOutputControl from "@/components/elements/UserAudioOutputControl";
 import UserVideoControl from "@/components/elements/UserVideoControl";
 import { BotAudioPanel } from "@/components/panels/BotAudioPanel";
 import { BotVideoPanel } from "@/components/panels/BotVideoPanel";
@@ -178,6 +177,7 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo((props) => {
   const {
     clientOptions = defaultClientOptions,
     connectParams,
+    noAudioOutput = false,
     noAutoInitDevices = false,
     startBotParams,
     startBotResponseTransformer,
@@ -198,6 +198,7 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo((props) => {
       themeProps={{
         defaultTheme: theme,
       }}
+      noAudioOutput={noAudioOutput}
     >
       {({ client, error, handleConnect, handleDisconnect }) =>
         !client ? (
@@ -232,7 +233,6 @@ const ConsoleUI = ({
   noUserVideo = false,
   noScreenControl = false,
   noTextInput = false,
-  noAudioOutput = false,
   noBotAudio = false,
   noBotVideo = false,
 
@@ -288,8 +288,7 @@ const ConsoleUI = ({
 
   const noBotArea = noBotAudio && noBotVideo;
   const noConversationPanel = noConversation && noMetrics;
-  const noDevices =
-    noAudioOutput && noUserAudio && noUserVideo && noScreenControl;
+  const noDevices = noUserAudio && noUserVideo && noScreenControl;
   const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
 
   useRTVIClientEvent(RTVIEvent.ParticipantConnected, (p) => {
@@ -469,7 +468,6 @@ const ConsoleUI = ({
                                 <UserVideoControl noVideo={!isCamEnabled} />
                               )}
                               {!noScreenControl && <UserScreenControl />}
-                              {!noAudioOutput && <UserAudioOutputControl />}
                             </PopoverContent>
                           </Popover>
                         )}
@@ -491,7 +489,6 @@ const ConsoleUI = ({
                       </div>
                     ) : (
                       <InfoPanel
-                        noAudioOutput={noAudioOutput}
                         noSessionInfo={noSessionInfo}
                         noStatusInfo={noStatusInfo}
                         noUserAudio={noUserAudio}
@@ -547,7 +544,6 @@ const ConsoleUI = ({
             )}
             <TabsContent value="info" className="flex-1 overflow-auto p-2">
               <InfoPanel
-                noAudioOutput={noAudioOutput}
                 noUserAudio={noUserAudio}
                 noUserVideo={noUserVideo}
                 noScreenControl={noScreenControl}
