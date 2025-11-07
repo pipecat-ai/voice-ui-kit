@@ -54,7 +54,6 @@ import {
 } from "lucide-react";
 import { type ImperativePanelHandle } from "react-resizable-panels";
 import React, { memo, useEffect, useRef, useState } from "react";
-import { AutoInitDevices } from "./AutoInitDevices";
 import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
 import UserScreenControl from "../../components/elements/UserScreenControl";
 
@@ -177,6 +176,7 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo((props) => {
   const {
     clientOptions = defaultClientOptions,
     connectParams,
+    noAutoInitDevices = false,
     startBotParams,
     startBotResponseTransformer,
     theme,
@@ -187,6 +187,7 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo((props) => {
   return (
     <PipecatAppBase
       connectParams={connectParams}
+      initDevicesOnMount={!noAutoInitDevices}
       startBotParams={startBotParams}
       startBotResponseTransformer={startBotResponseTransformer}
       transportType={transportType}
@@ -231,7 +232,6 @@ const ConsoleUI = ({
   noAudioOutput = false,
   noBotAudio = false,
   noBotVideo = false,
-  noAutoInitDevices = false,
 
   // Transport and client options
   transportType = "smallwebrtc",
@@ -307,7 +307,6 @@ const ConsoleUI = ({
 
   return (
     <>
-      {!noAutoInitDevices && <AutoInitDevices />}
       {transportType === "smallwebrtc" && (
         <SmallWebRTCCodecSetter
           audioCodec={audioCodec}

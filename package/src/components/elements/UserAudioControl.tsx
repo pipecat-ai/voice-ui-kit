@@ -261,7 +261,10 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
  * />
  * ```
  */
-export const UserAudioControl: React.FC<Props> = (props) => {
+export const UserAudioControl: React.FC<Props> = ({
+  buttonProps,
+  ...props
+}) => {
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();
 
@@ -281,6 +284,7 @@ export const UserAudioControl: React.FC<Props> = (props) => {
           state={isMicEnabled ? "default" : "inactive"}
           buttonProps={{
             isLoading: loading,
+            ...buttonProps,
           }}
           {...props}
         />

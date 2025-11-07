@@ -300,9 +300,10 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
  * />
  * ```
  */
-export const UserVideoControl: React.FC<UserVideoControlBaseProps> = (
-  props,
-) => {
+export const UserVideoControl: React.FC<UserVideoControlBaseProps> = ({
+  buttonProps,
+  ...props
+}) => {
   const { availableCams, selectedCam, updateCam } =
     usePipecatClientMediaDevices();
 
@@ -322,7 +323,7 @@ export const UserVideoControl: React.FC<UserVideoControlBaseProps> = (
           state={loading ? "default" : isCamEnabled ? "default" : "inactive"}
           buttonProps={{
             isLoading: loading,
-            ...props.buttonProps,
+            ...buttonProps,
           }}
           {...props}
         />

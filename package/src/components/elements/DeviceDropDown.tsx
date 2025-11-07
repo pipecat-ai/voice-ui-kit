@@ -10,10 +10,8 @@ import { cn } from "@/lib/utils";
 
 import {
   type OptionalMediaDeviceInfo,
-  usePipecatClient,
   usePipecatClientMediaDevices,
 } from "@pipecat-ai/client-react";
-import { useEffect } from "react";
 
 /**
  * Props for the headless DeviceDropDown component that accepts device data and callbacks as props.
@@ -134,17 +132,8 @@ export const DeviceDropDownComponent = ({
  * ```
  */
 export const DeviceDropDown: React.FC<DeviceDropDownProps> = (props) => {
-  const client = usePipecatClient();
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();
-
-  useEffect(() => {
-    if (!client) return;
-
-    if (["idle", "disconnected"].includes(client.state)) {
-      client.initDevices();
-    }
-  }, [client]);
 
   return (
     <DeviceDropDownComponent

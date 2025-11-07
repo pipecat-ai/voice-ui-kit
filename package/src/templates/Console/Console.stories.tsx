@@ -103,6 +103,7 @@ export const Default = () => {
           connectionUrl: "http://localhost:7860/api/offer",
         }}
         noUserVideo={true}
+        noAutoInitDevices={false}
         conversationElementProps={{
           assistantLabel: "my-assistant",
         }}

@@ -145,7 +145,29 @@ export default function Home() {
 }
 ```
 
-### 5. Disable Audio Output
+### 5. Initialize Devices on Mount
+
+You can automatically initialize devices (microphone, camera, speakers) when the component mounts by setting `initDevicesOnMount={true}`:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="smallwebrtc"
+      connectParams={{
+        webrtcUrl: "/api/offer",
+      }}
+      initDevicesOnMount={true}
+    >
+      <YourCustomComponent />
+    </PipecatAppBase>
+  );
+}
+```
+
+### 6. Disable Audio Output
 
 You can disable audio output for the bot by setting `noAudioOutput={true}`:
 
@@ -167,7 +189,7 @@ export default function Home() {
 }
 ```
 
-### 6. Transport Options
+### 7. Transport Options
 
 You can pass transport-specific configuration options:
 
@@ -232,6 +254,13 @@ export default function Home() {
     connectOnMount: {
       description:
         "Whether to automatically connect to the session when the component mounts",
+      type: "boolean",
+      default: "false",
+      required: false,
+    },
+    initDevicesOnMount: {
+      description:
+        "Whether to automatically initialize devices when the component mounts",
       type: "boolean",
       default: "false",
       required: false,

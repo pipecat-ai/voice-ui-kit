@@ -12,10 +12,8 @@ import {
 import { cn } from "@/lib/utils";
 import {
   type OptionalMediaDeviceInfo,
-  usePipecatClient,
   usePipecatClientMediaDevices,
 } from "@pipecat-ai/client-react";
-import { useEffect } from "react";
 
 export interface DeviceSelectBaseProps
   extends Omit<SelectTriggerProps, "children"> {
@@ -82,17 +80,8 @@ export const DeviceSelectComponent = ({
 };
 
 export const DeviceSelect: React.FC<DeviceSelectBaseProps> = (props) => {
-  const client = usePipecatClient();
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();
-
-  useEffect(() => {
-    if (!client) return;
-
-    if (["idle", "disconnected"].includes(client.state)) {
-      client.initDevices();
-    }
-  }, [client]);
 
   return (
     <DeviceSelectComponent
