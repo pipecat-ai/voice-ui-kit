@@ -54,7 +54,6 @@ import {
 } from "lucide-react";
 import { type ImperativePanelHandle } from "react-resizable-panels";
 import React, { memo, useEffect, useRef, useState } from "react";
-import { AutoInitDevices } from "./AutoInitDevices";
 import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
 import UserScreenControl from "../../components/elements/UserScreenControl";
 
@@ -177,6 +176,7 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo((props) => {
   const {
     clientOptions = defaultClientOptions,
     connectParams,
+    noAutoInitDevices = false,
     startBotParams,
     startBotResponseTransformer,
     theme,
@@ -187,6 +187,7 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo((props) => {
   return (
     <PipecatAppBase
       connectParams={connectParams}
+      initDevicesOnMount={!noAutoInitDevices}
       startBotParams={startBotParams}
       startBotResponseTransformer={startBotResponseTransformer}
       transportType={transportType}
@@ -231,7 +232,6 @@ const ConsoleUI = ({
   noAudioOutput = false,
   noBotAudio = false,
   noBotVideo = false,
-  noAutoInitDevices = false,
 
   // Transport and client options
   transportType = "smallwebrtc",
@@ -307,7 +307,6 @@ const ConsoleUI = ({
 
   return (
     <>
-      {!noAutoInitDevices && <AutoInitDevices />}
       {transportType === "smallwebrtc" && (
         <SmallWebRTCCodecSetter
           audioCodec={audioCodec}
@@ -461,23 +460,12 @@ const ConsoleUI = ({
                               className="flex flex-col gap-2"
                               side="left"
                             >
-                              {!noUserAudio && (
-                                <UserAudioControl
-                                  noAutoInitDevices={noAutoInitDevices}
-                                />
-                              )}
+                              {!noUserAudio && <UserAudioControl />}
                               {!noUserVideo && (
-                                <UserVideoControl
-                                  noVideo={!isCamEnabled}
-                                  noAutoInitDevices={noAutoInitDevices}
-                                />
+                                <UserVideoControl noVideo={!isCamEnabled} />
                               )}
                               {!noScreenControl && <UserScreenControl />}
-                              {!noAudioOutput && (
-                                <UserAudioOutputControl
-                                  noAutoInitDevices={noAutoInitDevices}
-                                />
-                              )}
+                              {!noAudioOutput && <UserAudioOutputControl />}
                             </PopoverContent>
                           </Popover>
                         )}
@@ -507,7 +495,6 @@ const ConsoleUI = ({
                         noScreenControl={noScreenControl}
                         participantId={participantId}
                         sessionId={sessionId}
-                        noAutoInitDevices={noAutoInitDevices}
                       />
                     )}
                   </ResizablePanel>
@@ -561,7 +548,6 @@ const ConsoleUI = ({
                 noScreenControl={noScreenControl}
                 participantId={participantId}
                 sessionId={sessionId}
-                noAutoInitDevices={noAutoInitDevices}
               />
             </TabsContent>
             <TabsContent value="events" className="flex-1 overflow-auto">

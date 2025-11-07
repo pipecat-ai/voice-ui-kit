@@ -1,4 +1,4 @@
-import { StrictMode, useEffect } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import type { PipecatBaseChildProps } from "@pipecat-ai/voice-ui-kit";
@@ -18,14 +18,9 @@ import {
 import "./index.css";
 
 export const App = ({
-  client,
   handleConnect,
   handleDisconnect,
 }: PipecatBaseChildProps) => {
-  useEffect(() => {
-    client?.initDevices();
-  }, [client]);
-
   return (
     <Card size="lg" shadow="xlong" rounded="xl">
       <CardContent className="flex flex-col gap-4">
@@ -54,6 +49,7 @@ createRoot(document.getElementById("root")!).render(
         connectParams={{
           webrtcUrl: "/api/offer",
         }}
+        initDevicesOnMount
         transportType="smallwebrtc"
         noThemeProvider
       >

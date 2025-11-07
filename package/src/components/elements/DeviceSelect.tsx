@@ -12,10 +12,8 @@ import {
 import { cn } from "@/lib/utils";
 import {
   type OptionalMediaDeviceInfo,
-  usePipecatClient,
   usePipecatClientMediaDevices,
 } from "@pipecat-ai/client-react";
-import { useEffect } from "react";
 
 export interface DeviceSelectBaseProps
   extends Omit<SelectTriggerProps, "children"> {
@@ -28,8 +26,6 @@ export interface DeviceSelectBaseProps
   };
   selectProps?: SelectProps;
   contentProps?: SelectContentProps;
-  /** Whether to prevent automatic initialization of devices. Default: false */
-  noAutoInitDevices?: boolean;
 }
 
 export interface DeviceSelectComponentProps extends DeviceSelectBaseProps {
@@ -83,21 +79,9 @@ export const DeviceSelectComponent = ({
   );
 };
 
-export const DeviceSelect: React.FC<DeviceSelectBaseProps> = ({
-  noAutoInitDevices = false,
-  ...props
-}) => {
-  const client = usePipecatClient();
+export const DeviceSelect: React.FC<DeviceSelectBaseProps> = (props) => {
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();
-
-  useEffect(() => {
-    if (!client || noAutoInitDevices) return;
-
-    if (["idle", "disconnected"].includes(client.state)) {
-      client.initDevices();
-    }
-  }, [client, noAutoInitDevices]);
 
   return (
     <DeviceSelectComponent

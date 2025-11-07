@@ -12,10 +12,9 @@ import {
 import { cn } from "@/lib/utils";
 import {
   type OptionalMediaDeviceInfo,
-  usePipecatClient,
   usePipecatClientMediaDevices,
 } from "@pipecat-ai/client-react";
-import React, { useEffect, useId } from "react";
+import React, { useId } from "react";
 
 /**
  * Base props interface for UserAudioOutputControl components.
@@ -42,8 +41,6 @@ export interface UserAudioOutputControlBaseProps
   selectProps?: SelectProps;
   /** Props to pass to the SelectContent component */
   contentProps?: SelectContentProps;
-  /** Whether to prevent automatic initialization of devices. Default: false */
-  noAutoInitDevices?: boolean;
 }
 
 /**
@@ -147,18 +144,9 @@ export const UserAudioOutputControlComponent = ({
  */
 export const UserAudioOutputControl: React.FC<
   UserAudioOutputControlBaseProps
-> = ({ noAutoInitDevices = false, ...props }) => {
-  const client = usePipecatClient();
+> = (props) => {
   const { availableSpeakers, selectedSpeaker, updateSpeaker } =
     usePipecatClientMediaDevices();
-
-  useEffect(() => {
-    if (!client || noAutoInitDevices) return;
-
-    if (["idle", "disconnected"].includes(client.state)) {
-      client.initDevices();
-    }
-  }, [client, noAutoInitDevices]);
 
   return (
     <UserAudioOutputControlComponent

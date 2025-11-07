@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]
 
-- Added: `noAutoInitDevices` prop to `UserAudioControl`, `UserVideoControl`, `DeviceSelect`, `DeviceDropDown`, and `UserAudioOutputControl` components, as well as the `Console` template. When set to `true`, this prop prevents components from automatically calling `initDevices()`, giving developers full control over when device access permissions are requested.
+- Added: `initDevicesOnMount` prop to `PipecatAppBase`, giving developers full control over when device access permissions are requested.
 
 [0.4.2]
 

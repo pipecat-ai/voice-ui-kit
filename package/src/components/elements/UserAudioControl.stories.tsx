@@ -215,28 +215,13 @@ export const Connected: Story<{
   variant: ButtonVariant;
   size: ButtonSize;
   state: ButtonState;
-  noAutoInitDevices: boolean;
-}> = ({ variant, size, state, noAutoInitDevices }) => (
-  <UserAudioControl
-    variant={variant}
-    size={size}
-    state={state}
-    noAutoInitDevices={noAutoInitDevices}
-  />
+}> = ({ variant, size, state }) => (
+  <UserAudioControl variant={variant} size={size} state={state} />
 );
 
 Connected.args = {
   variant: "secondary",
   size: "md",
-  noAutoInitDevices: false,
-};
-
-Connected.argTypes = {
-  ...Connected.argTypes,
-  noAutoInitDevices: {
-    control: { type: "boolean" },
-    defaultValue: false,
-  },
 };
 
 Connected.decorators = [

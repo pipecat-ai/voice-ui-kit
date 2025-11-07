@@ -21,8 +21,6 @@ interface Props {
   noScreenControl?: boolean;
   participantId?: string;
   sessionId?: string;
-  /** Whether to prevent automatic initialization of devices. Default: false */
-  noAutoInitDevices?: boolean;
 }
 
 export const InfoPanel: React.FC<Props> = ({
@@ -34,7 +32,6 @@ export const InfoPanel: React.FC<Props> = ({
   noScreenControl = false,
   participantId,
   sessionId,
-  noAutoInitDevices = false,
 }) => {
   const noDevices =
     noAudioOutput && noUserAudio && noUserVideo && noScreenControl;
@@ -62,19 +59,10 @@ export const InfoPanel: React.FC<Props> = ({
             <PanelTitle>Devices</PanelTitle>
           </PanelHeader>
           <PanelContent>
-            {!noUserAudio && (
-              <UserAudioControl noAutoInitDevices={noAutoInitDevices} />
-            )}
-            {!noUserVideo && (
-              <UserVideoControl
-                noVideo={!isCamEnabled}
-                noAutoInitDevices={noAutoInitDevices}
-              />
-            )}
+            {!noUserAudio && <UserAudioControl />}
+            {!noUserVideo && <UserVideoControl noVideo={!isCamEnabled} />}
             {!noScreenControl && <UserScreenControl />}
-            {!noAudioOutput && (
-              <AudioOutput noAutoInitDevices={noAutoInitDevices} />
-            )}
+            {!noAudioOutput && <AudioOutput />}
           </PanelContent>
         </>
       )}

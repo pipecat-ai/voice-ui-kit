@@ -68,32 +68,13 @@ export const Default: Story<SelectTriggerProps> = ({ ...props }) => (
 
 Default.storyName = "Device Select";
 
-export const Connected: Story<
-  SelectTriggerProps & { noAutoInitDevices: boolean }
-> = ({ noAutoInitDevices, ...props }) => (
+export const Connected: Story<SelectTriggerProps> = ({ ...props }) => (
   <Card className="w-full max-w-sm">
     <CardContent className="p-6">
-      <DeviceSelect
-        {...props}
-        placeholder="Select microphone"
-        guide="Mic"
-        noAutoInitDevices={noAutoInitDevices}
-      />
+      <DeviceSelect {...props} placeholder="Select microphone" guide="Mic" />
     </CardContent>
   </Card>
 );
-
-Connected.args = {
-  noAutoInitDevices: false,
-};
-
-Connected.argTypes = {
-  ...Connected.argTypes,
-  noAutoInitDevices: {
-    control: { type: "boolean" },
-    defaultValue: false,
-  },
-};
 
 Connected.decorators = [
   (Component) => {

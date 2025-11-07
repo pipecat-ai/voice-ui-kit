@@ -86,8 +86,6 @@ export interface UserVideoControlBaseProps {
   inactiveText?: string;
   /** Custom content to render inside the button */
   children?: React.ReactNode;
-  /** Whether to prevent automatic initialization of devices. Default: false */
-  noAutoInitDevices?: boolean;
 }
 
 /**
@@ -303,10 +301,8 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
  * ```
  */
 export const UserVideoControl: React.FC<UserVideoControlBaseProps> = ({
-  noAutoInitDevices = false,
-  deviceDropDownProps,
   buttonProps,
-  ...restProps
+  ...props
 }) => {
   const { availableCams, selectedCam, updateCam } =
     usePipecatClientMediaDevices();
@@ -314,16 +310,6 @@ export const UserVideoControl: React.FC<UserVideoControlBaseProps> = ({
   const transportState = usePipecatClientTransportState();
   const loading =
     transportState === "disconnected" || transportState === "initializing";
-
-  const mergedDeviceDropDownProps = {
-    ...deviceDropDownProps,
-    noAutoInitDevices,
-  } satisfies Partial<DeviceDropDownComponentProps>;
-
-  const mergedButtonProps = {
-    isLoading: loading,
-    ...buttonProps,
-  } satisfies Partial<React.ComponentProps<typeof Button>>;
 
   return (
     <PipecatClientCamToggle>
@@ -335,9 +321,11 @@ export const UserVideoControl: React.FC<UserVideoControlBaseProps> = ({
           selectedCam={selectedCam}
           updateCam={updateCam}
           state={loading ? "default" : isCamEnabled ? "default" : "inactive"}
-          buttonProps={mergedButtonProps}
-          deviceDropDownProps={mergedDeviceDropDownProps}
-          {...restProps}
+          buttonProps={{
+            isLoading: loading,
+            ...buttonProps,
+          }}
+          {...props}
         />
       )}
     </PipecatClientCamToggle>

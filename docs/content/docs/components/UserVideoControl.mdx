@@ -32,7 +32,7 @@ The `UserVideoControl` component provides a comprehensive camera control interfa
 The `UserVideoControl` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
 
 <Callout>
-By default, the component will automatically call `initDevices()` when mounted. To prevent automatic device initialization, set the `noAutoInitDevices` prop to `true` and manually call `initDevices()` when you're ready to request device permissions.
+You must call `initDevices` on the client before using the component.
 </Callout>
 
 <LiveComponent language="tsx" withPipecat>
@@ -135,12 +135,6 @@ By default, the component will automatically call `initDevices()` when mounted. 
       type: "React.ReactNode",
       required: false,
       default: "undefined",
-    },
-    noAutoInitDevices: {
-      description: "Whether to prevent automatic initialization of devices. When set to true, the component will not automatically call initDevices(). This prop is passed down to the underlying DeviceDropDown component via deviceDropDownProps.",
-      type: "boolean",
-      required: false,
-      default: "false",
     },
   }}
 />

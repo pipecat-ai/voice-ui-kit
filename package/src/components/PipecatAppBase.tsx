@@ -49,6 +49,8 @@ export interface PipecatBaseProps {
   themeProps?: Partial<ThemeProviderProps>;
   /** Whether to automatically connect to the session when the component mounts. Defaults to false. */
   connectOnMount?: boolean;
+  /** Whether to automatically initialize devices when the component mounts. Defaults to false. */
+  initDevicesOnMount?: boolean;
   /** Disables audio output for the bot. Default: false */
   noAudioOutput?: boolean;
 
@@ -150,6 +152,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   clientOptions,
   connectOnMount = false,
   connectParams,
+  initDevicesOnMount = false,
   noAudioOutput = false,
   noThemeProvider = false,
   startBotParams,
@@ -230,6 +233,10 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
         currentClient = pcClient;
         setClient(pcClient);
 
+        if (initDevicesOnMount) {
+          await pcClient.initDevices();
+        }
+
         if (connectOnMount) {
           await startAndConnect(pcClient);
         }
@@ -246,6 +253,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   }, [
     clientOptions,
     connectOnMount,
+    initDevicesOnMount,
     startAndConnect,
     transportOptions,
     transportType,
