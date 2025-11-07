@@ -32,7 +32,7 @@ The `UserAudioControl` component provides a comprehensive microphone control int
 The `UserAudioControl` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
 
 <Callout>
-You must call `initDevices` on the client before using the component.
+By default, the component will automatically call `initDevices()` when mounted. To prevent automatic device initialization, set the `noAutoInitDevices` prop to `true` and manually call `initDevices()` when you're ready to request device permissions.
 </Callout>
 
 <LiveComponent language="tsx" withPipecat>
@@ -141,6 +141,12 @@ You must call `initDevices` on the client before using the component.
       type: "React.ReactNode",
       required: false,
       default: "undefined",
+    },
+    noAutoInitDevices: {
+      description: "Whether to prevent automatic initialization of devices. When set to true, the component will not automatically call initDevices(). This prop is passed down to the underlying DeviceDropDown component via deviceDropDownProps.",
+      type: "boolean",
+      required: false,
+      default: "false",
     },
   }}
 />

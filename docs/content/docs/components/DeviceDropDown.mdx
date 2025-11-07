@@ -76,6 +76,12 @@ The `DeviceDropDown` component is the connected variant that automatically integ
       required: false,
       default: "undefined",
     },
+    noAutoInitDevices: {
+      description: "Whether to prevent automatic initialization of devices. When set to true, the component will not automatically call initDevices(), giving you full control over when device access permissions are requested.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
   }}
 />
 
