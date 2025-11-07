@@ -215,13 +215,28 @@ export const Connected: Story<{
   variant: ButtonVariant;
   size: ButtonSize;
   state: ButtonState;
-}> = ({ variant, size, state }) => (
-  <UserVideoControl variant={variant} size={size} state={state} />
+  noAutoInitDevices: boolean;
+}> = ({ variant, size, state, noAutoInitDevices }) => (
+  <UserVideoControl
+    variant={variant}
+    size={size}
+    state={state}
+    noAutoInitDevices={noAutoInitDevices}
+  />
 );
 
 Connected.args = {
   variant: "outline",
   size: "md",
+  noAutoInitDevices: false,
+};
+
+Connected.argTypes = {
+  ...Connected.argTypes,
+  noAutoInitDevices: {
+    control: { type: "boolean" },
+    defaultValue: false,
+  },
 };
 
 Connected.decorators = [

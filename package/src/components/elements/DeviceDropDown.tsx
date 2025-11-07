@@ -43,6 +43,8 @@ export interface DeviceDropDownComponentProps {
     /** CSS classes for the dropdown menu label. */
     dropdownMenuLabel?: string;
   };
+  /** Whether automatic device initialization should be prevented (supported by connected variant). */
+  noAutoInitDevices?: boolean;
 }
 
 /**
@@ -52,7 +54,10 @@ export interface DeviceDropDownComponentProps {
 export type DeviceDropDownProps = Omit<
   DeviceDropDownComponentProps,
   "availableDevices" | "selectedDevice" | "updateDevice"
->;
+> & {
+  /** Whether to prevent automatic initialization of devices. Default: false */
+  noAutoInitDevices?: boolean;
+};
 
 /**
  * Headless dropdown menu component for selecting microphone input devices.
@@ -133,18 +138,21 @@ export const DeviceDropDownComponent = ({
  * </DeviceDropDown>
  * ```
  */
-export const DeviceDropDown: React.FC<DeviceDropDownProps> = (props) => {
+export const DeviceDropDown: React.FC<DeviceDropDownProps> = ({
+  noAutoInitDevices = false,
+  ...props
+}) => {
   const client = usePipecatClient();
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();
 
   useEffect(() => {
-    if (!client) return;
+    if (!client || noAutoInitDevices) return;
 
     if (["idle", "disconnected"].includes(client.state)) {
       client.initDevices();
     }
-  }, [client]);
+  }, [client, noAutoInitDevices]);
 
   return (
     <DeviceDropDownComponent

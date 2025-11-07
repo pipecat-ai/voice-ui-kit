@@ -74,6 +74,8 @@ interface Props {
   inactiveText?: string;
   /** Custom content to render inside the button */
   children?: React.ReactNode;
+  /** Whether to prevent automatic initialization of devices. Default: false */
+  noAutoInitDevices?: boolean;
 }
 
 /**
@@ -261,13 +263,28 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
  * />
  * ```
  */
-export const UserAudioControl: React.FC<Props> = (props) => {
+export const UserAudioControl: React.FC<Props> = ({
+  noAutoInitDevices = false,
+  deviceDropDownProps,
+  buttonProps,
+  ...restProps
+}) => {
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();
 
   const transportState = usePipecatClientTransportState();
   const loading =
     transportState === "disconnected" || transportState === "initializing";
+
+  const mergedDeviceDropDownProps = {
+    ...deviceDropDownProps,
+    noAutoInitDevices,
+  } satisfies Partial<DeviceDropDownComponentProps>;
+
+  const mergedButtonProps = {
+    isLoading: loading,
+    ...buttonProps,
+  } satisfies Partial<React.ComponentProps<typeof Button>>;
 
   return (
     <PipecatClientMicToggle>
@@ -279,10 +296,9 @@ export const UserAudioControl: React.FC<Props> = (props) => {
           selectedMic={selectedMic}
           updateMic={updateMic}
           state={isMicEnabled ? "default" : "inactive"}
-          buttonProps={{
-            isLoading: loading,
-          }}
-          {...props}
+          buttonProps={mergedButtonProps}
+          deviceDropDownProps={mergedDeviceDropDownProps}
+          {...restProps}
         />
       )}
     </PipecatClientMicToggle>

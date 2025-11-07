@@ -42,6 +42,8 @@ export interface UserAudioOutputControlBaseProps
   selectProps?: SelectProps;
   /** Props to pass to the SelectContent component */
   contentProps?: SelectContentProps;
+  /** Whether to prevent automatic initialization of devices. Default: false */
+  noAutoInitDevices?: boolean;
 }
 
 /**
@@ -145,18 +147,18 @@ export const UserAudioOutputControlComponent = ({
  */
 export const UserAudioOutputControl: React.FC<
   UserAudioOutputControlBaseProps
-> = (props) => {
+> = ({ noAutoInitDevices = false, ...props }) => {
   const client = usePipecatClient();
   const { availableSpeakers, selectedSpeaker, updateSpeaker } =
     usePipecatClientMediaDevices();
 
   useEffect(() => {
-    if (!client) return;
+    if (!client || noAutoInitDevices) return;
 
     if (["idle", "disconnected"].includes(client.state)) {
       client.initDevices();
     }
-  }, [client]);
+  }, [client, noAutoInitDevices]);
 
   return (
     <UserAudioOutputControlComponent

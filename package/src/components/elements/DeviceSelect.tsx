@@ -28,6 +28,8 @@ export interface DeviceSelectBaseProps
   };
   selectProps?: SelectProps;
   contentProps?: SelectContentProps;
+  /** Whether to prevent automatic initialization of devices. Default: false */
+  noAutoInitDevices?: boolean;
 }
 
 export interface DeviceSelectComponentProps extends DeviceSelectBaseProps {
@@ -81,18 +83,21 @@ export const DeviceSelectComponent = ({
   );
 };
 
-export const DeviceSelect: React.FC<DeviceSelectBaseProps> = (props) => {
+export const DeviceSelect: React.FC<DeviceSelectBaseProps> = ({
+  noAutoInitDevices = false,
+  ...props
+}) => {
   const client = usePipecatClient();
   const { availableMics, selectedMic, updateMic } =
     usePipecatClientMediaDevices();
 
   useEffect(() => {
-    if (!client) return;
+    if (!client || noAutoInitDevices) return;
 
     if (["idle", "disconnected"].includes(client.state)) {
       client.initDevices();
     }
-  }, [client]);
+  }, [client, noAutoInitDevices]);
 
   return (
     <DeviceSelectComponent

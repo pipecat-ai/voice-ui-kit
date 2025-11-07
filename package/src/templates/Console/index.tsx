@@ -461,12 +461,23 @@ const ConsoleUI = ({
                               className="flex flex-col gap-2"
                               side="left"
                             >
-                              {!noUserAudio && <UserAudioControl />}
+                              {!noUserAudio && (
+                                <UserAudioControl
+                                  noAutoInitDevices={noAutoInitDevices}
+                                />
+                              )}
                               {!noUserVideo && (
-                                <UserVideoControl noVideo={!isCamEnabled} />
+                                <UserVideoControl
+                                  noVideo={!isCamEnabled}
+                                  noAutoInitDevices={noAutoInitDevices}
+                                />
                               )}
                               {!noScreenControl && <UserScreenControl />}
-                              {!noAudioOutput && <UserAudioOutputControl />}
+                              {!noAudioOutput && (
+                                <UserAudioOutputControl
+                                  noAutoInitDevices={noAutoInitDevices}
+                                />
+                              )}
                             </PopoverContent>
                           </Popover>
                         )}
@@ -496,6 +507,7 @@ const ConsoleUI = ({
                         noScreenControl={noScreenControl}
                         participantId={participantId}
                         sessionId={sessionId}
+                        noAutoInitDevices={noAutoInitDevices}
                       />
                     )}
                   </ResizablePanel>
@@ -549,6 +561,7 @@ const ConsoleUI = ({
                 noScreenControl={noScreenControl}
                 participantId={participantId}
                 sessionId={sessionId}
+                noAutoInitDevices={noAutoInitDevices}
               />
             </TabsContent>
             <TabsContent value="events" className="flex-1 overflow-auto">
