@@ -1,12 +1,16 @@
 import type { ConversationProps } from "@/components/elements/Conversation";
 import Conversation from "@/components/elements/Conversation";
-import { Metrics } from "@/components/metrics";
 import { Button } from "@/components/ui/button";
 import { Panel, PanelContent, PanelHeader } from "@/components/ui/panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextMode } from "@/types/conversation";
 import { LineChartIcon, MessagesSquareIcon } from "lucide-react";
-import { memo, useState } from "react";
+import { Suspense, lazy, memo, useState } from "react";
+
+const LazyMetrics = lazy(async () => {
+  const { Metrics } = await import("@/components/metrics");
+  return { default: Metrics };
+});
 
 interface ConversationPanelProps {
   /**
@@ -90,7 +94,15 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
             )}
             {!noMetrics && (
               <TabsContent value="metrics" className="h-full">
-                <Metrics />
+                <Suspense
+                  fallback={
+                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                      Loading metrics...
+                    </div>
+                  }
+                >
+                  <LazyMetrics />
+                </Suspense>
               </TabsContent>
             )}
           </PanelContent>

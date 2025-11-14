@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { RTVIEvent } from "@pipecat-ai/client-js";
 import {
   usePipecatClientTransportState,
@@ -14,7 +16,6 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { useState } from "react";
 import { Line } from "react-chartjs-2";
 
 import { cn } from "@/lib/utils";
