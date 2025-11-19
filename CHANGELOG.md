@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **IMPORTANT:** This is the last release before `1.0.0`, which will introduce breaking changes. The upcoming major version will add a component registry (via ShadCN) and significantly change the library developer experience. Most primitive components will be removed in `1.0.0`, so please plan your upgrade path accordingly. A migration guide will be provided to assist upgrading.
 
+[0.5.1]
+- `PipecatAppBase` updated to use `startAndConnect` pattern of recent clients.
+- Added: `handleConnect` now accepts optional `startBot` params in `PipecatAppBase` so callers can supply connection details at call time without recreating the client.
+
 [0.5.0]
 
 - Added: `initDevicesOnMount` prop to `PipecatAppBase`, giving developers full control over when device access permissions are requested.

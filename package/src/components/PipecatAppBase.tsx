@@ -1,10 +1,10 @@
 "use client";
 
+import { ConversationProvider } from "@/components/ConversationProvider";
 import {
   ThemeProvider,
   type ThemeProviderProps,
 } from "@/components/ThemeProvider";
-import { ConversationProvider } from "@/components/ConversationProvider";
 import { createTransport } from "@/lib/transports";
 import {
   APIRequest,
@@ -17,10 +17,7 @@ import {
   PipecatClientProvider,
 } from "@pipecat-ai/client-react";
 import type { DailyTransportConstructorOptions } from "@pipecat-ai/daily-transport";
-import type {
-  SmallWebRTCTransport,
-  SmallWebRTCTransportConstructorOptions,
-} from "@pipecat-ai/small-webrtc-transport";
+import type { SmallWebRTCTransportConstructorOptions } from "@pipecat-ai/small-webrtc-transport";
 import React, { useCallback, useEffect, useState } from "react";
 
 /**
@@ -73,8 +70,11 @@ export interface PipecatBaseProps {
 export interface PipecatBaseChildProps {
   /** Pipecat client instance */
   client: PipecatClient | null;
-  /** Function to initiate a connection to the session. Can be sync or async. */
-  handleConnect?: () => void | Promise<void>;
+  /**
+   * Function to initiate a connection to the session. Can be sync or async.
+   * Optional params allow supplying startBot data at call time.
+   */
+  handleConnect?: (params?: APIRequest) => void | Promise<void>;
   /** Function to disconnect from the current session. Can be sync or async. */
   handleDisconnect?: () => void | Promise<void>;
   /** Error message if connection fails */
@@ -84,10 +84,6 @@ export interface PipecatBaseChildProps {
   /** Transformed start bot response. */
   transformedStartBotResponse?: TransportConnectionParams | unknown;
 }
-
-const defaultStartBotResponseTransformer = (
-  response: TransportConnectionParams,
-) => response;
 
 /**
  * PipecatAppBase component that provides a configured Pipecat client with audio capabilities.
@@ -100,6 +96,7 @@ const defaultStartBotResponseTransformer = (
  * - Automatically disconnects the client when unmounting
  * - Optionally disables theme provider based on noThemeProvider prop
  * - Optionally auto-connects to the session on mount based on connectOnMount prop
+ * - Allows providing startBot params either as a prop or when calling handleConnect
  *
  * @param props - Configuration for the audio client including connection params, transport type, and auto-connect behavior
  * @returns A provider component that wraps children with client context and handlers
@@ -146,17 +143,22 @@ const defaultStartBotResponseTransformer = (
  * >
  *   <YourComponent />
  * </PipecatAppBase>
+ *
+ * // Passing startBot params at call time (when they aren't available at mount)
+ * <PipecatAppBase transportType="daily">
+ *   {({ handleConnect }) => (
+ *     <button onClick={() => handleConnect?.(lateParams)}>Connect</button>
+ *   )}
+ * </PipecatAppBase>
  * ```
  */
 export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   clientOptions,
   connectOnMount = false,
-  connectParams,
   initDevicesOnMount = false,
   noAudioOutput = false,
   noThemeProvider = false,
   startBotParams,
-  startBotResponseTransformer = defaultStartBotResponseTransformer,
   transportOptions,
   transportType,
   themeProps,
@@ -164,42 +166,16 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
 }) => {
   const [client, setClient] = useState<PipecatClient | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [rawStartBotResponse, setRawStartBotResponse] = useState<
-    TransportConnectionParams | unknown
-  >(null);
-  const [transformedStartBotResponse, setTransformedStartBotResponse] =
-    useState<TransportConnectionParams | unknown>(null);
 
   const startAndConnect = useCallback(
-    async (client: PipecatClient) => {
+    async (client: PipecatClient, overrideParams?: APIRequest) => {
+      const params = overrideParams ?? startBotParams;
+      if (!params) {
+        return;
+      }
       try {
-        if (startBotParams) {
-          const response = await client.startBot({
-            requestData: {},
-            ...startBotParams,
-          });
-          setRawStartBotResponse(response);
-          if (transportType === "smallwebrtc") {
-            // Check if response has ICEServers
-            if (
-              typeof response === "object" &&
-              response !== null &&
-              "iceConfig" in response
-            ) {
-              const iceConfig = response.iceConfig as {
-                iceServers: RTCIceServer[];
-              };
-              (client.transport as SmallWebRTCTransport).iceServers =
-                iceConfig.iceServers;
-            }
-          }
-          const transformedResponse =
-            await startBotResponseTransformer(response);
-          await client.connect(transformedResponse);
-          setTransformedStartBotResponse(transformedResponse);
-        } else {
-          await client.connect(connectParams ?? {});
-        }
+        console.debug("Connecting to session with params:", params);
+        await client.startBotAndConnect(params);
       } catch (err) {
         console.error("Connection error:", err);
         setError(
@@ -207,7 +183,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
         );
       }
     },
-    [connectParams, startBotParams, startBotResponseTransformer, transportType],
+    [startBotParams],
   );
 
   /**
@@ -264,7 +240,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
    * Only allows connection from specific states (initialized, disconnected, error).
    * Clears any previous errors and handles connection failures.
    */
-  const handleConnect = async () => {
+  const handleConnect = async (params?: APIRequest) => {
     if (
       !client ||
       !["initialized", "disconnected", "error"].includes(client.state)
@@ -273,7 +249,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
     }
     setError(null);
 
-    await startAndConnect(client);
+    await startAndConnect(client, params);
   };
 
   /**
@@ -300,8 +276,6 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
     handleConnect,
     handleDisconnect,
     error,
-    rawStartBotResponse,
-    transformedStartBotResponse,
   };
 
   // Only create PipecatClientProvider when client is fully initialized

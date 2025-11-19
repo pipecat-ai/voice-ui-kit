@@ -425,8 +425,8 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0(@pipecat-ai/client-js@1.4.0)
       '@pipecat-ai/small-webrtc-transport':
-        specifier: ^1.5.0
-        version: 1.5.0(@pipecat-ai/client-js@1.4.0)
+        specifier: ^1.7.0
+        version: 1.7.0(@pipecat-ai/client-js@1.4.0)
       '@tailwindcss/vite':
         specifier: ^4.1.13
         version: 4.1.13(vite@7.1.7(@types/node@22.18.8)(jiti@2.6.0)(lightningcss@1.30.1)(tsx@4.20.5))
@@ -1467,6 +1467,11 @@ packages:
 
   '@pipecat-ai/small-webrtc-transport@1.5.0':
     resolution: {integrity: sha512-kGebGYD60U9A7wKskw9pRw3XZUZ+tepumqc5ObaST8tzM1O+oroDOriPxEtMaOVEglAyOg+7gXYUBDexK2Rp3Q==}
+    peerDependencies:
+      '@pipecat-ai/client-js': ~1.4.0
+
+  '@pipecat-ai/small-webrtc-transport@1.7.0':
+    resolution: {integrity: sha512-yMBHWla22S3sIfo0kckyj6AJsZms3syRja1IDXc1NOC/v0iNVGlJ5EbeWrup5zJdVc4bc8JQ9kZYI5jQYP219Q==}
     peerDependencies:
       '@pipecat-ai/client-js': ~1.4.0
 
@@ -6971,6 +6976,13 @@ snapshots:
       '@pipecat-ai/client-js': 1.4.0
 
   '@pipecat-ai/small-webrtc-transport@1.5.0(@pipecat-ai/client-js@1.4.0)':
+    dependencies:
+      '@daily-co/daily-js': 0.83.1
+      '@pipecat-ai/client-js': 1.4.0
+      dequal: 2.0.3
+      lodash: 4.17.21
+
+  '@pipecat-ai/small-webrtc-transport@1.7.0(@pipecat-ai/client-js@1.4.0)':
     dependencies:
       '@daily-co/daily-js': 0.83.1
       '@pipecat-ai/client-js': 1.4.0

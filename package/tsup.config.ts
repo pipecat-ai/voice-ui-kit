@@ -8,7 +8,7 @@ export default defineConfig({
   },
   format: ["esm", "cjs"],
   dts: true,
-  splitting: false,
+  splitting: true,
   clean: true,
   external: [
     "react",

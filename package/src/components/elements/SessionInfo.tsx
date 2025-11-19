@@ -1,8 +1,8 @@
 import CopyText from "@/components/elements/CopyText";
 import DataList from "@/components/elements/DataList";
 import { TextDashBlankslate } from "@/index";
-import Daily from "@daily-co/daily-js";
 import { usePipecatClient } from "@pipecat-ai/client-react";
+import { useEffect, useState } from "react";
 
 interface Props {
   noTransportType?: boolean;
@@ -22,14 +22,44 @@ export const SessionInfo: React.FC<Props> = ({
   participantId,
 }) => {
   const client = usePipecatClient();
+  const [dailyVersion, setDailyVersion] = useState<string | null>(null);
+  const transport = client?.transport;
+  const isDailyTransport = !!transport && "dailyCallClient" in transport;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadDailyVersion = async () => {
+      try {
+        const { default: Daily } = await import("@daily-co/daily-js");
+        if (!isMounted) {
+          return;
+        }
+        setDailyVersion(Daily.version());
+      } catch {
+        if (isMounted) {
+          setDailyVersion(null);
+        }
+      }
+    };
+
+    if (isDailyTransport) {
+      loadDailyVersion();
+    } else {
+      setDailyVersion(null);
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isDailyTransport]);
 
   let transportTypeName = "Unknown";
-  if (client && "dailyCallClient" in client.transport) {
-    transportTypeName = `Daily (v${Daily.version()})`;
+  if (isDailyTransport) {
+    transportTypeName = dailyVersion ? `Daily (v${dailyVersion})` : "Daily";
   } else if (
     // @ts-expect-error - __proto__ not typed
-    client?.transport.__proto__.constructor.SERVICE_NAME ===
-    "small-webrtc-transport"
+    transport?.__proto__.constructor.SERVICE_NAME === "small-webrtc-transport"
   ) {
     transportTypeName = "Small WebRTC";
   }
