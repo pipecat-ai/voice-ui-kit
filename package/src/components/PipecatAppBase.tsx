@@ -70,8 +70,11 @@ export interface PipecatBaseProps {
 export interface PipecatBaseChildProps {
   /** Pipecat client instance */
   client: PipecatClient | null;
-  /** Function to initiate a connection to the session. Can be sync or async. */
-  handleConnect?: () => void | Promise<void>;
+  /**
+   * Function to initiate a connection to the session. Can be sync or async.
+   * Optional params allow supplying startBot data at call time.
+   */
+  handleConnect?: (params?: APIRequest) => void | Promise<void>;
   /** Function to disconnect from the current session. Can be sync or async. */
   handleDisconnect?: () => void | Promise<void>;
   /** Error message if connection fails */
@@ -93,6 +96,7 @@ export interface PipecatBaseChildProps {
  * - Automatically disconnects the client when unmounting
  * - Optionally disables theme provider based on noThemeProvider prop
  * - Optionally auto-connects to the session on mount based on connectOnMount prop
+ * - Allows providing startBot params either as a prop or when calling handleConnect
  *
  * @param props - Configuration for the audio client including connection params, transport type, and auto-connect behavior
  * @returns A provider component that wraps children with client context and handlers
@@ -139,6 +143,13 @@ export interface PipecatBaseChildProps {
  * >
  *   <YourComponent />
  * </PipecatAppBase>
+ *
+ * // Passing startBot params at call time (when they aren't available at mount)
+ * <PipecatAppBase transportType="daily">
+ *   {({ handleConnect }) => (
+ *     <button onClick={() => handleConnect?.(lateParams)}>Connect</button>
+ *   )}
+ * </PipecatAppBase>
  * ```
  */
 export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
@@ -157,19 +168,14 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const startAndConnect = useCallback(
-    async (client: PipecatClient) => {
-      if (!startBotParams) {
+    async (client: PipecatClient, overrideParams?: APIRequest) => {
+      const params = overrideParams ?? startBotParams;
+      if (!params) {
         return;
       }
       try {
-        console.debug("Connecting to session with params:", startBotParams);
-        await client.startBotAndConnect({
-          endpoint: startBotParams.endpoint,
-          requestData: startBotParams.requestData,
-          headers: new Headers({
-            "Content-Type": "application/json",
-          }),
-        });
+        console.debug("Connecting to session with params:", params);
+        await client.startBotAndConnect(params);
       } catch (err) {
         console.error("Connection error:", err);
         setError(
@@ -234,7 +240,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
    * Only allows connection from specific states (initialized, disconnected, error).
    * Clears any previous errors and handles connection failures.
    */
-  const handleConnect = async () => {
+  const handleConnect = async (params?: APIRequest) => {
     if (
       !client ||
       !["initialized", "disconnected", "error"].includes(client.state)
@@ -243,7 +249,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
     }
     setError(null);
 
-    await startAndConnect(client);
+    await startAndConnect(client, params);
   };
 
   /**
