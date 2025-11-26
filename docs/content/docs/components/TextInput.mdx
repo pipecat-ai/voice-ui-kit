@@ -51,23 +51,29 @@ The `TextInput` component is the connected variant that automatically integrates
       required: false,
       default: "false",
     },
-    role: {
-      description: "Role of the message sender (user or assistant)",
-      type: '"user" | "assistant"',
+    sendTextOptions: {
+      description: "Options for the sendText API call. See SendTextOptions interface below.",
+      type: "SendTextOptions",
       required: false,
-      default: '"user"',
+      default: "undefined",
     },
-    runImmediately: {
-      description: "Whether to run the message immediately when sent",
+    noInject: {
+      description: "If true, the message will not be injected into the conversation store. Useful when you want to handle message injection manually.",
       type: "boolean",
       required: false,
-      default: "true",
+      default: "false",
     },
     noConnectedPlaceholder: {
       description: "Placeholder text shown when not connected to Pipecat",
       type: "string",
       required: false,
       default: '"Connect to send"',
+    },
+    onSend: {
+      description: "Optional callback function called after a message is successfully sent",
+      type: "(message: string) => Promise<void> | void",
+      required: false,
+      default: "undefined",
     },
     multiline: {
       description: "Whether to use a multiline textarea instead of single-line input",
@@ -110,6 +116,28 @@ The `TextInput` component is the connected variant that automatically integrates
       type: '"sm" | "md" | "lg" | "xl"',
       required: false,
       default: '"md"',
+    },
+  }}
+/>
+
+### SendTextOptions
+
+The `sendTextOptions` prop accepts an object with the following properties:
+
+<TypeTable
+  className="text-sm"
+  type={{
+    run_immediately: {
+      description: "Whether to immediately run the bot with the updated context. If false, the context will be updated but the bot will not be run until the next message or action that triggers the bot to run.",
+      type: "boolean",
+      required: false,
+      default: "true",
+    },
+    audio_response: {
+      description: "Whether the bot should respond with audio. If true, the bot's response will be processed by TTS and be spoken. If false, the bot will bypass the TTS and respond with text only.",
+      type: "boolean",
+      required: false,
+      default: "true",
     },
   }}
 />
@@ -346,6 +374,43 @@ You can use different sizes for the input and button components.
   }
 
   render(<Demo />);
+`}
+</LiveComponent>
+
+#### SendTextOptions
+
+You can customize how the bot handles text messages using the `sendTextOptions` prop.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { TextInput } from "@pipecat-ai/voice-ui-kit";
+
+  <TextInput
+    placeholder="Send a text-only message..."
+    sendTextOptions={{
+      run_immediately: true,
+      audio_response: false, // Bot will respond with text only, no TTS
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Disable Message Injection
+
+By default, messages sent via `TextInput` are automatically injected into the conversation store. You can disable this behavior with the `noInject` prop if you want to handle message injection manually.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { TextInput } from "@pipecat-ai/voice-ui-kit";
+
+  <TextInput
+    placeholder="Send without auto-injecting..."
+    noInject={true}
+    onSend={(message) => {
+      console.log("Message sent:", message);
+      // Handle message injection manually if needed
+    }}
+  />
 `}
 </LiveComponent>
 

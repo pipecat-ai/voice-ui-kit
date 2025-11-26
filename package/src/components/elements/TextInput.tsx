@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { usePipecatClient } from "@pipecat-ai/client-react";
 import { SendIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useConversationContext } from "../ConversationProvider";
 
 export interface TextInputComponentProps {
   debounceTime?: number;
@@ -44,15 +45,34 @@ export const TextInputComponent = ({
   const [isSending, setIsSending] = useState(false);
   const [message, setMessage] = useState("");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSend = useCallback(async () => {
     if (!message.trim() || isSending) return;
 
     setIsSending(true);
-    await onSend?.(message);
-    setMessage("");
-    setIsSending(false);
+    try {
+      await onSend?.(message);
+      // Only clear message on successful send
+      setMessage("");
+    } catch (error) {
+      // Keep message in input if send fails
+      // Error handling can be added here if needed (e.g., show toast)
+      console.error("Failed to send message:", error);
+    } finally {
+      setIsSending(false);
+    }
   }, [message, onSend, isSending]);
+
+  // Refocus input after message is cleared (successful send)
+  useEffect(() => {
+    if (message === "" && !isSending && containerRef.current) {
+      const input = containerRef.current.querySelector<HTMLInputElement>(
+        'input[data-slot="input"], textarea[data-slot="textarea"]',
+      );
+      input?.focus();
+    }
+  }, [message, isSending]);
 
   useEffect(() => {
     if (!message.trim()) return;
@@ -96,7 +116,10 @@ export const TextInputComponent = ({
   const InputComponent = multiline ? Textarea : Input;
 
   return (
-    <div className={cn("flex flex-row gap-2", classNames?.container)}>
+    <div
+      ref={containerRef}
+      className={cn("flex flex-row gap-2 items-center", classNames?.container)}
+    >
       <InputComponent
         placeholder={placeholder}
         value={message}
@@ -112,7 +135,7 @@ export const TextInputComponent = ({
         disabled={!canSend}
         isLoading={isSending}
         size={size}
-        className={cn(classNames?.button)}
+        className={cn("shrink-0", classNames?.button)}
         isIcon={!buttonLabel}
         {...buttonProps}
       >
@@ -123,32 +146,57 @@ export const TextInputComponent = ({
   );
 };
 
+export interface SendTextOptions {
+  run_immediately?: boolean;
+  audio_response?: boolean;
+}
+
 export const TextInput = ({
   debounceTime = 300,
   disabled,
-  role = "user",
-  runImmediately = true,
+  sendTextOptions,
   noConnectedPlaceholder = "Connect to send",
+  noInject = false,
+  onSend,
   ...props
 }: TextInputComponentProps & {
-  role?: "user" | "assistant";
-  runImmediately?: boolean;
+  sendTextOptions?: SendTextOptions;
   noConnectedPlaceholder?: string;
+  noInject?: boolean;
 }) => {
   const { isConnected } = usePipecatConnectionState();
   const client = usePipecatClient();
 
+  const { injectMessage } = useConversationContext();
+
   const handleSend = useCallback(
     async (message: string) => {
-      if (!isConnected || !client) return;
+      // Validate connection before attempting to send
+      if (!isConnected || !client) {
+        return;
+      }
 
-      await client.appendToContext({
-        role,
-        content: message,
-        run_immediately: runImmediately,
-      });
+      // Inject message to store first (if enabled)
+      if (!noInject) {
+        injectMessage({
+          role: "user",
+          parts: [
+            {
+              text: message,
+              final: true,
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        });
+      }
+
+      // Send the message through the client
+      await client.sendText(message, sendTextOptions);
+
+      // Call the optional callback after successful send
+      onSend?.(message);
     },
-    [isConnected, client, role, runImmediately],
+    [isConnected, client, injectMessage, noInject, onSend, sendTextOptions],
   );
 
   return (
