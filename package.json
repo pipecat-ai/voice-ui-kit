@@ -12,8 +12,8 @@
     "@daily-co/daily-js": "^0.84.0",
     "@pipecat-ai/client-js": "^1.4.0",
     "@pipecat-ai/client-react": "^1.1.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
