@@ -15,8 +15,8 @@
     "@tailwindcss/vite": "^4.1.12",
     "install": "^0.13.0",
     "npm": "^11.5.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
