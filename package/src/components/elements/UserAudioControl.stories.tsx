@@ -35,6 +35,30 @@ export default {
       control: { type: "text" },
       defaultValue: null,
     },
+    noDevicePicker: {
+      control: { type: "boolean" },
+      defaultValue: false,
+    },
+    noMicrophones: {
+      control: { type: "boolean" },
+      defaultValue: false,
+    },
+    noSpeakers: {
+      control: { type: "boolean" },
+      defaultValue: false,
+    },
+    microphoneLabel: {
+      control: { type: "text" },
+      defaultValue: "Microphones",
+    },
+    speakerLabel: {
+      control: { type: "text" },
+      defaultValue: "Speakers",
+    },
+    dropdownMenuLabel: {
+      control: { type: "text" },
+      defaultValue: "Audio Devices",
+    },
   },
 } satisfies StoryDefault;
 
@@ -76,12 +100,22 @@ export const Default: Story<{
   noDevicePicker: boolean;
   noVisualizer: boolean;
   isLoading: boolean;
+  noMicrophones: boolean;
+  noSpeakers: boolean;
+  microphoneLabel: string;
+  speakerLabel: string;
+  dropdownMenuLabel: string;
 }> = ({
   size,
   isMuted = false,
   noDevicePicker = false,
   noVisualizer = false,
   isLoading = false,
+  noMicrophones = false,
+  noSpeakers = false,
+  microphoneLabel = "Microphones",
+  speakerLabel = "Speakers",
+  dropdownMenuLabel = "Audio Devices",
 }) => (
   <Card className="w-full">
     <CardContent className="flex flex-col gap-4">
@@ -96,6 +130,11 @@ export const Default: Story<{
           updateMic={() => {}}
           noVisualizer={noVisualizer}
           noDevicePicker={noDevicePicker}
+          noMicrophones={noMicrophones}
+          noSpeakers={noSpeakers}
+          microphoneLabel={microphoneLabel}
+          speakerLabel={speakerLabel}
+          dropdownMenuLabel={dropdownMenuLabel}
           buttonProps={{
             isLoading,
           }}
@@ -113,6 +152,11 @@ export const Default: Story<{
           updateMic={() => {}}
           noVisualizer={noVisualizer}
           noDevicePicker={noDevicePicker}
+          noMicrophones={noMicrophones}
+          noSpeakers={noSpeakers}
+          microphoneLabel={microphoneLabel}
+          speakerLabel={speakerLabel}
+          dropdownMenuLabel={dropdownMenuLabel}
           buttonProps={{
             isLoading,
           }}
@@ -130,6 +174,11 @@ export const Default: Story<{
           updateMic={() => {}}
           noVisualizer={noVisualizer}
           noDevicePicker={noDevicePicker}
+          noMicrophones={noMicrophones}
+          noSpeakers={noSpeakers}
+          microphoneLabel={microphoneLabel}
+          speakerLabel={speakerLabel}
+          dropdownMenuLabel={dropdownMenuLabel}
           buttonProps={{
             isLoading,
           }}
@@ -215,8 +264,34 @@ export const Connected: Story<{
   variant: ButtonVariant;
   size: ButtonSize;
   state: ButtonState;
-}> = ({ variant, size, state }) => (
-  <UserAudioControl variant={variant} size={size} state={state} />
+  noDevicePicker: boolean;
+  noMicrophones: boolean;
+  noSpeakers: boolean;
+  microphoneLabel: string;
+  speakerLabel: string;
+  dropdownMenuLabel: string;
+}> = ({
+  variant,
+  size,
+  state,
+  noDevicePicker,
+  noMicrophones,
+  noSpeakers,
+  microphoneLabel,
+  speakerLabel,
+  dropdownMenuLabel,
+}) => (
+  <UserAudioControl
+    variant={variant}
+    size={size}
+    state={state}
+    noDevicePicker={noDevicePicker}
+    noMicrophones={noMicrophones}
+    noSpeakers={noSpeakers}
+    microphoneLabel={microphoneLabel}
+    speakerLabel={speakerLabel}
+    dropdownMenuLabel={dropdownMenuLabel}
+  />
 );
 
 Connected.args = {

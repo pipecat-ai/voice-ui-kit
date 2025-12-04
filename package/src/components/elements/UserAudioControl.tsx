@@ -1,9 +1,5 @@
 "use client";
 
-import {
-  DeviceDropDownComponent,
-  type DeviceDropDownComponentProps,
-} from "@/components/elements/DeviceDropDown";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/buttongroup";
 import {
@@ -12,6 +8,14 @@ import {
   type ButtonState,
   type ButtonVariant,
 } from "@/components/ui/buttonVariants";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { VoiceVisualizer } from "@/visualizers";
 import {
@@ -20,7 +24,12 @@ import {
   usePipecatClientMediaDevices,
   usePipecatClientTransportState,
 } from "@pipecat-ai/client-react";
-import { ChevronDownIcon, MicIcon, MicOffIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  MicIcon,
+  MicOffIcon,
+  SpeakerIcon,
+} from "lucide-react";
 
 /**
  * Base props interface for UserAudioControl components.
@@ -54,10 +63,18 @@ interface Props {
   };
   /** Additional props to pass to the dropdown button */
   dropdownButtonProps?: Partial<React.ComponentProps<typeof Button>>;
-  /** Additional props to pass to the device dropdown component */
-  deviceDropDownProps?: Partial<DeviceDropDownComponentProps>;
   /** Whether to hide the device picker dropdown */
   noDevicePicker?: boolean;
+  /** Custom label for the main dropdown menu (null/empty to hide) */
+  dropdownMenuLabel?: string | null;
+  /** Whether to hide microphones from the device dropdown */
+  noMicrophones?: boolean;
+  /** Whether to hide speakers from the device dropdown */
+  noSpeakers?: boolean;
+  /** Custom label for the microphone section in the dropdown */
+  microphoneLabel?: string;
+  /** Custom label for the speaker section in the dropdown */
+  speakerLabel?: string;
   /** Whether to hide the voice visualizer */
   noVisualizer?: boolean;
   /** Additional props to pass to the VoiceVisualizer component */
@@ -91,6 +108,12 @@ interface ComponentProps extends Props {
   selectedMic?: OptionalMediaDeviceInfo;
   /** Callback function called when a microphone device is selected */
   updateMic?: (deviceId: string) => void;
+  /** Array of available speaker devices */
+  availableSpeakers?: MediaDeviceInfo[];
+  /** Currently selected speaker device */
+  selectedSpeaker?: OptionalMediaDeviceInfo;
+  /** Callback function called when a speaker device is selected */
+  updateSpeaker?: (deviceId: string) => void;
 }
 
 const btnClasses = "flex-1 w-full z-10 justify-start";
@@ -118,8 +141,12 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
   classNames = {},
   buttonProps = {},
   dropdownButtonProps = {},
-  deviceDropDownProps = {},
   noDevicePicker = false,
+  dropdownMenuLabel = "Audio Devices",
+  noMicrophones = false,
+  noSpeakers = false,
+  microphoneLabel = "Microphones",
+  speakerLabel = "Speakers",
   noVisualizer = false,
   visualizerProps = {},
   isMicEnabled = false,
@@ -127,6 +154,9 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
   availableMics,
   selectedMic,
   updateMic,
+  availableSpeakers,
+  selectedSpeaker,
+  updateSpeaker,
   noAudio,
   noAudioText = "Audio disabled",
   noIcon = false,
@@ -136,6 +166,8 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
   onClick,
 }) => {
   let buttonComp;
+
+  const noDropdown = noDevicePicker || (noMicrophones && noSpeakers);
 
   /** NO AUDIO */
   if (noAudio || buttonProps?.isLoading) {
@@ -164,6 +196,11 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
     /** AUDIO ENABLED */
     const buttonState = state || (isMicEnabled ? "default" : "inactive");
 
+    const hasMicrophones =
+      !noMicrophones && availableMics && availableMics.length > 0;
+    const hasSpeakers =
+      !noSpeakers && availableSpeakers && availableSpeakers.length > 0;
+
     buttonComp = (
       <>
         <Button
@@ -174,7 +211,7 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
           {...buttonProps}
           className={cn(
             btnClasses,
-            !noDevicePicker && "rounded-e-none",
+            !noDropdown && "rounded-e-none",
             classNames.button,
           )}
         >
@@ -208,31 +245,76 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
             />
           )}
         </Button>
-        {!noDevicePicker && (
-          <DeviceDropDownComponent
-            menuLabel="Microphone device"
-            availableDevices={availableMics}
-            selectedDevice={selectedMic}
-            updateDevice={updateMic}
-            classNames={{
-              dropdownMenuContent: classNames.dropdownMenuContent,
-              dropdownMenuCheckboxItem: classNames.dropdownMenuCheckboxItem,
-            }}
-            {...deviceDropDownProps}
-          >
-            <Button
-              className={cn(
-                "flex-none z-0 rounded-s-none border-l-0",
-                classNames.dropdownMenuTrigger,
-              )}
-              variant={variant}
-              size={size}
-              isIcon
-              {...dropdownButtonProps}
+        {!noDropdown && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                className={cn(
+                  "flex-none z-0 rounded-s-none border-l-0",
+                  classNames.dropdownMenuTrigger,
+                )}
+                variant={variant}
+                size={size}
+                isIcon
+                {...dropdownButtonProps}
+              >
+                <ChevronDownIcon size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className={cn(classNames.dropdownMenuContent)}
             >
-              <ChevronDownIcon size={16} />
-            </Button>
-          </DeviceDropDownComponent>
+              {dropdownMenuLabel && (
+                <>
+                  <DropdownMenuLabel>{dropdownMenuLabel}</DropdownMenuLabel>
+                  {(hasMicrophones || hasSpeakers) && <DropdownMenuSeparator />}
+                </>
+              )}
+
+              {/* Microphone devices */}
+              {hasMicrophones && (
+                <>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">
+                    <MicIcon size={12} className="inline mr-1" />
+                    {microphoneLabel}
+                  </DropdownMenuLabel>
+                  {availableMics.map((device) => (
+                    <DropdownMenuCheckboxItem
+                      key={`mic-${device.deviceId}`}
+                      checked={selectedMic?.deviceId === device.deviceId}
+                      onCheckedChange={() => updateMic?.(device.deviceId)}
+                      className={cn(classNames.dropdownMenuCheckboxItem)}
+                    >
+                      {device.label ||
+                        `Microphone ${device.deviceId.slice(0, 5)}`}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                  {hasSpeakers && <DropdownMenuSeparator />}
+                </>
+              )}
+
+              {/* Speaker devices */}
+              {hasSpeakers && (
+                <>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">
+                    <SpeakerIcon size={12} className="inline mr-1" />
+                    {speakerLabel}
+                  </DropdownMenuLabel>
+                  {availableSpeakers.map((device) => (
+                    <DropdownMenuCheckboxItem
+                      key={`speaker-${device.deviceId}`}
+                      checked={selectedSpeaker?.deviceId === device.deviceId}
+                      onCheckedChange={() => updateSpeaker?.(device.deviceId)}
+                      className={cn(classNames.dropdownMenuCheckboxItem)}
+                    >
+                      {device.label || `Speaker ${device.deviceId.slice(0, 5)}`}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </>
     );
@@ -265,8 +347,14 @@ export const UserAudioControl: React.FC<Props> = ({
   buttonProps,
   ...props
 }) => {
-  const { availableMics, selectedMic, updateMic } =
-    usePipecatClientMediaDevices();
+  const {
+    availableMics,
+    selectedMic,
+    updateMic,
+    availableSpeakers,
+    selectedSpeaker,
+    updateSpeaker,
+  } = usePipecatClientMediaDevices();
 
   const transportState = usePipecatClientTransportState();
   const loading =
@@ -281,6 +369,9 @@ export const UserAudioControl: React.FC<Props> = ({
           availableMics={availableMics}
           selectedMic={selectedMic}
           updateMic={updateMic}
+          availableSpeakers={availableSpeakers}
+          selectedSpeaker={selectedSpeaker}
+          updateSpeaker={updateSpeaker}
           state={isMicEnabled ? "default" : "inactive"}
           buttonProps={{
             isLoading: loading,

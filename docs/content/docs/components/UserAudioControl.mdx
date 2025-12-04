@@ -94,6 +94,36 @@ You must call `initDevices` on the client before using the component.
       required: false,
       default: "false",
     },
+    dropdownMenuLabel: {
+      description: "Custom label for the main dropdown menu (null/empty to hide)",
+      type: "string | null",
+      required: false,
+      default: '"Audio Devices"',
+    },
+    noMicrophones: {
+      description: "Whether to hide microphones from the device dropdown",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noSpeakers: {
+      description: "Whether to hide speakers from the device dropdown",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    microphoneLabel: {
+      description: "Custom label for the microphone section in the dropdown",
+      type: "string",
+      required: false,
+      default: '"Microphones"',
+    },
+    speakerLabel: {
+      description: "Custom label for the speaker section in the dropdown",
+      type: "string",
+      required: false,
+      default: '"Speakers"',
+    },
     noVisualizer: {
       description: "Whether to hide the audio visualizer",
       type: "boolean",
@@ -264,6 +294,36 @@ The `UserAudioComponent` is the headless variant that accepts all microphone sta
       required: false,
       default: "false",
     },
+    dropdownMenuLabel: {
+      description: "Custom label for the main dropdown menu (null/empty to hide)",
+      type: "string | null",
+      required: false,
+      default: '"Audio Devices"',
+    },
+    noMicrophones: {
+      description: "Whether to hide microphones from the device dropdown",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noSpeakers: {
+      description: "Whether to hide speakers from the device dropdown",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    microphoneLabel: {
+      description: "Custom label for the microphone section in the dropdown",
+      type: "string",
+      required: false,
+      default: '"Microphones"',
+    },
+    speakerLabel: {
+      description: "Custom label for the speaker section in the dropdown",
+      type: "string",
+      required: false,
+      default: '"Speakers"',
+    },
     noVisualizer: {
       description: "Whether to hide the audio visualizer",
       type: "boolean",
@@ -391,6 +451,77 @@ Hide the device selection dropdown for a simpler interface.
 `}
 </LiveComponent>
 
+#### With Speaker Selection
+
+Include both microphones and speakers in the device dropdown for comprehensive audio device management.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserAudioControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioControl />
+`}
+</LiveComponent>
+
+#### Exclude Device Types
+
+You can hide specific device types from the dropdown. For example, show only speakers:
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserAudioControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioControl noMicrophones />
+`}
+</LiveComponent>
+
+Or show only microphones:
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserAudioControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioControl noSpeakers />
+`}
+</LiveComponent>
+
+#### Custom Dropdown Label
+
+Customize or hide the main dropdown label.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserAudioControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioControl dropdownMenuLabel="Select Audio Device" />
+`}
+</LiveComponent>
+
+Hide the main label entirely:
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserAudioControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioControl dropdownMenuLabel={null} />
+`}
+</LiveComponent>
+
+#### Custom Device Labels
+
+Customize the labels for device sections in the dropdown.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserAudioControl } from "@pipecat-ai/voice-ui-kit";
+
+  <UserAudioControl 
+    microphoneLabel="Input Devices"
+    speakerLabel="Output Devices"
+  />
+`}
+</LiveComponent>
+
 #### Without Visualizer
 
 Hide the audio visualizer for a minimal microphone button.
@@ -487,6 +618,8 @@ Apply custom CSS classes to different parts of the component.
 
 - **Microphone Toggle**: Click to enable/disable microphone input
 - **Device Selection**: Built-in dropdown for selecting different microphone devices
+- **Speaker Selection**: Optional speaker device selection in the same dropdown
+- **Flexible Device Display**: Exclude specific device types or customize section labels
 - **Audio Visualization**: Optional real-time audio level visualization
 - **Loading States**: Automatic loading indicators during connection setup
 - **Accessible**: Includes proper ARIA labels and keyboard navigation
@@ -523,8 +656,12 @@ The component displays different visual states based on the microphone status:
 ## Device Management
 
 The component includes a dropdown menu for device selection that:
-- Lists all available microphone devices
-- Shows the currently selected device
+- Lists all available microphone devices (unless `noMicrophones` is true)
+- Lists speaker devices (unless `noSpeakers` is true)
+- Groups devices by type (microphones and speakers) with configurable labels
+- Shows the currently selected device for each type
 - Allows switching between devices
 - Can be hidden with the `noDevicePicker` prop
-- Integrates with the `DeviceDropDown` component
+- Supports custom main dropdown label via `dropdownMenuLabel` (null to hide)
+- Supports custom labels for device sections via `microphoneLabel` and `speakerLabel`
+- Uses a custom dropdown implementation for enhanced flexibility
