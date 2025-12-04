@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@pipecat-ai/voice-ui-kit": "workspace:*",
-    "next": "15.3.4",
+    "next": "15.3.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
