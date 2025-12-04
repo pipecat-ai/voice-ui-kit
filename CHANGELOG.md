@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]
 
+[0.6.0]
+
 - Added: `UserAudioControl` dropdown can list both microphones and speakers with grouped sections
 - Added: `dropdownMenuLabel` to customize or hide the main dropdown label
 - Added: `microphoneLabel`, `speakerLabel` to customize dropdown section labels
