@@ -4,6 +4,7 @@ import { usePipecatClientTransportState } from "@pipecat-ai/client-react";
 import { TextMode } from "@/types/conversation";
 import { memo, useCallback, useEffect, useRef } from "react";
 import { MessageContainer } from "./MessageContainer";
+import { TextInput } from "./TextInput";
 
 /**
  * Props for the Conversation component
@@ -53,6 +54,11 @@ export interface ConversationProps {
    * @default "llm"
    */
   textMode?: TextMode;
+  /**
+   * Disable the text input field at the bottom of the conversation
+   * @default false
+   */
+  noTextInput?: boolean;
 }
 
 /**
@@ -89,6 +95,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
     classNames = {},
     clientLabel,
     noAutoscroll = false,
+    noTextInput = false,
     systemLabel,
     textMode = "llm",
   }) => {
@@ -152,34 +159,49 @@ export const Conversation: React.FC<ConversationProps> = memo(
       return () => scrollElement.removeEventListener("scroll", handleScroll);
     }, [updateScrollState]);
 
+    const textInput = noTextInput ? null : (
+      <div className="p-3 border-t">
+        <TextInput
+          classNames={{
+            container: "items-center",
+          }}
+        />
+      </div>
+    );
+
     // Show messages first if they exist, regardless of connection state
     if (messages.length > 0) {
       return (
         <div
-          ref={scrollRef}
-          className={cn(
-            "relative h-full overflow-y-auto p-4",
-            classNames.container,
-          )}
+          className={cn("relative h-full flex flex-col", classNames.container)}
         >
-          <div className={cn(classNames.message)}>
-            {messages.map((message, index) => (
-              <MessageContainer
-                key={index}
-                message={message}
-                assistantLabel={assistantLabel}
-                clientLabel={clientLabel}
-                systemLabel={systemLabel}
-                classNames={{
-                  container: classNames.message,
-                  messageContent: classNames.messageContent,
-                  thinking: classNames.thinking,
-                  time: classNames.time,
-                  role: classNames.role,
-                }}
-              />
-            ))}
+          <div
+            ref={scrollRef}
+            className={cn(
+              "relative flex-1 overflow-y-auto p-4",
+              !noTextInput && "pb-2",
+            )}
+          >
+            <div className={cn(classNames.message)}>
+              {messages.map((message, index) => (
+                <MessageContainer
+                  key={index}
+                  message={message}
+                  assistantLabel={assistantLabel}
+                  clientLabel={clientLabel}
+                  systemLabel={systemLabel}
+                  classNames={{
+                    container: classNames.message,
+                    messageContent: classNames.messageContent,
+                    thinking: classNames.thinking,
+                    time: classNames.time,
+                    role: classNames.role,
+                  }}
+                />
+              ))}
+            </div>
           </div>
+          {textInput}
         </div>
       );
     }
@@ -188,14 +210,14 @@ export const Conversation: React.FC<ConversationProps> = memo(
     if (isConnecting) {
       return (
         <div
-          className={cn(
-            "relative flex items-center justify-center h-full",
-            classNames.container,
-          )}
+          className={cn("relative h-full flex flex-col", classNames.container)}
         >
-          <div className="text-muted-foreground text-sm">
-            Connecting to agent...
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-muted-foreground text-sm">
+              Connecting to agent...
+            </div>
           </div>
+          {textInput}
         </div>
       );
     }
@@ -203,33 +225,33 @@ export const Conversation: React.FC<ConversationProps> = memo(
     if (!isConnected) {
       return (
         <div
-          className={cn(
-            "relative flex items-center justify-center h-full",
-            classNames.container,
-          )}
+          className={cn("relative h-full flex flex-col", classNames.container)}
         >
-          <div className="text-center p-4">
-            <div className="text-muted-foreground mb-2">
-              Not connected to agent
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center p-4">
+              <div className="text-muted-foreground mb-2">
+                Not connected to agent
+              </div>
+              <p className="text-sm text-muted-foreground max-w-md">
+                Connect to an agent to see conversation messages in real-time.
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Connect to an agent to see conversation messages in real-time.
-            </p>
           </div>
+          {textInput}
         </div>
       );
     }
 
     return (
       <div
-        className={cn(
-          "relative flex items-center justify-center h-full",
-          classNames.container,
-        )}
+        className={cn("relative h-full flex flex-col", classNames.container)}
       >
-        <div className="text-muted-foreground text-sm">
-          Waiting for messages...
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-muted-foreground text-sm">
+            Waiting for messages...
+          </div>
         </div>
+        {textInput}
       </div>
     );
   },

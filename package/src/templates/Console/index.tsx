@@ -69,6 +69,8 @@ export interface ConsoleTemplateProps
   noUserVideo?: boolean;
   /** Disables user screen control entirely. Default: false */
   noScreenControl?: boolean;
+  /** Disables text input in the conversation. Default: false */
+  noTextInput?: boolean;
   /** Disables audio output for the bot. Default: false */
   noAudioOutput?: boolean;
   /** Disables audio visualization for the bot. Default: false */
@@ -229,6 +231,7 @@ const ConsoleUI = ({
   noUserAudio = false,
   noUserVideo = false,
   noScreenControl = false,
+  noTextInput = false,
   noAudioOutput = false,
   noBotAudio = false,
   noBotVideo = false,
@@ -412,6 +415,7 @@ const ConsoleUI = ({
                       <ConversationPanel
                         noConversation={noConversation}
                         noMetrics={noMetrics}
+                        noTextInput={noTextInput}
                         conversationElementProps={{
                           ...conversationElementProps,
                           assistantLabel: assistantLabelText,
@@ -537,6 +541,7 @@ const ConsoleUI = ({
                 <ConversationPanel
                   noConversation={noConversation}
                   noMetrics={noMetrics}
+                  noTextInput={noTextInput}
                 />
               </TabsContent>
             )}

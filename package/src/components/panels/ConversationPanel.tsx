@@ -35,6 +35,11 @@ interface ConversationPanelProps {
    * @default false
    */
   noTextModeToggle?: boolean;
+  /**
+   * Disable the text input field in the conversation.
+   * @default false
+   */
+  noTextInput?: boolean;
 }
 
 export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
@@ -42,6 +47,7 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
     conversationElementProps,
     noConversation = false,
     noMetrics = false,
+    noTextInput = false,
     noTextModeToggle = false,
     textMode: initialTextMode = "llm",
   }) => {
@@ -85,6 +91,9 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
                 <Conversation
                   {...conversationElementProps}
                   textMode={textMode}
+                  noTextInput={
+                    conversationElementProps?.noTextInput ?? noTextInput
+                  }
                 />
               </TabsContent>
             )}
