@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: `dropdownMenuLabel` to customize or hide the main dropdown label
 - Added: `microphoneLabel`, `speakerLabel` to customize dropdown section labels
 - Added: `noMicrophones`, `noSpeakers` to independently hide device dropdown sections
+- Added: `noTextInput` to `Console` template and `Conversation` component to hide text input controls
+- Added: `noInject` to `TextInput` component to prevent user text messages from being injected into conversation state
+- Added: `onSend` callback prop to `TextInput`
 - Updated: Console template now uses `UserAudioControl` for speaker selection instead of `UserAudioOutputControl`
 - Fixed: `noAudioOutput` prop correctly passed down to `PipecatAppBase` in Console template
 
