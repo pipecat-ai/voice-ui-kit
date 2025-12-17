@@ -3,6 +3,7 @@ import {
   type ConversationMessage,
   type ConversationMessagePart,
 } from "@/types/conversation";
+import { useBotMessages } from "@/hooks/useBotMessages";
 import { RTVIEvent } from "@pipecat-ai/client-js";
 import { useRTVIClientEvent } from "@pipecat-ai/client-react";
 import { createContext, useContext, useRef } from "react";
@@ -29,7 +30,6 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     injectMessage,
     upsertUserTranscript,
     updateAssistantText,
-    startAssistantLlmStream,
   } = useConversationStore();
 
   const userStoppedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -39,22 +39,8 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     clearMessages();
   });
 
-  useRTVIClientEvent(RTVIEvent.BotLlmStarted, () => {
-    startAssistantLlmStream();
-    // Nudge a reset counter so any consumer logic can infer fresh turn if needed
-    assistantStreamResetRef.current += 1;
-  });
-
-  useRTVIClientEvent(RTVIEvent.BotLlmText, (data) => {
-    updateAssistantText(data.text, false, "llm");
-  });
-
-  useRTVIClientEvent(RTVIEvent.BotLlmStopped, () => {
-    finalizeLastMessage("assistant");
-  });
-
-  useRTVIClientEvent(RTVIEvent.BotTtsStarted, () => {
-    // Start a new assistant message for TTS if there isn't one already in progress
+  // Helper to ensure assistant message exists
+  const ensureAssistantMessage = () => {
     const store = useConversationStore.getState();
     const lastAssistantIndex = store.messages.findLastIndex(
       (msg: ConversationMessage) => msg.role === "assistant",
@@ -70,15 +56,37 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
         final: false,
         parts: [],
       });
+      assistantStreamResetRef.current += 1;
+      return true;
     }
+    return false;
+  };
+
+  // Use the bot messages hook to handle BotOutput detection and fallback
+  useBotMessages({
+    onBotMessageStarted: () => {
+      ensureAssistantMessage();
+    },
+    onBotMessageChunk: (type, text) => {
+      // The hook handles spacing for BotOutput chunks internally
+      // For legacy events, spacing is handled by the store for TTS
+      updateAssistantText(text, false, type);
+    },
+    onBotMessageEnded: () => {
+      const store = useConversationStore.getState();
+      const lastAssistant = store.messages.findLast(
+        (m: ConversationMessage) => m.role === "assistant",
+      );
+
+      if (lastAssistant && !lastAssistant.final) {
+        finalizeLastMessage("assistant");
+      }
+    },
   });
 
-  useRTVIClientEvent(RTVIEvent.BotTtsText, (data) => {
-    updateAssistantText(data.text, false, "tts");
-  });
-
-  useRTVIClientEvent(RTVIEvent.BotTtsStopped, () => {
-    // Finalize the TTS text stream
+  useRTVIClientEvent(RTVIEvent.BotStoppedSpeaking, () => {
+    // Finalize the assistant message when bot stops speaking
+    // This works for both BotOutput and fallback scenarios
     const store = useConversationStore.getState();
     const lastAssistant = store.messages.findLast(
       (m: ConversationMessage) => m.role === "assistant",

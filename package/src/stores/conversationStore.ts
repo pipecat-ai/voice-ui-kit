@@ -38,7 +38,7 @@ interface ConversationState {
   updateAssistantText: (
     text: string,
     final: boolean,
-    source: "llm" | "tts",
+    source: "llm" | "tts", // Derived from BotOutput.spoken: "llm" if false, "tts" if true
   ) => void;
   startAssistantLlmStream: () => void;
 }

@@ -1,11 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { type BotTTSTextData, RTVIEvent } from "@pipecat-ai/client-js";
+import { RTVIEvent } from "@pipecat-ai/client-js";
 import {
   usePipecatClientTransportState,
   useRTVIClientEvent,
 } from "@pipecat-ai/client-react";
+import { useBotMessages } from "@/hooks/useBotMessages";
 import { cva } from "class-variance-authority";
 import { useCallback, useState } from "react";
 
@@ -183,11 +184,18 @@ export const TranscriptOverlay = ({
   const [turnEnd, setIsTurnEnd] = useState(false);
   const transportState = usePipecatClientTransportState();
 
-  useRTVIClientEvent(
-    RTVIEvent.BotTtsText,
-    useCallback(
-      (event: BotTTSTextData) => {
-        if (participant === "local") {
+  // Use the bot messages hook to handle BotOutput detection and fallback
+  useBotMessages({
+    onBotMessageChunk: (type, text, metadata) => {
+      if (participant === "local") {
+        return;
+      }
+
+      // Only process TTS chunks (spoken content)
+      if (type === "tts") {
+        // For BotOutput events, only process word-level chunks
+        // For legacy events, process all chunks
+        if (metadata?.aggregated_by && metadata.aggregated_by !== "word") {
           return;
         }
 
@@ -196,24 +204,22 @@ export const TranscriptOverlay = ({
           setIsTurnEnd(false);
         }
 
-        setTranscript((prev) => [...prev, event.text]);
-      },
-      [turnEnd, participant],
-    ),
-  );
-
-  useRTVIClientEvent(
-    RTVIEvent.BotStoppedSpeaking,
-    useCallback(() => {
+        setTranscript((prev) => [...prev, text]);
+      }
+    },
+    onBotMessageEnded: (type) => {
       if (participant === "local") {
         return;
       }
-      setIsTurnEnd(true);
-    }, [participant]),
-  );
+      // Only handle TTS ended events
+      if (type === "tts") {
+        setIsTurnEnd(true);
+      }
+    },
+  });
 
   useRTVIClientEvent(
-    RTVIEvent.BotTtsStopped,
+    RTVIEvent.BotStoppedSpeaking,
     useCallback(() => {
       if (participant === "local") {
         return;

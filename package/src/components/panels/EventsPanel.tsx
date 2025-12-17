@@ -6,7 +6,8 @@ import {
   PanelTitle,
 } from "@/components/ui/panel";
 import { cn } from "@/lib/utils";
-import { RTVIEvent } from "@pipecat-ai/client-js";
+import { BotOutputData, RTVIEvent } from "@pipecat-ai/client-js";
+
 import {
   usePipecatClient,
   usePipecatClientTransportState,
@@ -101,6 +102,14 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
     addEvent({
       event: RTVIEvent.BotStoppedSpeaking,
       message: "Bot stopped speaking",
+      time: new Date().toLocaleTimeString(),
+    });
+  });
+
+  useRTVIClientEvent(RTVIEvent.BotOutput, (data: BotOutputData) => {
+    addEvent({
+      event: RTVIEvent.BotOutput,
+      message: `Bot output (${data.aggregated_by}, spoken: ${data.spoken}): ${data.text}`,
       time: new Date().toLocaleTimeString(),
     });
   });

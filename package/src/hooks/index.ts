@@ -13,3 +13,8 @@ export type {
   UsePipecatEventStreamOptions,
 } from "./usePipecatEventStream";
 export { useTheme } from "./useTheme";
+export { useBotMessages } from "./useBotMessages";
+export type {
+  UseBotMessagesCallbacks,
+  BotMessageChunkMetadata,
+} from "./useBotMessages";
