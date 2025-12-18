@@ -125,7 +125,7 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
       setBotOutputSupported(supportsBotOutput);
 
       // If we determined support and have cached data, apply it
-      if (supportsBotOutput && cachedEventsRef.current) {
+      if (supportsBotOutput) {
         applyCachedData();
         // Reset stream state after applying cached data
         botOutputStreamStateRef.current = {
@@ -150,27 +150,27 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
     const cached = cachedEventsRef.current;
 
     // Apply cached started events
-    if (cached.llmStarted && callbacks.onBotMessageStarted) {
-      callbacks.onBotMessageStarted("llm");
+    if (cached.llmStarted) {
+      callbacks.onBotMessageStarted?.("llm");
     }
-    if (cached.ttsStarted && callbacks.onBotMessageStarted) {
-      callbacks.onBotMessageStarted("tts");
+    if (cached.ttsStarted) {
+      callbacks.onBotMessageStarted?.("tts");
     }
 
     // Apply cached text chunks
-    if (cached.llmText && callbacks.onBotMessageChunk) {
-      callbacks.onBotMessageChunk("llm", cached.llmText);
+    if (cached.llmText) {
+      callbacks.onBotMessageChunk?.("llm", cached.llmText);
     }
-    if (cached.ttsText && callbacks.onBotMessageChunk) {
-      callbacks.onBotMessageChunk("tts", cached.ttsText);
+    if (cached.ttsText) {
+      callbacks.onBotMessageChunk?.("tts", cached.ttsText);
     }
 
     // Apply cached ended events
-    if (cached.llmStopped && callbacks.onBotMessageEnded) {
-      callbacks.onBotMessageEnded("llm");
+    if (cached.llmStopped) {
+      callbacks.onBotMessageEnded?.("llm");
     }
-    if (cached.ttsStopped && callbacks.onBotMessageEnded) {
-      callbacks.onBotMessageEnded("tts");
+    if (cached.ttsStopped) {
+      callbacks.onBotMessageEnded?.("tts");
     }
 
     // Clear cache after applying
@@ -197,8 +197,8 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
         (type === "llm" && !streamState.llmStarted) ||
         (type === "tts" && !streamState.ttsStarted);
 
-      if (isFirstForType && callbacks.onBotMessageStarted) {
-        callbacks.onBotMessageStarted(type);
+      if (isFirstForType) {
+        callbacks.onBotMessageStarted?.(type);
         if (type === "llm") {
           streamState.llmStarted = true;
         } else {
@@ -207,7 +207,7 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
       }
 
       // Process the text chunk with proper spacing for BotOutput
-      if (callbacks.onBotMessageChunk && data.text) {
+      if (data.text) {
         const lastChunk = botOutputStreamStateRef.current.lastChunkText[type];
         let textToSend = data.text;
 
@@ -225,7 +225,7 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
           aggregated_by: data.aggregated_by,
         };
 
-        callbacks.onBotMessageChunk(type, textToSend, metadata);
+        callbacks.onBotMessageChunk?.(type, textToSend, metadata);
         botOutputStreamStateRef.current.lastChunkText[type] = textToSend;
       }
 
@@ -239,11 +239,11 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
     if (botOutputSupported === true) {
       // For BotOutput, signal end for any active streams
       const streamState = botOutputStreamStateRef.current;
-      if (streamState.llmStarted && callbacks.onBotMessageEnded) {
-        callbacks.onBotMessageEnded("llm");
+      if (streamState.llmStarted) {
+        callbacks.onBotMessageEnded?.("llm");
       }
-      if (streamState.ttsStarted && callbacks.onBotMessageEnded) {
-        callbacks.onBotMessageEnded("tts");
+      if (streamState.ttsStarted) {
+        callbacks.onBotMessageEnded?.("tts");
       }
       // Reset stream state
       botOutputStreamStateRef.current = {
@@ -257,8 +257,8 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
   // Handle legacy BotLlmStarted events
   useRTVIClientEvent(RTVIEvent.BotLlmStarted, () => {
     // Handle the event based on support status
-    if (botOutputSupported === false && callbacks.onBotMessageStarted) {
-      callbacks.onBotMessageStarted("llm");
+    if (botOutputSupported === false) {
+      callbacks.onBotMessageStarted?.("llm");
     } else if (botOutputSupported === null) {
       // Cache during period before BotReady is received
       cachedEventsRef.current.llmStarted = true;
@@ -266,8 +266,8 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
   });
 
   useRTVIClientEvent(RTVIEvent.BotLlmText, (data) => {
-    if (botOutputSupported === false && callbacks.onBotMessageChunk) {
-      callbacks.onBotMessageChunk("llm", data.text);
+    if (botOutputSupported === false) {
+      callbacks.onBotMessageChunk?.("llm", data.text);
     } else if (botOutputSupported === null) {
       // Cache during period before BotReady is received with proper spacing
       const cached = cachedEventsRef.current.llmText;
@@ -279,8 +279,8 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
   });
 
   useRTVIClientEvent(RTVIEvent.BotLlmStopped, () => {
-    if (botOutputSupported === false && callbacks.onBotMessageEnded) {
-      callbacks.onBotMessageEnded("llm");
+    if (botOutputSupported === false) {
+      callbacks.onBotMessageEnded?.("llm");
     } else if (botOutputSupported === null) {
       // Cache during period before BotReady is received
       cachedEventsRef.current.llmStopped = true;
@@ -288,8 +288,8 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
   });
 
   useRTVIClientEvent(RTVIEvent.BotTtsStarted, () => {
-    if (botOutputSupported === false && callbacks.onBotMessageStarted) {
-      callbacks.onBotMessageStarted("tts");
+    if (botOutputSupported === false) {
+      callbacks.onBotMessageStarted?.("tts");
     } else if (botOutputSupported === null) {
       // Cache during period before BotReady is received
       cachedEventsRef.current.ttsStarted = true;
@@ -297,8 +297,8 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
   });
 
   useRTVIClientEvent(RTVIEvent.BotTtsText, (data) => {
-    if (botOutputSupported === false && callbacks.onBotMessageChunk) {
-      callbacks.onBotMessageChunk("tts", data.text);
+    if (botOutputSupported === false) {
+      callbacks.onBotMessageChunk?.("tts", data.text);
     } else if (botOutputSupported === null) {
       // Cache during period before BotReady is received with proper spacing
       const cached = cachedEventsRef.current.ttsText;
@@ -310,8 +310,8 @@ export function useBotMessages(callbacks: UseBotMessagesCallbacks) {
   });
 
   useRTVIClientEvent(RTVIEvent.BotTtsStopped, () => {
-    if (botOutputSupported === false && callbacks.onBotMessageEnded) {
-      callbacks.onBotMessageEnded("tts");
+    if (botOutputSupported === false) {
+      callbacks.onBotMessageEnded?.("tts");
     } else if (botOutputSupported === null) {
       // Cache during period before BotReady is received
       cachedEventsRef.current.ttsStopped = true;
