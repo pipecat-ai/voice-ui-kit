@@ -107,6 +107,7 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
   });
 
   useRTVIClientEvent(RTVIEvent.BotOutput, (data: BotOutputData) => {
+    if (data.aggregated_by === "word") return;
     addEvent({
       event: RTVIEvent.BotOutput,
       message: `Bot output (${data.aggregated_by}, spoken: ${data.spoken}): ${data.text}`,
