@@ -80,6 +80,12 @@ export const usePipecatConversation = ({
   const messages = useConversationStore((state) => state.messages);
   const llmTextStreams = useConversationStore((state) => state.llmTextStreams);
   const ttsTextStreams = useConversationStore((state) => state.ttsTextStreams);
+  const botOutputSpokenStreams = useConversationStore(
+    (state) => state.botOutputSpokenStreams,
+  );
+  const botOutputUnspokenStreams = useConversationStore(
+    (state) => state.botOutputUnspokenStreams,
+  );
 
   // Memoize the filtered messages to prevent infinite loops
   const filteredMessages = useMemo(() => {
@@ -87,6 +93,25 @@ export const usePipecatConversation = ({
     const messagesWithTextStreams = messages.map((message) => {
       if (message.role === "assistant") {
         const messageId = message.createdAt; // Use createdAt as unique ID
+
+        // Handle BotOutput mode
+        if (message.mode === "botOutput") {
+          const spokenText = botOutputSpokenStreams.get(messageId) || "";
+          const unspokenText = botOutputUnspokenStreams.get(messageId) || "";
+
+          return {
+            ...message,
+            parts: [
+              {
+                text: { spoken: spokenText, unspoken: unspokenText },
+                final: message.final || false,
+                createdAt: message.createdAt,
+              },
+            ],
+          };
+        }
+
+        // Handle TTS/LLM mode (legacy)
         const textStream =
           textMode === "llm"
             ? llmTextStreams.get(messageId) || ""
@@ -114,7 +139,14 @@ export const usePipecatConversation = ({
     );
 
     return processedMessages;
-  }, [messages, llmTextStreams, ttsTextStreams, textMode]);
+  }, [
+    messages,
+    llmTextStreams,
+    ttsTextStreams,
+    botOutputSpokenStreams,
+    botOutputUnspokenStreams,
+    textMode,
+  ]);
 
   return {
     messages: filteredMessages,

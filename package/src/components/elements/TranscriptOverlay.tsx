@@ -1,12 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { RTVIEvent } from "@pipecat-ai/client-js";
+import { BotOutputData, BotReadyData, RTVIEvent } from "@pipecat-ai/client-js";
 import {
   usePipecatClientTransportState,
   useRTVIClientEvent,
 } from "@pipecat-ai/client-react";
 import { useBotMessages } from "@/hooks/useBotMessages";
+import { isMinVersion } from "@/utils/version";
 import { cva } from "class-variance-authority";
 import { useCallback, useState } from "react";
 
@@ -182,41 +183,64 @@ export const TranscriptOverlay = ({
 }: TranscriptOverlayProps) => {
   const [transcript, setTranscript] = useState<string[]>([]);
   const [turnEnd, setIsTurnEnd] = useState(false);
+  const [botOutputSupported, setBotOutputSupported] = useState(false);
   const transportState = usePipecatClientTransportState();
 
-  // Use the bot messages hook to handle BotOutput detection and fallback
-  useBotMessages({
-    onBotMessageChunk: (type, text, metadata) => {
-      if (participant === "local") {
-        return;
+  // Detect BotOutput support from BotReady event
+  useRTVIClientEvent(RTVIEvent.BotReady, (botData: BotReadyData) => {
+    const rtviVersion = botData.version;
+    const supportsBotOutput = isMinVersion(rtviVersion, [1, 1, 0]);
+    setBotOutputSupported(supportsBotOutput);
+  });
+
+  // Handle BotOutput events (when supported) - only word-level spoken chunks
+  useRTVIClientEvent(RTVIEvent.BotOutput, (data: BotOutputData) => {
+    if (participant === "local" || !botOutputSupported) {
+      return;
+    }
+
+    // Only process word-level outputs that have been spoken
+    // These provide real-time word-by-word streaming for karaoke-like UI
+    if (data.aggregated_by === "word" && data.spoken === true && data.text) {
+      if (turnEnd) {
+        setTranscript([]);
+        setIsTurnEnd(false);
       }
 
-      // Only process TTS chunks (spoken content)
-      if (type === "tts") {
-        // For BotOutput events, only process word-level chunks
-        // For legacy events, process all chunks
-        if (metadata?.aggregated_by && metadata.aggregated_by !== "word") {
+      setTranscript((prev) => [...prev, data.text]);
+    }
+  });
+
+  // Handle legacy TTS events (when BotOutput not supported)
+  useBotMessages(
+    {
+      onBotMessageChunk: (type, text) => {
+        if (participant === "local") {
           return;
         }
 
-        if (turnEnd) {
-          setTranscript([]);
-          setIsTurnEnd(false);
-        }
+        // Only process TTS chunks (spoken content)
+        if (type === "tts") {
+          if (turnEnd) {
+            setTranscript([]);
+            setIsTurnEnd(false);
+          }
 
-        setTranscript((prev) => [...prev, text]);
-      }
+          setTranscript((prev) => [...prev, text]);
+        }
+      },
+      onBotMessageEnded: (type) => {
+        if (participant === "local") {
+          return;
+        }
+        // Only handle TTS ended events
+        if (type === "tts") {
+          setIsTurnEnd(true);
+        }
+      },
     },
-    onBotMessageEnded: (type) => {
-      if (participant === "local") {
-        return;
-      }
-      // Only handle TTS ended events
-      if (type === "tts") {
-        setIsTurnEnd(true);
-      }
-    },
-  });
+    botOutputSupported,
+  );
 
   useRTVIClientEvent(
     RTVIEvent.BotStoppedSpeaking,

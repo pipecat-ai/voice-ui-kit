@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Panel, PanelContent, PanelHeader } from "@/components/ui/panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextMode } from "@/types/conversation";
+import { useConversationContext } from "@/components/ConversationProvider";
 import { LineChartIcon, MessagesSquareIcon } from "lucide-react";
 import { memo, useState } from "react";
 
@@ -53,6 +54,13 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
   }) => {
     const defaultValue = noConversation ? "metrics" : "conversation";
     const [textMode, setTextMode] = useState<TextMode>(initialTextMode);
+    const { botOutputSupported } = useConversationContext();
+
+    // Show toggle only when BotOutput is confirmed unsupported (false) and not disabled
+    // Hide by default (when botOutputSupported is still unknown/null or true)
+    const shouldShowToggle =
+      !noTextModeToggle && botOutputSupported === false;
+
     return (
       <Tabs className="h-full" defaultValue={defaultValue}>
         <Panel className="h-full max-sm:border-none">
@@ -71,7 +79,7 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
                 </TabsTrigger>
               )}
             </TabsList>
-            {!noTextModeToggle && (
+            {shouldShowToggle && (
               <Button
                 className="absolute right-1.5 top-1/2 -translate-y-1/2"
                 variant="ghost"

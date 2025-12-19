@@ -1,4 +1,5 @@
 import {
+  type BotOutputText,
   type ConversationMessage,
   type ConversationMessagePart,
 } from "@/types/conversation";
@@ -7,9 +8,12 @@ import { create } from "zustand";
 interface ConversationState {
   messages: ConversationMessage[];
   messageCallbacks: Map<string, (message: ConversationMessage) => void>;
-  // Store separate text streams for LLM and TTS
+  // Store separate text streams for LLM and TTS (legacy mode)
   llmTextStreams: Map<string, string>; // messageId -> accumulated LLM text
   ttsTextStreams: Map<string, string>; // messageId -> accumulated TTS text
+  // Store BotOutput text streams (BotOutput mode)
+  botOutputSpokenStreams: Map<string, string>; // messageId -> accumulated spoken text
+  botOutputUnspokenStreams: Map<string, string>; // messageId -> accumulated unspoken text
 
   // Actions
   registerMessageCallback: (
@@ -40,6 +44,11 @@ interface ConversationState {
     final: boolean,
     source: "llm" | "tts", // Derived from BotOutput.spoken: "llm" if false, "tts" if true
   ) => void;
+  updateAssistantBotOutput: (
+    text: string,
+    final: boolean,
+    spoken: boolean, // true if text has been spoken, false if unspoken
+  ) => void;
   startAssistantLlmStream: () => void;
 }
 
@@ -53,9 +62,26 @@ export const sortByCreatedAt = (
 export const isMessageEmpty = (message: ConversationMessage): boolean => {
   const parts = message.parts || [];
   if (parts.length === 0) return true;
-  return parts.every((p) =>
-    typeof p.text === "string" ? p.text.trim().length === 0 : false,
-  );
+  return parts.every((p) => {
+    if (typeof p.text === "string") {
+      return p.text.trim().length === 0;
+    }
+    // Check BotOutputText objects
+    if (
+      typeof p.text === "object" &&
+      p.text !== null &&
+      "spoken" in p.text &&
+      "unspoken" in p.text
+    ) {
+      const botText = p.text as BotOutputText;
+      return (
+        botText.spoken.trim().length === 0 &&
+        botText.unspoken.trim().length === 0
+      );
+    }
+    // For ReactNode, consider it non-empty
+    return false;
+  });
 };
 
 export const filterEmptyMessages = (
@@ -129,6 +155,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
   messageCallbacks: new Map(),
   llmTextStreams: new Map(),
   ttsTextStreams: new Map(),
+  botOutputSpokenStreams: new Map(),
+  botOutputUnspokenStreams: new Map(),
 
   registerMessageCallback: (id, callback) =>
     set((state) => {
@@ -149,6 +177,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       messages: [],
       llmTextStreams: new Map(),
       ttsTextStreams: new Map(),
+      botOutputSpokenStreams: new Map(),
+      botOutputUnspokenStreams: new Map(),
     }),
 
   addMessage: (messageData) => {
@@ -207,9 +237,12 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       const lastMessage = messages[lastMessageIndex];
 
       // Check if message is empty in both parts and text streams
+      const messageId = lastMessage.createdAt;
       const hasTextInStreams =
-        state.llmTextStreams.get(lastMessage.createdAt) ||
-        state.ttsTextStreams.get(lastMessage.createdAt);
+        state.llmTextStreams.get(messageId) ||
+        state.ttsTextStreams.get(messageId) ||
+        state.botOutputSpokenStreams.get(messageId) ||
+        state.botOutputUnspokenStreams.get(messageId);
 
       if (isMessageEmpty(lastMessage) && !hasTextInStreams) {
         // Remove empty message only if it has no text in streams either
@@ -253,7 +286,16 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       if (lastMessageIndex === -1) return state;
 
       const lastMessage = messages[lastMessageIndex];
-      if (isMessageEmpty(lastMessage)) {
+      const messageId = lastMessage.createdAt;
+
+      // Check if message has text in streams
+      const hasTextInStreams =
+        state.llmTextStreams.get(messageId) ||
+        state.ttsTextStreams.get(messageId) ||
+        state.botOutputSpokenStreams.get(messageId) ||
+        state.botOutputUnspokenStreams.get(messageId);
+
+      if (isMessageEmpty(lastMessage) && !hasTextInStreams) {
         messages.splice(lastMessageIndex, 1);
         const processedMessages = mergeMessages(
           filterEmptyMessages(messages.sort(sortByCreatedAt)),
@@ -377,6 +419,7 @@ export const useConversationStore = create<ConversationState>()((set) => ({
           parts: [],
           createdAt: messageId,
           updatedAt: messageId,
+          mode: "tts/llm",
         };
         messages.push(newMessage);
       } else {
@@ -386,6 +429,7 @@ export const useConversationStore = create<ConversationState>()((set) => ({
 
         messages[lastAssistantIndex] = {
           ...lastMessage,
+          mode: "tts/llm", // Ensure mode is set for legacy events
           final: final ? true : lastMessage.final,
           updatedAt: now.toISOString(),
         };
@@ -412,6 +456,75 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         messages: processedMessages,
         llmTextStreams,
         ttsTextStreams,
+      };
+    });
+  },
+
+  updateAssistantBotOutput: (text, final, spoken) => {
+    const now = new Date();
+    set((state) => {
+      const messages = [...state.messages];
+      const botOutputSpokenStreams = new Map(state.botOutputSpokenStreams);
+      const botOutputUnspokenStreams = new Map(state.botOutputUnspokenStreams);
+
+      const lastAssistantIndex = messages.findLastIndex(
+        (msg) => msg.role === "assistant",
+      );
+
+      let messageId: string;
+
+      if (lastAssistantIndex === -1) {
+        // Create new assistant message
+        messageId = now.toISOString();
+        const newMessage: ConversationMessage = {
+          role: "assistant",
+          final,
+          parts: [],
+          createdAt: messageId,
+          updatedAt: messageId,
+          mode: "botOutput",
+        };
+        messages.push(newMessage);
+      } else {
+        // Update existing assistant message
+        const lastMessage = messages[lastAssistantIndex];
+        messageId = lastMessage.createdAt;
+
+        // Ensure mode is set to botOutput
+        messages[lastAssistantIndex] = {
+          ...lastMessage,
+          mode: "botOutput",
+          final: final ? true : lastMessage.final,
+          updatedAt: now.toISOString(),
+        };
+      }
+
+      // Update the appropriate text stream
+      if (spoken) {
+        const currentText = botOutputSpokenStreams.get(messageId) || "";
+        // Add space separator if needed
+        const separator =
+          currentText && !currentText.endsWith(" ") && !text.startsWith(" ")
+            ? " "
+            : "";
+        botOutputSpokenStreams.set(messageId, currentText + separator + text);
+      } else {
+        const currentText = botOutputUnspokenStreams.get(messageId) || "";
+        // Add space separator if needed
+        const separator =
+          currentText && !currentText.endsWith(" ") && !text.startsWith(" ")
+            ? " "
+            : "";
+        botOutputUnspokenStreams.set(messageId, currentText + separator + text);
+      }
+
+      // Don't filter out messages that have text in the text streams
+      const processedMessages = mergeMessages(messages.sort(sortByCreatedAt));
+
+      return {
+        messages: processedMessages,
+        botOutputSpokenStreams,
+        botOutputUnspokenStreams,
       };
     });
   },
