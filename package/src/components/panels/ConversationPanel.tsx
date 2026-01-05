@@ -58,8 +58,7 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
 
     // Show toggle only when BotOutput is confirmed unsupported (false) and not disabled
     // Hide by default (when botOutputSupported is still unknown/null or true)
-    const shouldShowToggle =
-      !noTextModeToggle && botOutputSupported === false;
+    const shouldShowToggle = !noTextModeToggle && botOutputSupported === false;
 
     return (
       <Tabs className="h-full" defaultValue={defaultValue}>
@@ -101,6 +100,9 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
                   textMode={textMode}
                   noTextInput={
                     conversationElementProps?.noTextInput ?? noTextInput
+                  }
+                  botOutputRenderers={
+                    conversationElementProps?.botOutputRenderers
                   }
                 />
               </TabsContent>

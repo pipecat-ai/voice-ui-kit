@@ -86,6 +86,9 @@ export const usePipecatConversation = ({
   const botOutputUnspokenStreams = useConversationStore(
     (state) => state.botOutputUnspokenStreams,
   );
+  const botOutputAggregationTypes = useConversationStore(
+    (state) => state.botOutputAggregationTypes,
+  );
 
   // Memoize the filtered messages to prevent infinite loops
   const filteredMessages = useMemo(() => {
@@ -98,6 +101,7 @@ export const usePipecatConversation = ({
         if (message.mode === "botOutput") {
           const spokenText = botOutputSpokenStreams.get(messageId) || "";
           const unspokenText = botOutputUnspokenStreams.get(messageId) || "";
+          const aggregatedBy = botOutputAggregationTypes.get(messageId);
 
           return {
             ...message,
@@ -106,6 +110,7 @@ export const usePipecatConversation = ({
                 text: { spoken: spokenText, unspoken: unspokenText },
                 final: message.final || false,
                 createdAt: message.createdAt,
+                aggregatedBy,
               },
             ],
           };
@@ -145,6 +150,7 @@ export const usePipecatConversation = ({
     ttsTextStreams,
     botOutputSpokenStreams,
     botOutputUnspokenStreams,
+    botOutputAggregationTypes,
     textMode,
   ]);
 

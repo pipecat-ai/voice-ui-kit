@@ -59,6 +59,13 @@ export interface ConversationProps {
    * @default false
    */
   noTextInput?: boolean;
+  /**
+   * Custom renderers for BotOutput content based on aggregation type
+   * Key is the aggregation type (e.g., "code", "link"), value is a renderer function
+   */
+  botOutputRenderers?: React.ComponentProps<
+    typeof MessageContainer
+  >["botOutputRenderers"];
 }
 
 /**
@@ -98,6 +105,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
     noTextInput = false,
     systemLabel,
     textMode = "llm",
+    botOutputRenderers,
   }) => {
     const transportState = usePipecatClientTransportState();
 
@@ -197,6 +205,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
                     time: classNames.time,
                     role: classNames.role,
                   }}
+                  botOutputRenderers={botOutputRenderers}
                 />
               ))}
             </div>

@@ -48,6 +48,12 @@ interface Props {
    * The message to display
    */
   message: ConversationMessage;
+  /**
+   * Custom renderers for BotOutput content based on aggregation type
+   */
+  botOutputRenderers?: React.ComponentProps<
+    typeof MessageContent
+  >["botOutputRenderers"];
 }
 
 export const MessageContainer = ({
@@ -56,6 +62,7 @@ export const MessageContainer = ({
   systemLabel,
   classNames = {},
   message,
+  botOutputRenderers,
 }: Props) => {
   return (
     <div className={cn("flex flex-col gap-2", classNames.container)}>
@@ -73,6 +80,7 @@ export const MessageContainer = ({
           time: classNames.time,
         }}
         message={message}
+        botOutputRenderers={botOutputRenderers}
       />
     </div>
   );

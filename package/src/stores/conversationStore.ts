@@ -14,6 +14,8 @@ interface ConversationState {
   // Store BotOutput text streams (BotOutput mode)
   botOutputSpokenStreams: Map<string, string>; // messageId -> accumulated spoken text
   botOutputUnspokenStreams: Map<string, string>; // messageId -> accumulated unspoken text
+  // Store BotOutput aggregation types per message
+  botOutputAggregationTypes: Map<string, string>; // messageId -> last aggregation type
 
   // Actions
   registerMessageCallback: (
@@ -48,6 +50,7 @@ interface ConversationState {
     text: string,
     final: boolean,
     spoken: boolean, // true if text has been spoken, false if unspoken
+    aggregatedBy?: string, // aggregation type (e.g., "code", "link", "sentence", "word")
   ) => void;
   startAssistantLlmStream: () => void;
 }
@@ -157,6 +160,7 @@ export const useConversationStore = create<ConversationState>()((set) => ({
   ttsTextStreams: new Map(),
   botOutputSpokenStreams: new Map(),
   botOutputUnspokenStreams: new Map(),
+  botOutputAggregationTypes: new Map(),
 
   registerMessageCallback: (id, callback) =>
     set((state) => {
@@ -179,6 +183,7 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       ttsTextStreams: new Map(),
       botOutputSpokenStreams: new Map(),
       botOutputUnspokenStreams: new Map(),
+      botOutputAggregationTypes: new Map(),
     }),
 
   addMessage: (messageData) => {
@@ -460,12 +465,13 @@ export const useConversationStore = create<ConversationState>()((set) => ({
     });
   },
 
-  updateAssistantBotOutput: (text, final, spoken) => {
+  updateAssistantBotOutput: (text, final, spoken, aggregatedBy) => {
     const now = new Date();
     set((state) => {
       const messages = [...state.messages];
       const botOutputSpokenStreams = new Map(state.botOutputSpokenStreams);
       const botOutputUnspokenStreams = new Map(state.botOutputUnspokenStreams);
+      const botOutputAggregationTypes = new Map(state.botOutputAggregationTypes);
 
       const lastAssistantIndex = messages.findLastIndex(
         (msg) => msg.role === "assistant",
@@ -499,6 +505,11 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         };
       }
 
+      // Store aggregation type if provided
+      if (aggregatedBy !== undefined) {
+        botOutputAggregationTypes.set(messageId, aggregatedBy);
+      }
+
       // Update the appropriate text stream
       if (spoken) {
         const currentText = botOutputSpokenStreams.get(messageId) || "";
@@ -525,6 +536,7 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         messages: processedMessages,
         botOutputSpokenStreams,
         botOutputUnspokenStreams,
+        botOutputAggregationTypes,
       };
     });
   },

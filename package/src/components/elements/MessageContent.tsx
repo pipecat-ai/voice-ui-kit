@@ -7,6 +7,11 @@ import {
 import { Fragment } from "react";
 import Thinking from "./Thinking";
 
+type CustomBotOutputRenderer = (
+  content: string,
+  metadata: { spoken: string; unspoken: string },
+) => React.ReactNode;
+
 interface Props {
   /**
    * Custom CSS classes for the component
@@ -29,12 +34,34 @@ interface Props {
    * The message to display
    */
   message: ConversationMessage;
+  /**
+   * Custom renderers for BotOutput content based on aggregation type
+   * Key is the aggregation type (e.g., "code", "link"), value is a renderer function
+   */
+  botOutputRenderers?: Record<string, CustomBotOutputRenderer>;
 }
 
 /**
- * Renders BotOutput mode: shows unspoken text muted, spoken text replaces it
+ * Renders BotOutput content based on the aggregation type. Uses a custom renderer if provided, otherwise renders the spoken and unspoken text.
+ * @param spoken - The spoken text
+ * @param unspoken - The unspoken text
+ * @param aggregatedBy - The aggregation type
+ * @param customRenderer - A custom renderer function
+ * @returns The rendered content
  */
-const renderBotOutput = (spoken: string, unspoken: string): React.ReactNode => {
+const renderBotOutput = (
+  spoken: string,
+  unspoken: string,
+  aggregatedBy?: string,
+  customRenderer?: CustomBotOutputRenderer,
+): React.ReactNode => {
+  // Use custom renderer if provided and aggregation type matches
+  if (aggregatedBy && customRenderer) {
+    const content = spoken + unspoken;
+    return customRenderer(content, { spoken, unspoken });
+  }
+
+  // Default rendering
   const spokenLength = spoken?.length || 0;
   const remainingUnspoken = unspoken ? unspoken.slice(spokenLength) : "";
 
@@ -48,7 +75,11 @@ const renderBotOutput = (spoken: string, unspoken: string): React.ReactNode => {
   );
 };
 
-export const MessageContent = ({ classNames = {}, message }: Props) => {
+export const MessageContent = ({
+  botOutputRenderers,
+  classNames = {},
+  message,
+}: Props) => {
   const parts = Array.isArray(message.parts) ? message.parts : [];
 
   return (
@@ -64,7 +95,15 @@ export const MessageContent = ({ classNames = {}, message }: Props) => {
         let content: React.ReactNode;
         if (isBotOutputTextValue) {
           const botText = part.text as BotOutputText;
-          content = renderBotOutput(botText.spoken, botText.unspoken);
+          const customRenderer = part.aggregatedBy
+            ? botOutputRenderers?.[part.aggregatedBy]
+            : undefined;
+          content = renderBotOutput(
+            botText.spoken,
+            botText.unspoken,
+            part.aggregatedBy,
+            customRenderer,
+          );
         } else {
           content = part.text as React.ReactNode;
         }

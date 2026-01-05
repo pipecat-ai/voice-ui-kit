@@ -111,7 +111,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
 
     // Update both spoken and unspoken text streams
     const isFinal = data.aggregated_by === "sentence";
-    updateAssistantBotOutput(textToAdd, isFinal, data.spoken);
+    updateAssistantBotOutput(textToAdd, isFinal, data.spoken, data.aggregated_by);
   });
 
   // Handle legacy TTS/LLM events (when BotOutput not supported)
