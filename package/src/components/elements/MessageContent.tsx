@@ -54,22 +54,12 @@ export const MessageContent = ({ classNames = {}, message }: Props) => {
   return (
     <div className={cn("flex flex-col gap-2", classNames.messageContent)}>
       {parts.map((part: ConversationMessagePart, idx: number) => {
-        const nextPart = parts?.[idx + 1] ?? null;
-        const isText = typeof part.text === "string";
         const isBotOutputTextValue = Boolean(
           part.text &&
             typeof part.text === "object" &&
             "spoken" in part.text &&
             "unspoken" in part.text,
         );
-        const nextIsText =
-          nextPart &&
-          Boolean(
-            typeof nextPart.text === "string" ||
-              (nextPart.text &&
-                typeof nextPart.text === "object" &&
-                "spoken" in nextPart.text),
-          );
 
         let content: React.ReactNode;
         if (isBotOutputTextValue) {
@@ -81,8 +71,8 @@ export const MessageContent = ({ classNames = {}, message }: Props) => {
 
         return (
           <Fragment key={idx}>
+            {idx > 0 && " "}
             {content}
-            {(isText || isBotOutputTextValue) && nextIsText ? " " : null}
           </Fragment>
         );
       })}
