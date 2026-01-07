@@ -471,7 +471,9 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       const messages = [...state.messages];
       const botOutputSpokenStreams = new Map(state.botOutputSpokenStreams);
       const botOutputUnspokenStreams = new Map(state.botOutputUnspokenStreams);
-      const botOutputAggregationTypes = new Map(state.botOutputAggregationTypes);
+      const botOutputAggregationTypes = new Map(
+        state.botOutputAggregationTypes,
+      );
 
       const lastAssistantIndex = messages.findLastIndex(
         (msg) => msg.role === "assistant",

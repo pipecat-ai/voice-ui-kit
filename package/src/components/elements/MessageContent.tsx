@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { isMessageEmpty } from "@/stores/conversationStore";
 import {
   BotOutputText,
   ConversationMessage,
@@ -75,35 +76,6 @@ const renderBotOutput = (
   );
 };
 
-/**
- * Checks if a message is empty (has no parts or all parts are empty).
- * A part is considered empty if:
- * - It's a string and contains only whitespace, or
- * - It's a BotOutputText object with both spoken and unspoken text being empty/whitespace
- * @param message - The conversation message to check
- * @returns true if the message has no parts or all parts are empty, false otherwise
- */
-const isEmptyMessage = (message: ConversationMessage): boolean => {
-  const parts = Array.isArray(message.parts) ? message.parts : [];
-  if (parts.length === 0) {
-    return true;
-  }
-  return parts.every((part) => {
-    if (typeof part.text === "string") {
-      return part.text.trim() === "";
-    }
-    if (
-      part.text &&
-      typeof part.text === "object" &&
-      "spoken" in part.text &&
-      "unspoken" in part.text
-    ) {
-      return part.text.spoken.trim() === "" && part.text.unspoken.trim() === "";
-    }
-    return false;
-  });
-};
-
 export const MessageContent = ({
   botOutputRenderers,
   classNames = {},
@@ -144,7 +116,7 @@ export const MessageContent = ({
           </Fragment>
         );
       })}
-      {isEmptyMessage(message) ? (
+      {isMessageEmpty(message) ? (
         <Thinking className={classNames.thinking} />
       ) : null}
       <div
