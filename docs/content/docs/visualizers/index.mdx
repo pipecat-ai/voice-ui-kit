@@ -1,4 +1,73 @@
 ---
 title: Visualizers
-description: Displays a visualizer for the Pipecat AI SDK.
+description: Audio visualization components for real-time frequency display
 ---
+
+Visualizers provide real-time audio spectrum visualization for voice applications. They display frequency data from audio streams using various visual styles and techniques.
+
+## Available Visualizers
+
+### VoiceVisualizer
+
+A bar-based audio spectrum visualizer that displays frequency data as animated bars. Perfect for showing audio levels and activity.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { VoiceVisualizer } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="w-64 h-32">
+    <VoiceVisualizer participantType="local" />
+  </div>
+`}
+</LiveComponent>
+
+### CircularWaveform
+
+A circular audio spectrum visualizer with dynamic rotation and color transitions. Features traveling pulse animations for thinking states.
+
+<LiveComponent language="tsx">
+{`
+  import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="w-96 h-96">
+    <CircularWaveform 
+      audioTrack={null}
+      isThinking={true}
+    />
+  </div>
+`}
+</LiveComponent>
+
+### PlasmaVisualizer
+
+A WebGL-powered plasma effect visualizer with real-time audio reactivity. Requires Three.js and WebGL support.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { PlasmaVisualizer } from "@pipecat-ai/voice-ui-kit/webgl";
+
+  <div className="w-full h-96 relative">
+    <PlasmaVisualizer />
+  </div>
+`}
+</LiveComponent>
+
+## Choosing a Visualizer
+
+- **VoiceVisualizer**: Best for simple, lightweight audio level display. Integrates automatically with Pipecat client.
+- **CircularWaveform**: Best for engaging, animated visualizations with thinking states. Requires manual audio track connection.
+- **PlasmaVisualizer**: Best for immersive, high-performance visualizations. Requires WebGL and Three.js.
+
+## Integration
+
+All visualizers use the Web Audio API for real-time frequency analysis:
+- **VoiceVisualizer**: Automatically connects via `usePipecatClientMediaTrack`
+- **CircularWaveform**: Accepts `MediaStreamTrack` directly
+- **PlasmaVisualizer**: Automatically connects via `usePipecatClientMediaTrack` and responds to transport state
+
+## Performance
+
+Visualizers are optimized for smooth 60fps animations:
+- Canvas-based rendering with 2x scaling for high-DPI displays
+- Efficient frequency analysis using Web Audio API
+- Optimized rendering loops with `requestAnimationFrame`

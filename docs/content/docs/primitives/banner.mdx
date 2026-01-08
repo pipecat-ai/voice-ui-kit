@@ -6,12 +6,9 @@ component: Banner
 
 <LiveComponent language="tsx">
 {`
-  import { Banner, BannerIcon, BannerTitle, BannerClose } from "@pipecat-ai/voice-ui-kit";
-  import { CircleAlert } from "lucide-react";
-
   <Banner className="animate-in fade-in duration-300" variant="destructive">
-    <BannerIcon icon={CircleAlert} />
-    <BannerTitle>Unable to connect. Please check web console for errors.</BannerTitle>
+    <BannerIcon icon={CircleAlertIcon} />
+    <BannerTitle>Important: This is a destructive banner example.</BannerTitle>
     <BannerClose variant="destructive" />
   </Banner>
 `}
@@ -61,8 +58,6 @@ component: Banner
 
 <LiveComponent language="tsx">
 {`
-  import { Banner, BannerIcon, BannerTitle, BannerClose, CircleAlertIcon } from "@pipecat-ai/voice-ui-kit";
-
   <div className="flex flex-row gap-3 w-full">
     <Banner className="flex-1">
       <BannerTitle>Primary</BannerTitle>

@@ -1,0 +1,239 @@
+---
+title: Widget Template
+description: Compact widget template for embedding Pipecat functionality
+component: WidgetTemplate
+---
+
+The Widget template provides a compact, embeddable widget interface for Pipecat applications. It features a toggle button to show/hide the widget panel, which includes text input and audio controls.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { WidgetTemplate } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="fixed bottom-4 right-4">
+    <WidgetTemplate
+      connectParams={{
+        webrtcUrl: "/api/offer"
+      }}
+    />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Overview
+
+The Widget template is designed for embedding Pipecat functionality into existing applications. It provides:
+
+- **Toggle Button**: Show/hide the widget panel
+- **Text Input**: Message input with debounced sending
+- **Audio Control**: User audio input control
+- **Auto-connect**: Automatically connects on mount
+- **Compact Design**: Minimal footprint for embedding
+
+## Usage
+
+### Basic Usage
+
+```tsx
+import { WidgetTemplate } from "@pipecat-ai/voice-ui-kit";
+
+export default function App() {
+  return (
+    <div className="fixed bottom-4 right-4">
+      <WidgetTemplate
+        connectParams={{
+          webrtcUrl: "/api/offer"
+        }}
+      />
+    </div>
+  );
+}
+```
+
+### Custom Toggle Label
+
+```tsx
+<WidgetTemplate
+  toggleButtonLabel="Chat with AI"
+  connectParams={{
+    webrtcUrl: "/api/offer"
+  }}
+/>
+```
+
+### Custom Debounce Time
+
+```tsx
+<WidgetTemplate
+  debounceTime={500}
+  connectParams={{
+    webrtcUrl: "/api/offer"
+  }}
+/>
+```
+
+### Custom Styling
+
+```tsx
+<WidgetTemplate
+  classNames={{
+    container: "fixed bottom-4 right-4",
+    toggleContainer: "bg-primary",
+    toggleButton: "text-white",
+    widgetContainer: "max-w-sm"
+  }}
+  connectParams={{
+    webrtcUrl: "/api/offer"
+  }}
+/>
+```
+
+## Props
+
+<TypeTable
+  className="text-sm"
+  type={{
+    serverUrl: {
+      description: "The URL of the Pipecat server to connect to (legacy prop, use connectParams instead)",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    debounceTime: {
+      description: "Debounce time in milliseconds for the send function",
+      type: "number",
+      required: false,
+      default: "300",
+    },
+    toggleButtonLabel: {
+      description: "The label of the toggle button when closed",
+      type: "string",
+      required: false,
+      default: '"Open"',
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ container?: string; toggleContainer?: string; toggleButton?: string; widgetContainer?: string; }",
+      required: false,
+      default: "{}",
+    },
+    connectParams: {
+      description: "Connection parameters for the transport",
+      type: "TransportConnectionParams",
+      required: false,
+      default: "{}",
+    },
+  }}
+/>
+
+## Widget Behavior
+
+### Toggle State
+
+- **Closed**: Shows toggle button with label (default: "Open")
+- **Open**: Shows toggle button as icon (chevron down) and displays widget panel
+
+### Text Input
+
+The text input:
+- Automatically sends messages after debounce time (default: 300ms)
+- Is disabled when not connected or while sending
+- Shows loading state on send button while sending
+- Clears input after sending
+
+### Auto-connect
+
+The widget automatically:
+- Connects on mount (`connectOnMount={true}`)
+- Uses SmallWebRTC transport by default
+- Disables theme provider (uses parent theme)
+
+## Widget Panel Contents
+
+When open, the widget panel displays:
+
+1. **Text Input**: Message input with send button
+2. **Divider**: Visual separator
+3. **User Audio Control**: Audio input control with device selection
+
+## Styling
+
+The widget uses:
+- **Card Component**: For both toggle button and widget panel
+- **Gradient Border**: On widget panel for visual appeal
+- **Shadow Effects**: Extended shadow on toggle, shorter on open widget
+- **Animations**: Fade and slide animations on open/close
+
+## Integration
+
+The Widget template:
+- Wraps content with `PipecatAppBase` for client setup
+- Uses `noThemeProvider` to inherit parent theme
+- Automatically connects on mount
+- Uses SmallWebRTC transport by default
+- Handles connection state and errors
+
+## Positioning
+
+The widget is designed to be positioned using CSS. Common patterns:
+
+### Fixed Bottom Right
+
+```tsx
+<div className="fixed bottom-4 right-4">
+  <WidgetTemplate connectParams={...} />
+</div>
+```
+
+### Fixed Bottom Left
+
+```tsx
+<div className="fixed bottom-4 left-4">
+  <WidgetTemplate connectParams={...} />
+</div>
+```
+
+### Absolute Positioning
+
+```tsx
+<div className="relative">
+  <div className="absolute bottom-0 right-0">
+    <WidgetTemplate connectParams={...} />
+  </div>
+</div>
+```
+
+## Customization Example
+
+```tsx
+import { WidgetTemplate } from "@pipecat-ai/voice-ui-kit";
+
+export default function EmbeddedWidget() {
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      <WidgetTemplate
+        toggleButtonLabel="Need Help?"
+        debounceTime={500}
+        classNames={{
+          container: "flex flex-col gap-2",
+          toggleContainer: "bg-blue-600 hover:bg-blue-700",
+          toggleButton: "text-white font-semibold",
+          widgetContainer: "bg-white dark:bg-gray-800"
+        }}
+        connectParams={{
+          webrtcUrl: "/api/voice-assistant"
+        }}
+      />
+    </div>
+  );
+}
+```
+
+## See Also
+
+- [PipecatAppBase](/docs/components/PipecatAppBase) - Base component used by the template
+- [UserAudioControl](/docs/components/UserAudioControl) - Audio control component
+- [Input](/docs/primitives/input) - Text input component
+

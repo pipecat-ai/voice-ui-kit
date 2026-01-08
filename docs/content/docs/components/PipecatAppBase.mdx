@@ -1,10 +1,8 @@
 ---
 title: Pipecat App Base
-description: Higher-order component that streamlines setup of a Pipecat Client instance.
-component: true
+description: Higher-order component that streamlines setup of a Pipecat Client instance
+component: PipecatAppBase
 ---
-
-## Overview
 
 The `PipecatAppBase` component reduces the boilerplate code required to bootstrap a new Pipecat Client application.
 
@@ -189,9 +187,9 @@ export default function Home() {
 }
 ```
 
-### 7. Transport Options
+### 7. Using startBotParams
 
-You can pass transport-specific configuration options:
+You can use `startBotParams` instead of `connectParams` to start a bot session:
 
 ```tsx
 import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
@@ -200,8 +198,8 @@ export default function Home() {
   return (
     <PipecatAppBase
       transportType="smallwebrtc"
-      connectParams={{
-        webrtcUrl: "/api/offer",
+      startBotParams={{
+        // Your startBot parameters
       }}
     >
       <YourCustomComponent />
@@ -216,9 +214,21 @@ export default function Home() {
   type={{
     connectParams: {
       description:
-        "Connection parameters for the transport, including the connection URL and any authentication details",
+        "Optional connection parameters for the transport. Only used when no startBotParams are provided.",
       type: "TransportConnectionParams",
-      required: true,
+      required: false,
+    },
+    startBotParams: {
+      description:
+        "Optional parameters for startBot. When provided, the component will call startBot before connecting.",
+      type: "APIRequest",
+      required: false,
+    },
+    startBotResponseTransformer: {
+      description:
+        "Callback function to transform the startBot response before connecting.",
+      type: "(response: TransportConnectionParams) => TransportConnectionParams | Promise<TransportConnectionParams>",
+      required: false,
     },
     transportType: {
       description:
@@ -235,7 +245,7 @@ export default function Home() {
     clientOptions: {
       description:
         "Optional configuration options for the Pipecat Client instance",
-      type: "PipecatClientOptions",
+      type: "Partial<PipecatClientOptions>",
       required: false,
     },
     noThemeProvider: {
@@ -310,5 +320,16 @@ The `PipecatAppBase` component passes the following props to its children when u
       type: "string | null",
       required: false,
     },
+    rawStartBotResponse: {
+      description: "Response returned from starting the bot",
+      type: "TransportConnectionParams | unknown",
+      required: false,
+    },
+    transformedStartBotResponse: {
+      description: "Transformed start bot response",
+      type: "TransportConnectionParams | unknown",
+      required: false,
+    },
   }}
 />
+

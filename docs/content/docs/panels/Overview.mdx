@@ -1,5 +1,106 @@
 ---
 title: Panels
+description: Pre-built panel components for common UI patterns
 ---
 
-TODO
+Panels are pre-built components that combine multiple elements into organized, reusable interfaces. They provide common patterns for displaying information, controls, and content in voice applications.
+
+## Available Panels
+
+### BotAudioPanel
+
+Displays bot audio visualization with waveform. Automatically shows audio levels and handles no-audio states.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotAudioPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotAudioPanel />
+  </div>
+`}
+</LiveComponent>
+
+### BotVideoPanel
+
+Displays bot video feed with proper aspect ratio handling. Shows video when available and a placeholder when not.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotVideoPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotVideoPanel />
+  </div>
+`}
+</LiveComponent>
+
+### ConversationPanel
+
+Tabbed panel combining conversation display and metrics. Includes text mode toggle and customizable conversation settings.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { ConversationPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-96 w-full">
+    <ConversationPanel />
+  </div>
+`}
+</LiveComponent>
+
+### EventsPanel
+
+Real-time event log displaying RTVI events from the Pipecat Client SDK. Includes filtering and auto-scroll functionality.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { EventsPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-96 w-full">
+    <EventsPanel />
+  </div>
+`}
+</LiveComponent>
+
+### InfoPanel
+
+Comprehensive information panel displaying status, device controls, and session information in organized sections.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { InfoPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-96 w-full">
+    <InfoPanel />
+  </div>
+`}
+</LiveComponent>
+
+## Common Features
+
+All panels share common characteristics:
+
+- **Panel Styling**: Built on the Panel component for consistent appearance
+- **Collapsed Mode**: Many panels support a collapsed/compact display mode
+- **Pipecat Integration**: Automatically integrate with Pipecat Client SDK
+- **Customizable**: Support custom styling and configuration options
+- **Responsive**: Adapt to container sizes and screen dimensions
+
+## Usage Patterns
+
+Panels are designed to be used in layouts like:
+
+- **Sidebars**: Info panels, event logs
+- **Main Content Areas**: Conversation panels, video displays
+- **Control Areas**: Device controls, status displays
+- **Dashboard Layouts**: Multiple panels arranged in grids
+
+## Integration Requirements
+
+Most panels require:
+- `PipecatClientProvider` context for SDK integration
+- `ConversationProvider` context (for conversation-related panels)
+- Proper container sizing (panels typically need height constraints)
+
+See individual panel documentation for specific requirements.

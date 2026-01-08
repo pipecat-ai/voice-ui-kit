@@ -1,0 +1,141 @@
+---
+title: Container
+description: Full-screen container component for layout
+component: FullScreenContainer
+---
+
+The Container component provides a full-screen container that fills the viewport height and centers its content. It's useful for creating full-page layouts or centered content areas.
+
+<LiveComponent language="tsx">
+{`
+  import { FullScreenContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <FullScreenContainer>
+    <div className="text-center">
+      <h1 className="text-2xl font-bold mb-4">Centered Content</h1>
+      <p>This content is centered in a full-screen container</p>
+    </div>
+  </FullScreenContainer>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### FullScreenContainer
+
+The FullScreenContainer component creates a full-viewport container with centered content.
+
+<LiveComponent language="tsx">
+{`
+  import { FullScreenContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <FullScreenContainer>
+    <div>Centered content</div>
+  </FullScreenContainer>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    horizontal: {
+      description: "Use horizontal (row) layout instead of vertical (column) layout",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    className: {
+      description: "Additional CSS classes to apply to the container",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Create a full-screen container with vertically centered content.
+
+<LiveComponent language="tsx">
+{`
+  import { FullScreenContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <FullScreenContainer>
+    <div className="text-center">
+      <h1 className="text-2xl font-bold">Welcome</h1>
+      <p>This is centered vertically and horizontally</p>
+    </div>
+  </FullScreenContainer>
+`}
+</LiveComponent>
+
+#### Horizontal Layout
+
+Use horizontal layout for side-by-side content.
+
+<LiveComponent language="tsx">
+{`
+  import { FullScreenContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <FullScreenContainer horizontal={true}>
+    <div className="flex-1">Left content</div>
+    <div className="flex-1">Right content</div>
+  </FullScreenContainer>
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to override default styling.
+
+<LiveComponent language="tsx">
+{`
+  import { FullScreenContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <FullScreenContainer className="bg-gradient-to-br from-primary/10 to-secondary/10">
+    <div>Custom styled container</div>
+  </FullScreenContainer>
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Full Viewport**: Uses `h-dvh` (dynamic viewport height) for full-screen coverage
+- **Centered Content**: Centers content both vertically and horizontally
+- **Flexible Layout**: Supports both vertical (column) and horizontal (row) layouts
+- **Background**: Includes background color from theme
+- **Customizable**: Supports custom styling via className
+
+## Layout Modes
+
+- **Vertical (default)**: Uses `flex-col` for vertical stacking
+- **Horizontal**: Uses `flex-row` for horizontal layout when `horizontal={true}`
+
+## Styling
+
+The component uses:
+- `w-full h-dvh` - Full width and dynamic viewport height
+- `bg-background` - Theme background color
+- `flex items-center justify-center` - Centers content
+- `flex-col` or `flex-row` - Layout direction based on `horizontal` prop
+
+## Integration
+
+The FullScreenContainer component is useful for:
+- Landing pages
+- Login/authentication screens
+- Full-page applications
+- Centered content areas
+- Splash screens
+
+It's a standalone component that doesn't require any context providers.
+

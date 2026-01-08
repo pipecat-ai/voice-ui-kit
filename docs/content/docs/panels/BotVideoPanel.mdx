@@ -1,0 +1,127 @@
+---
+title: Bot Video Panel
+description: Panel component for displaying bot video feed
+component: BotVideoPanel
+---
+
+The BotVideoPanel component displays the bot's video feed in a panel. It automatically integrates with the Pipecat Client SDK to show real-time video output.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotVideoPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotVideoPanel />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### BotVideoPanel
+
+The BotVideoPanel component automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotVideoPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotVideoPanel />
+  </div>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    className: {
+      description: "Additional CSS classes to apply to the panel",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    collapsed: {
+      description: "Display the panel in collapsed mode with aspect-video ratio",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display bot video feed in a panel.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotVideoPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotVideoPanel />
+  </div>
+`}
+</LiveComponent>
+
+#### Collapsed Mode
+
+Display the panel in a compact collapsed format.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotVideoPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="w-64">
+    <BotVideoPanel collapsed={true} />
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to style the panel.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotVideoPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotVideoPanel className="border-2 border-primary" />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Video Display**: Shows bot video feed using PipecatClientVideo
+- **Aspect Ratio**: Maintains 16:9 aspect ratio
+- **No Video State**: Shows "No video" message with icon when no video track is available
+- **Contain Fit**: Video uses "contain" fit to preserve aspect ratio
+- **Collapsed Mode**: Supports compact display mode
+
+## Video Display
+
+The panel uses the `PipecatClientVideo` component with:
+- `participant="bot"` to display bot video
+- `fit="contain"` to preserve aspect ratio
+- `aspect-video` class for 16:9 ratio
+- Muted background when no video is available
+
+## Integration
+
+The BotVideoPanel component uses:
+- `usePipecatClientMediaTrack("video", "bot")` to get the bot's video track
+- `PipecatClientVideo` component for video display
+- `Panel` component for consistent panel styling
+
+It must be used within a `PipecatClientProvider` context to function properly.
+

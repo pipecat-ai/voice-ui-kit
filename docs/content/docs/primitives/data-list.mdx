@@ -1,0 +1,166 @@
+---
+title: Data List
+description: Component for displaying key-value pairs in a structured list format
+component: DataList
+---
+
+The DataList component displays data as a structured list of key-value pairs. It's useful for showing metadata, status information, or any structured data in a clean, readable format.
+
+<LiveComponent language="tsx">
+{`
+  import { DataList } from "@pipecat-ai/voice-ui-kit";
+
+  <DataList
+    data={{
+      "Status": "Connected",
+      "Session ID": "abc123",
+      "Version": "1.0.0"
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### DataList
+
+The DataList component displays key-value pairs in a grid layout.
+
+<LiveComponent language="tsx">
+{`
+  import { DataList } from "@pipecat-ai/voice-ui-kit";
+
+  <DataList
+    data={{
+      "Key 1": "Value 1",
+      "Key 2": "Value 2"
+    }}
+  />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    data: {
+      description: "Object containing key-value pairs to display. Values can be strings or React nodes",
+      type: "Record<string, string | React.ReactNode>",
+      required: true,
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ container?: string; key?: string; value?: string; }",
+      required: false,
+      default: "{}",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display simple key-value pairs.
+
+<LiveComponent language="tsx">
+{`
+  import { DataList } from "@pipecat-ai/voice-ui-kit";
+
+  <DataList
+    data={{
+      "Name": "John Doe",
+      "Email": "john@example.com",
+      "Status": "Active"
+    }}
+  />
+`}
+</LiveComponent>
+
+#### With React Nodes
+
+Values can be React components or nodes.
+
+<LiveComponent language="tsx">
+{`
+  import { DataList, Badge } from "@pipecat-ai/voice-ui-kit";
+
+  <DataList
+    data={{
+      "Status": <Badge variant="success">Online</Badge>,
+      "Count": <span className="font-bold">42</span>
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to different parts of the list.
+
+<LiveComponent language="tsx">
+{`
+  import { DataList } from "@pipecat-ai/voice-ui-kit";
+
+  <DataList
+    data={{
+      "Key": "Value"
+    }}
+    classNames={{
+      container: "border rounded p-4 bg-muted",
+      key: "font-bold text-primary",
+      value: "text-lg"
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Long Values
+
+Long values are automatically truncated with ellipsis.
+
+<LiveComponent language="tsx">
+{`
+  import { DataList } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="w-64">
+    <DataList
+      data={{
+        "Long Key": "This is a very long value that will be truncated"
+      }}
+    />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Structured Layout**: Uses a semantic `<dl>` element with grid layout
+- **Flexible Values**: Supports both strings and React nodes as values
+- **Responsive Grid**: Two-column grid layout (1fr for keys, 2fr for values)
+- **Text Truncation**: Automatically truncates long values with ellipsis
+- **Customizable**: Supports custom styling for container, keys, and values
+- **Monospace Values**: Values use monospace font by default for consistency
+
+## Layout
+
+The component uses a CSS grid with:
+- **Keys**: Left column, muted foreground color, right-aligned
+- **Values**: Right column, monospace font, right-aligned, truncated if too long
+
+The grid uses `grid-cols-[1fr_2fr]` which gives keys 1/3 of the width and values 2/3.
+
+## Styling
+
+Default styles:
+- Container: `text-sm grid grid-cols-[1fr_2fr] gap-2 items-center`
+- Keys (`<dt>`): `text-muted-foreground`
+- Values (`<dd>`): `text-right font-mono text-xs min-w-0 truncate`
+
+You can override any of these with the `classNames` prop.
+

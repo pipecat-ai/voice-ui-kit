@@ -1,0 +1,193 @@
+---
+title: Message Container
+description: Container component for individual conversation messages
+component: MessageContainer
+---
+
+The MessageContainer component wraps individual conversation messages, displaying the message role and content in a structured format. It's typically used within the Conversation component to render each message in the conversation history.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContainer
+    message={{
+      role: "assistant",
+      parts: [{ text: "Hello! How can I help you today?" }],
+      createdAt: new Date().toISOString()
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### MessageContainer
+
+The MessageContainer component displays a single message with its role and content.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContainer
+    message={{
+      role: "user",
+      parts: [{ text: "What's the weather like?" }],
+      createdAt: new Date().toISOString()
+    }}
+  />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    message: {
+      description: "The conversation message to display",
+      type: "ConversationMessage",
+      required: true,
+    },
+    assistantLabel: {
+      description: "Custom label for assistant messages",
+      type: "string",
+      required: false,
+      default: '"assistant"',
+    },
+    clientLabel: {
+      description: "Custom label for user/client messages",
+      type: "string",
+      required: false,
+      default: '"user"',
+    },
+    systemLabel: {
+      description: "Custom label for system messages",
+      type: "string",
+      required: false,
+      default: '"system"',
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ container?: string; messageContent?: string; role?: string; thinking?: string; time?: string; }",
+      required: false,
+      default: "{}",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display a message with default styling.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContainer
+    message={{
+      role: "assistant",
+      parts: [{ text: "Hello! How can I help you?" }],
+      createdAt: new Date().toISOString()
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Custom Labels
+
+Customize the labels for different message roles.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContainer
+    message={{
+      role: "assistant",
+      parts: [{ text: "Hello!" }],
+      createdAt: new Date().toISOString()
+    }}
+    assistantLabel="AI Assistant"
+    clientLabel="You"
+    systemLabel="System"
+  />
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to different parts of the message.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContainer
+    message={{
+      role: "user",
+      parts: [{ text: "Custom styled message" }],
+      createdAt: new Date().toISOString()
+    }}
+    classNames={{
+      container: "border rounded p-4 bg-muted",
+      role: "text-lg font-bold",
+      messageContent: "mt-2"
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Multiple Parts
+
+Messages can contain multiple parts (text chunks).
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContainer } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContainer
+    message={{
+      role: "assistant",
+      parts: [
+        { text: "First part. " },
+        { text: "Second part. " },
+        { text: "Third part." }
+      ],
+      createdAt: new Date().toISOString()
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Role Display**: Shows the message role (user, assistant, system) with customizable labels
+- **Content Rendering**: Renders message content parts with proper spacing
+- **Thinking Indicator**: Automatically shows thinking indicator for empty messages
+- **Timestamp**: Displays message creation timestamp
+- **Customizable**: Supports custom styling for all parts
+- **Flexible**: Works with single or multiple message parts
+
+## Message Structure
+
+The component expects a `ConversationMessage` object with:
+- `role`: "user" | "assistant" | "system"
+- `parts`: Array of `ConversationMessagePart` objects, each with a `text` property
+- `createdAt`: ISO timestamp string
+
+## Integration
+
+The MessageContainer component uses:
+- `MessageRole` component to display the role label
+- `MessageContent` component to display the message content
+
+It's typically used within the `Conversation` component to render individual messages from the conversation history.
+

@@ -1,0 +1,196 @@
+---
+title: Textarea
+description: Multi-line text input component
+component: Textarea
+---
+
+The Textarea component provides a multi-line text input field. It extends the standard HTML textarea element with Voice UI Kit styling and variants.
+
+<LiveComponent language="tsx">
+{`
+  import { Textarea } from "@pipecat-ai/voice-ui-kit";
+
+  <Textarea placeholder="Enter your message..." />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### Textarea
+
+The Textarea component provides a styled multi-line text input.
+
+<LiveComponent language="tsx">
+{`
+  import { Textarea } from "@pipecat-ai/voice-ui-kit";
+
+  <Textarea placeholder="Type here..." />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    size: {
+      description: "Size of the textarea",
+      type: '"sm" | "md" | "lg" | "xl"',
+      required: false,
+      default: "Inherited from inputVariants",
+    },
+    variant: {
+      description: "Visual style variant",
+      type: "InputVariant",
+      required: false,
+      default: "Inherited from inputVariants",
+    },
+    rounded: {
+      description: "Border radius of the textarea",
+      type: '"size" | "sm" | "lg" | "xl" | "full" | "none"',
+      required: false,
+      default: '"size"',
+    },
+    multiline: {
+      description: "Whether the textarea can be resized vertically",
+      type: "boolean",
+      required: false,
+      default: "true",
+    },
+    className: {
+      description: "Additional CSS classes to apply",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Create a simple textarea input.
+
+<LiveComponent language="tsx">
+{`
+  import { Textarea } from "@pipecat-ai/voice-ui-kit";
+
+  <Textarea placeholder="Enter your message..." />
+`}
+</LiveComponent>
+
+#### Different Sizes
+
+Use different size variants.
+
+<LiveComponent language="tsx">
+{`
+  import { Textarea } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-2">
+    <Textarea size="sm" placeholder="Small" />
+    <Textarea size="md" placeholder="Medium" />
+    <Textarea size="lg" placeholder="Large" />
+    <Textarea size="xl" placeholder="Extra Large" />
+  </div>
+`}
+</LiveComponent>
+
+#### Non-resizable
+
+Disable vertical resizing.
+
+<LiveComponent language="tsx">
+{`
+  import { Textarea } from "@pipecat-ai/voice-ui-kit";
+
+  <Textarea 
+    multiline={false}
+    placeholder="Fixed height textarea"
+  />
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes for additional styling.
+
+<LiveComponent language="tsx">
+{`
+  import { Textarea } from "@pipecat-ai/voice-ui-kit";
+
+  <Textarea 
+    className="min-h-32 font-mono"
+    placeholder="Custom styled textarea"
+  />
+`}
+</LiveComponent>
+
+#### With Rows
+
+Set initial number of rows.
+
+<LiveComponent language="tsx">
+{`
+  import { Textarea } from "@pipecat-ai/voice-ui-kit";
+
+  <Textarea 
+    rows={5}
+    placeholder="5 rows tall"
+  />
+`}
+</LiveComponent>
+
+#### Disabled State
+
+Disable the textarea.
+
+<LiveComponent language="tsx">
+{`
+  import { Textarea } from "@pipecat-ai/voice-ui-kit";
+
+  <Textarea 
+    disabled
+    placeholder="Disabled textarea"
+    value="This is disabled"
+  />
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Multi-line Input**: Supports multiple lines of text
+- **Resizable**: Can be resized vertically (when multiline is true)
+- **Size Variants**: Supports sm, md, lg, xl sizes
+- **Style Variants**: Inherits input variants for consistent styling
+- **Accessible**: Proper disabled states and ARIA support
+- **Customizable**: Supports custom styling and all standard textarea attributes
+
+## Resizing Behavior
+
+- **multiline={true}**: Textarea can be resized vertically by dragging the bottom-right corner
+- **multiline={false}**: Textarea has a fixed height and cannot be resized
+
+## Size Variants
+
+The textarea supports the same size variants as the Input component:
+- `sm`: Small padding (py-0.75)
+- `md`: Medium padding (py-1.25)
+- `lg`: Large padding (py-2.25)
+- `xl`: Extra large padding (py-3.25)
+
+## Integration
+
+The Textarea component:
+- Extends standard HTML textarea attributes
+- Uses `inputVariants` for consistent styling with Input component
+- Supports `field-sizing-content` for automatic height adjustment
+- Integrates with Voice UI Kit theme system
+
+It's a standalone component that doesn't require any context providers.
+

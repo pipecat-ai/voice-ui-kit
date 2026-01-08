@@ -1,0 +1,175 @@
+---
+title: Message Content
+description: Component for displaying the content of conversation messages
+component: MessageContent
+---
+
+The MessageContent component renders the actual content of a conversation message, including text parts, thinking indicators, and timestamps. It handles multiple text parts and automatically shows a thinking indicator for empty messages.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContent } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContent
+    message={{
+      role: "assistant",
+      parts: [{ text: "Hello! This is a message." }],
+      createdAt: new Date().toISOString()
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### MessageContent
+
+The MessageContent component displays message content with thinking indicator and timestamp.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContent } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContent
+    message={{
+      role: "assistant",
+      parts: [{ text: "Message content here" }],
+      createdAt: new Date().toISOString()
+    }}
+  />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    message: {
+      description: "The conversation message to display",
+      type: "ConversationMessage",
+      required: true,
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ messageContent?: string; thinking?: string; time?: string; }",
+      required: false,
+      default: "{}",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display message content with default styling.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContent } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContent
+    message={{
+      role: "assistant",
+      parts: [{ text: "Hello! How can I help you?" }],
+      createdAt: new Date().toISOString()
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Multiple Parts
+
+Messages can contain multiple text parts that are rendered with proper spacing.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContent } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContent
+    message={{
+      role: "assistant",
+      parts: [
+        { text: "First part. " },
+        { text: "Second part. " },
+        { text: "Third part." }
+      ],
+      createdAt: new Date().toISOString()
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Empty Message (Thinking)
+
+Empty messages automatically show a thinking indicator.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContent } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContent
+    message={{
+      role: "assistant",
+      parts: [],
+      createdAt: new Date().toISOString()
+    }}
+  />
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to different parts of the content.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageContent } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageContent
+    message={{
+      role: "assistant",
+      parts: [{ text: "Custom styled content" }],
+      createdAt: new Date().toISOString()
+    }}
+    classNames={{
+      messageContent: "text-lg leading-relaxed",
+      thinking: "text-muted-foreground",
+      time: "text-xs opacity-75"
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Multiple Parts**: Handles messages with multiple text parts
+- **Smart Spacing**: Adds spaces between consecutive text parts
+- **Thinking Indicator**: Automatically shows thinking indicator for empty messages
+- **Timestamp**: Displays formatted timestamp at the bottom
+- **Customizable**: Supports custom styling for content, thinking indicator, and timestamp
+
+## Behavior
+
+The component:
+1. Renders all text parts from `message.parts` array
+2. Adds a space between consecutive text parts
+3. Shows a `Thinking` component if the message has no parts or all parts are empty whitespace
+4. Displays a formatted timestamp using `toLocaleTimeString()`
+
+## Message Parts
+
+Each message part should have a `text` property containing a string. The component:
+- Renders text parts sequentially
+- Adds spaces between consecutive text parts
+- Handles empty or whitespace-only parts by showing thinking indicator
+
+## Integration
+
+The MessageContent component is typically used within `MessageContainer` to render the content portion of a message. It uses the `Thinking` component to show loading/thinking states.
+

@@ -1,0 +1,134 @@
+---
+title: Bot Audio Panel
+description: Panel component for displaying bot audio visualization
+component: BotAudioPanel
+---
+
+The BotAudioPanel component displays a visual representation of the bot's audio output using a waveform visualizer. It automatically integrates with the Pipecat Client SDK to show real-time audio visualization.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotAudioPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotAudioPanel />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### BotAudioPanel
+
+The BotAudioPanel component automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotAudioPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotAudioPanel />
+  </div>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    className: {
+      description: "Additional CSS classes to apply to the panel",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    collapsed: {
+      description: "Display the panel in collapsed mode with aspect-video ratio",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display bot audio visualization in a panel.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotAudioPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotAudioPanel />
+  </div>
+`}
+</LiveComponent>
+
+#### Collapsed Mode
+
+Display the panel in a compact collapsed format.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotAudioPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="w-64">
+    <BotAudioPanel collapsed={true} />
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to style the panel.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotAudioPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 w-full">
+    <BotAudioPanel className="border-2 border-primary" />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Audio Visualization**: Displays real-time audio waveform using VoiceVisualizer
+- **Automatic Sizing**: Automatically adjusts bar width and height based on container size
+- **No Audio State**: Shows "No audio" message with icon when no audio track is available
+- **Responsive**: Adapts to container size using ResizeObserver
+- **Collapsed Mode**: Supports compact display mode
+
+## Visualization
+
+The panel uses the `VoiceVisualizer` component with:
+- 10 bars for visualization
+- Bar color from theme (`--color-agent`)
+- Square line caps
+- Bottom origin for bars
+- Transparent background
+
+The visualization automatically adjusts:
+- Bar width based on container width (max 240px)
+- Bar height based on container height (max 240px / 16:9 ratio)
+- Minimum bar width of 2px
+- Minimum height of 20px
+
+## Integration
+
+The BotAudioPanel component uses:
+- `usePipecatClientMediaTrack("audio", "bot")` to get the bot's audio track
+- `VoiceVisualizer` component for audio visualization
+- `Panel` component for consistent panel styling
+
+It must be used within a `PipecatClientProvider` context to function properly.
+

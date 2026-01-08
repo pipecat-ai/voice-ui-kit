@@ -5,10 +5,11 @@ import { PipecatClientProvider } from "@pipecat-ai/client-react";
 import { SmallWebRTCTransport } from "@pipecat-ai/small-webrtc-transport";
 import * as VoiceUIKit from "@pipecat-ai/voice-ui-kit";
 import * as VoiceUIKitWebGL from "@pipecat-ai/voice-ui-kit/webgl";
+const { ConversationProvider } = VoiceUIKit;
 import { CodeBlock, Pre as CodePre } from "fumadocs-ui/components/codeblock";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
-import { CircleIcon, Loader2 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useMemo, useState } from "react";
 import { LiveError, LivePreview, LiveProvider } from "react-live";
@@ -129,7 +130,7 @@ export function LiveComponent({
       React,
       ...VoiceUIKit,
       ...VoiceUIKitWebGL,
-      CircleIcon,
+      ...LucideIcons,
       ...(scope ?? {}),
     }),
     [scope]
@@ -206,7 +207,9 @@ export function LiveComponent({
     } else {
       previewComp = (
         <PipecatClientProvider client={client!}>
-          {previewComp}
+          <ConversationProvider>
+            {previewComp}
+          </ConversationProvider>
         </PipecatClientProvider>
       );
     }
@@ -216,7 +219,9 @@ export function LiveComponent({
   if (withConfirm && confirmed && withPipecat && client) {
     previewComp = (
       <PipecatClientProvider client={client}>
-        {previewComp}
+        <ConversationProvider>
+          {previewComp}
+        </ConversationProvider>
       </PipecatClientProvider>
     );
   }
@@ -239,7 +244,7 @@ export function LiveComponent({
                 previewComp
               ) : (
                 <div className="h-full w-full flex items-center justify-center">
-                  <Loader2
+                  <LucideIcons.Loader2
                     className="animate-spin text-muted-foreground"
                     size={24}
                   />

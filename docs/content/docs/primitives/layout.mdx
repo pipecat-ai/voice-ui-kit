@@ -1,0 +1,168 @@
+---
+title: Layout
+description: Layout section component for semantic HTML structure
+component: LayoutSection
+---
+
+The Layout component provides a semantic section element with a data attribute for identification. It's useful for creating structured layouts and identifying sections programmatically.
+
+<LiveComponent language="tsx">
+{`
+  import { LayoutSection } from "@pipecat-ai/voice-ui-kit";
+
+  <LayoutSection sectionKey="main-content">
+    <h2>Main Content Section</h2>
+    <p>This section can be identified by its sectionKey</p>
+  </LayoutSection>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### LayoutSection
+
+The LayoutSection component creates a semantic `<section>` element with a data attribute.
+
+<LiveComponent language="tsx">
+{`
+  import { LayoutSection } from "@pipecat-ai/voice-ui-kit";
+
+  <LayoutSection sectionKey="header">
+    Header content
+  </LayoutSection>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    sectionKey: {
+      description: "Unique identifier for the section, stored in data-section attribute",
+      type: "string",
+      required: true,
+    },
+    className: {
+      description: "Additional CSS classes to apply to the section",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Create a layout section with a unique key.
+
+<LiveComponent language="tsx">
+{`
+  import { LayoutSection } from "@pipecat-ai/voice-ui-kit";
+
+  <LayoutSection sectionKey="content">
+    <h2>Content Section</h2>
+    <p>This is a semantic section element</p>
+  </LayoutSection>
+`}
+</LiveComponent>
+
+#### Multiple Sections
+
+Use multiple sections to structure your layout.
+
+<LiveComponent language="tsx">
+{`
+  import { LayoutSection } from "@pipecat-ai/voice-ui-kit";
+
+  <div>
+    <LayoutSection sectionKey="header">
+      <h1>Header</h1>
+    </LayoutSection>
+    <LayoutSection sectionKey="main">
+      <p>Main content</p>
+    </LayoutSection>
+    <LayoutSection sectionKey="footer">
+      <p>Footer</p>
+    </LayoutSection>
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to style the section.
+
+<LiveComponent language="tsx">
+{`
+  import { LayoutSection } from "@pipecat-ai/voice-ui-kit";
+
+  <LayoutSection 
+    sectionKey="sidebar"
+    className="w-64 bg-muted p-4"
+  >
+    Sidebar content
+  </LayoutSection>
+`}
+</LiveComponent>
+
+#### Programmatic Access
+
+Use the data-section attribute to find sections programmatically.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { LayoutSection } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    React.useEffect(() => {
+      const section = document.querySelector('[data-section="demo"]');
+      if (section) {
+        console.log('Found section:', section);
+      }
+    }, []);
+    
+    return (
+      <LayoutSection sectionKey="demo">
+        This section can be found using querySelector('[data-section="demo"]')
+      </LayoutSection>
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Semantic HTML**: Uses `<section>` element for proper document structure
+- **Data Attribute**: Includes `data-section` attribute for identification
+- **Programmatic Access**: Can be found using CSS selectors or JavaScript
+- **Customizable**: Supports custom styling via className
+- **Simple API**: Minimal props for easy use
+
+## Data Attribute
+
+The component sets `data-section={sectionKey}` on the section element, allowing you to:
+- Select sections using CSS: `[data-section="my-key"]`
+- Find sections using JavaScript: `document.querySelector('[data-section="my-key"]')`
+- Style sections based on their key
+- Create navigation or scroll-to-section functionality
+
+## Integration
+
+The LayoutSection component is useful for:
+- Creating structured page layouts
+- Building navigation systems
+- Organizing content into semantic sections
+- Programmatic section identification
+- Scroll-to-section functionality
+
+It's a standalone component that doesn't require any context providers.
+

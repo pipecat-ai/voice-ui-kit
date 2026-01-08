@@ -1,8 +1,426 @@
 ---
-title: Console
-description: Displays a console-like interface for the Pipecat AI SDK.
+title: Console Template
+description: Full-featured console interface template for Pipecat applications
+component: ConsoleTemplate
 ---
 
-Console template docs are work in progress.
+The Console template provides a complete, production-ready interface for Pipecat applications. It includes resizable panels, conversation display, bot media visualization, device controls, event logging, and more.
 
-Please refer to docstrings in the [Console template source code](https://github.com/pipecat-ai/voice-ui-kit/blob/main/package/src/templates/Console/index.tsx#L57).
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { ConsoleTemplate } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-screen">
+    <ConsoleTemplate
+      transportType="smallwebrtc"
+      connectParams={{
+        webrtcUrl: "/api/offer"
+      }}
+    />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Overview
+
+The Console template is a comprehensive UI template that combines multiple panels and components into a single, cohesive interface. It's designed for development, testing, and production use cases.
+
+### Key Features
+
+- **Resizable Panels**: Adjustable layout with collapsible panels
+- **Conversation Display**: Tabbed interface with conversation and metrics
+- **Bot Media**: Audio visualization and video display panels
+- **Device Controls**: Audio, video, and screen sharing controls
+- **Event Logging**: Real-time RTVI event display with filtering
+- **Session Information**: Transport type, session ID, participant ID, and version
+- **Responsive Design**: Desktop resizable layout and mobile tabbed interface
+- **Theme Support**: Built-in theme switcher
+
+## Usage
+
+### Basic Usage
+
+```tsx
+import { ConsoleTemplate } from "@pipecat-ai/voice-ui-kit";
+
+export default function App() {
+  return (
+    <div className="h-screen">
+      <ConsoleTemplate
+        transportType="smallwebrtc"
+        connectParams={{
+          webrtcUrl: "/api/offer"
+        }}
+      />
+    </div>
+  );
+}
+```
+
+### With Daily Transport
+
+```tsx
+import { ConsoleTemplate } from "@pipecat-ai/voice-ui-kit";
+
+export default function App() {
+  return (
+    <div className="h-screen">
+      <ConsoleTemplate
+        transportType="daily"
+        connectParams={{
+          dailyUrl: "https://your-domain.daily.co/room-name",
+          token: "your-token"
+        }}
+      />
+    </div>
+  );
+}
+```
+
+### Custom Configuration
+
+```tsx
+import { ConsoleTemplate } from "@pipecat-ai/voice-ui-kit";
+
+export default function App() {
+  return (
+    <div className="h-screen">
+      <ConsoleTemplate
+        transportType="smallwebrtc"
+        connectParams={{
+          webrtcUrl: "/api/offer"
+        }}
+        titleText="My Application"
+        assistantLabelText="AI Assistant"
+        userLabelText="You"
+        noBotVideo={true}
+        noMetrics={true}
+      />
+    </div>
+  );
+}
+```
+
+## Props
+
+The ConsoleTemplate extends `PipecatBaseProps` and adds additional configuration options:
+
+<TypeTable
+  className="text-sm"
+  type={{
+    "PipecatBaseProps": {
+      description: "All props from PipecatAppBase are supported",
+      type: "PipecatBaseProps",
+      required: false,
+    },
+    noRTVI: {
+      description: "Disables RTVI related functionality",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    serverRTVIVersion: {
+      description: "Specifies the RTVI version in use by the server",
+      type: "string | null",
+      required: false,
+      default: "null",
+    },
+    noUserAudio: {
+      description: "Disables user audio input entirely",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noUserVideo: {
+      description: "Disables user video input entirely",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noScreenControl: {
+      description: "Disables user screen control entirely",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noTextInput: {
+      description: "Disables text input in the conversation",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noAudioOutput: {
+      description: "Disables audio output for the bot",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noBotAudio: {
+      description: "Disables audio visualization for the bot",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noBotVideo: {
+      description: "Disables video visualization for the bot",
+      type: "boolean",
+      required: false,
+      default: "true",
+    },
+    noAutoInitDevices: {
+      description: "Disables automatic initialization of devices",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    theme: {
+      description: "Theme to use for the UI",
+      type: "string",
+      required: false,
+      default: '"system"',
+    },
+    noThemeSwitch: {
+      description: "Disables the theme switcher in the header",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noLogo: {
+      description: "Disables the logo in the header",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noSessionInfo: {
+      description: "Disables the session info panel",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noStatusInfo: {
+      description: "Disables the status info panel",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    titleText: {
+      description: "Title displayed in the header",
+      type: "string",
+      required: false,
+      default: '"Pipecat Playground"',
+    },
+    assistantLabelText: {
+      description: "Label for assistant messages",
+      type: "string",
+      required: false,
+      default: '"assistant"',
+    },
+    userLabelText: {
+      description: "Label for user messages",
+      type: "string",
+      required: false,
+      default: '"user"',
+    },
+    systemLabelText: {
+      description: "Label for system messages",
+      type: "string",
+      required: false,
+      default: '"system"',
+    },
+    collapseInfoPanel: {
+      description: "Whether to collapse the info panel by default",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    collapseMediaPanel: {
+      description: "Whether to collapse the media panel by default",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    audioCodec: {
+      description: "Sets the audio codec. Only applicable for SmallWebRTC transport. Defaults to 'default'",
+      type: "string",
+      required: false,
+      default: '"default"',
+    },
+    videoCodec: {
+      description: "Sets the video codec. Only applicable for SmallWebRTC transport. Defaults to 'default'",
+      type: "string",
+      required: false,
+      default: '"default"',
+    },
+    noConversation: {
+      description: "Disables the conversation panel",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noMetrics: {
+      description: "Disables the metrics panel",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    logoComponent: {
+      description: "Custom logo component to display in the header",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    conversationElementProps: {
+      description: "Props to pass to the Conversation component",
+      type: "Partial<ConversationProps>",
+      required: false,
+      default: "undefined",
+    },
+    onInjectMessage: {
+      description: "Callback that receives the injectMessage function for manually adding messages",
+      type: "(injectMessage: (message: Pick<ConversationMessage, 'role' | 'parts'>) => void) => void",
+      required: false,
+      default: "undefined",
+    },
+    onServerMessage: {
+      description: "Callback that receives incoming server messages",
+      type: "(data: unknown) => void",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+## Layout
+
+### Desktop Layout
+
+On desktop (sm and above), the template uses a resizable panel layout:
+
+1. **Header**: Logo, title, theme switcher, info panel toggle, and connect button
+2. **Main Area** (70% height):
+   - **Left Panel**: Bot audio/video visualization (collapsible)
+   - **Middle Panel**: Conversation/Metrics tabs
+   - **Right Panel**: Info panel with status, devices, and session info (collapsible)
+3. **Bottom Panel** (30% height): Events panel (collapsible)
+
+### Mobile Layout
+
+On mobile, the template uses a tabbed interface:
+
+- **Bot Tab**: Bot audio and video panels
+- **Conversation Tab**: Conversation and metrics
+- **Info Tab**: Status, devices, and session info
+- **Events Tab**: Event log
+
+## Panel Configuration
+
+### Collapsible Panels
+
+Panels can be collapsed/expanded:
+- **Info Panel**: Collapses to show icon buttons in popovers
+- **Media Panel**: Collapses to show compact bot media
+- **Events Panel**: Collapses to minimal height
+
+### Panel Visibility
+
+Control which panels are visible:
+- `noBotAudio` / `noBotVideo`: Hide bot media panels
+- `noConversation` / `noMetrics`: Hide conversation/metrics tabs
+- `noSessionInfo` / `noStatusInfo`: Hide info panel sections
+- `noUserAudio` / `noUserVideo` / `noScreenControl`: Hide device controls
+
+## Codec Configuration (SmallWebRTC)
+
+For SmallWebRTC transport, you can specify audio and video codecs:
+
+```tsx
+<ConsoleTemplate
+  transportType="smallwebrtc"
+  audioCodec="opus"
+  videoCodec="vp9"
+  connectParams={{
+    webrtcUrl: "/api/offer"
+  }}
+/>
+```
+
+Supported codecs depend on browser support. Use `"default"` to use the browser's default codec.
+
+## Callbacks
+
+### onInjectMessage
+
+Receive a function to manually inject messages into the conversation:
+
+```tsx
+<ConsoleTemplate
+  onInjectMessage={(injectMessage) => {
+    // Store injectMessage for later use
+    window.injectMessage = injectMessage;
+  }}
+/>
+```
+
+### onServerMessage
+
+Subscribe to server messages:
+
+```tsx
+<ConsoleTemplate
+  onServerMessage={(data) => {
+    console.log("Server message:", data);
+  }}
+/>
+```
+
+## Integration
+
+The Console template:
+- Wraps your app with `PipecatAppBase` for client setup
+- Provides all necessary providers (ThemeProvider, PipecatClientProvider, ConversationProvider)
+- Handles connection state and error display
+- Manages panel collapse states
+- Tracks session and participant IDs automatically
+
+## Customization
+
+### Custom Logo
+
+```tsx
+<ConsoleTemplate
+  logoComponent={<YourCustomLogo />}
+  // ... other props
+/>
+```
+
+### Custom Conversation Props
+
+```tsx
+<ConsoleTemplate
+  conversationElementProps={{
+    assistantLabel: "AI Assistant",
+    clientLabel: "You",
+    noAutoscroll: false
+  }}
+  // ... other props
+/>
+```
+
+### Custom Theme
+
+```tsx
+<ConsoleTemplate
+  theme="dark"
+  noThemeSwitch={true}
+  // ... other props
+/>
+```
+
+## See Also
+
+- [PipecatAppBase](/docs/components/PipecatAppBase) - Base component used by the template
+- [ConversationPanel](/docs/panels/ConversationPanel) - Conversation display panel
+- [InfoPanel](/docs/panels/InfoPanel) - Information panel
+- [EventsPanel](/docs/panels/EventsPanel) - Events logging panel

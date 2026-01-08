@@ -1,4 +1,12 @@
 {
     "title": "Panels",
-    "icon": "AppWindow"
+    "icon": "AppWindow",
+    "pages": [
+        "Overview",
+        "BotAudioPanel",
+        "BotVideoPanel",
+        "ConversationPanel",
+        "EventsPanel",
+        "InfoPanel"
+    ]
 }

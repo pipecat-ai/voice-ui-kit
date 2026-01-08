@@ -1,4 +1,33 @@
 {
     "title": "Primitives",
-    "icon": "Blocks"
+    "icon": "Blocks",
+    "pages": [
+        "badge",
+        "banner",
+        "blankslates",
+        "button",
+        "buttongroup",
+        "card",
+        "container",
+        "control-bar",
+        "copy-text",
+        "data-list",
+        "divider",
+        "dropdown-menu",
+        "error",
+        "highlight-overlay",
+        "input",
+        "layout",
+        "led",
+        "loader",
+        "panel",
+        "pipecat-logo",
+        "popover",
+        "progress",
+        "resizable",
+        "select",
+        "tabs",
+        "textarea",
+        "tooltip"
+    ]
 }

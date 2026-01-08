@@ -1,0 +1,150 @@
+---
+title: Events Panel
+description: Panel component for displaying RTVI events and logs
+component: EventsPanel
+---
+
+The EventsPanel component displays a real-time log of RTVI events from the Pipecat Client SDK. It shows connection events, bot events, track events, and more, with filtering capabilities.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { EventsPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-96 w-full">
+    <EventsPanel />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### EventsPanel
+
+The EventsPanel component automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { EventsPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-96 w-full">
+    <EventsPanel />
+  </div>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    collapsed: {
+      description: "Display the panel in collapsed mode",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display events panel with all RTVI events.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { EventsPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-96 w-full">
+    <EventsPanel />
+  </div>
+`}
+</LiveComponent>
+
+#### Collapsed Mode
+
+Display the panel in collapsed mode.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { EventsPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-96 w-full">
+    <EventsPanel collapsed={true} />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Features
+
+- **Real-time Events**: Automatically captures and displays RTVI events
+- **Event Filtering**: Search/filter events by event name or message content
+- **Auto-scroll**: Automatically scrolls to bottom when new events arrive (if user is at bottom)
+- **Event Types**: Captures various event types including:
+  - Transport state changes
+  - Bot connection/disconnection
+  - Bot ready events
+  - Speaking events (bot and user)
+  - Track events (audio, video, screen)
+  - Participant events
+  - Error events
+  - Server messages
+- **Formatted Display**: Shows timestamp, event name, and message for each event
+
+## Event Types
+
+The panel captures and displays the following event types:
+
+- **Transport State**: Changes in connection state
+- **BotConnected**: Bot connects to the session
+- **BotDisconnected**: Bot disconnects from the session
+- **BotReady**: Bot is ready with version and metadata
+- **BotStartedSpeaking**: Bot begins speaking
+- **BotStoppedSpeaking**: Bot stops speaking
+- **Connected**: Client connects to session
+- **Disconnected**: Client disconnects from session
+- **Error**: Error events with error messages
+- **ParticipantConnected**: Participant joins the session
+- **ParticipantLeft**: Participant leaves the session
+- **TrackStarted**: Media track starts
+- **TrackStopped**: Media track stops
+- **ScreenTrackStarted**: Screen share track starts
+- **ScreenTrackStopped**: Screen share track stops
+- **UserStartedSpeaking**: User begins speaking
+- **UserStoppedSpeaking**: User stops speaking
+- **ServerMessage**: Messages from the server
+
+## Filtering
+
+The panel includes a filter input that searches through:
+- Event names (case-insensitive)
+- Event messages (case-insensitive)
+
+Only events matching the filter are displayed.
+
+## Auto-scroll Behavior
+
+The panel automatically scrolls to the bottom when new events arrive, but only if the user is already at the bottom. This prevents interrupting users who are reading previous events.
+
+## Display Format
+
+Each event is displayed in a grid with three columns:
+1. **Time**: Timestamp when the event occurred
+2. **Event**: Event name/type
+3. **Message**: Event details/message
+
+## Integration
+
+The EventsPanel component uses:
+- `usePipecatClient` to access the client instance
+- `usePipecatClientTransportState` to track transport state changes
+- `useRTVIClientEvent` hooks to listen for various RTVI events
+- `Panel` component for consistent styling
+
+It must be used within a `PipecatClientProvider` context to function properly.
+
