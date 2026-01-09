@@ -6,7 +6,6 @@ import {
   usePipecatClientTransportState,
   useRTVIClientEvent,
 } from "@pipecat-ai/client-react";
-import { useRawServiceMessages } from "@/hooks/useRawServiceMessages";
 import { isMinVersion } from "@/utils/version";
 import { cva } from "class-variance-authority";
 import { useCallback, useState } from "react";
@@ -210,37 +209,6 @@ export const TranscriptOverlay = ({
       setTranscript((prev) => [...prev, data.text]);
     }
   });
-
-  // Handle raw TTS events (when BotOutput not supported)
-  useRawServiceMessages(
-    {
-      onBotMessageChunk: (type, text) => {
-        if (participant === "local") {
-          return;
-        }
-
-        // Only process TTS chunks (spoken content)
-        if (type === "tts") {
-          if (turnEnd) {
-            setTranscript([]);
-            setIsTurnEnd(false);
-          }
-
-          setTranscript((prev) => [...prev, text]);
-        }
-      },
-      onBotMessageEnded: (type) => {
-        if (participant === "local") {
-          return;
-        }
-        // Only handle TTS ended events
-        if (type === "tts") {
-          setIsTurnEnd(true);
-        }
-      },
-    },
-    botOutputSupported,
-  );
 
   useRTVIClientEvent(
     RTVIEvent.BotStoppedSpeaking,

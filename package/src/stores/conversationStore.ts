@@ -8,9 +8,6 @@ import { create } from "zustand";
 interface ConversationState {
   messages: ConversationMessage[];
   messageCallbacks: Map<string, (message: ConversationMessage) => void>;
-  // Store separate text streams for LLM and TTS (legacy mode)
-  llmTextStreams: Map<string, string>; // messageId -> accumulated LLM text
-  ttsTextStreams: Map<string, string>; // messageId -> accumulated TTS text
   // Store BotOutput text streams (BotOutput mode)
   botOutputSpokenStreams: Map<string, string>; // messageId -> accumulated spoken text
   botOutputUnspokenStreams: Map<string, string>; // messageId -> accumulated unspoken text
@@ -41,18 +38,12 @@ interface ConversationState {
     text: string | React.ReactNode,
     final: boolean,
   ) => void;
-  updateAssistantText: (
-    text: string,
-    final: boolean,
-    source: "llm" | "tts", // Derived from BotOutput.spoken: "llm" if false, "tts" if true
-  ) => void;
   updateAssistantBotOutput: (
     text: string,
     final: boolean,
     spoken: boolean, // true if text has been spoken, false if unspoken
     aggregatedBy?: string, // aggregation type (e.g., "code", "link", "sentence", "word")
   ) => void;
-  startAssistantLlmStream: () => void;
 }
 
 export const sortByCreatedAt = (
@@ -156,8 +147,6 @@ const callAllMessageCallbacks = (
 export const useConversationStore = create<ConversationState>()((set) => ({
   messages: [],
   messageCallbacks: new Map(),
-  llmTextStreams: new Map(),
-  ttsTextStreams: new Map(),
   botOutputSpokenStreams: new Map(),
   botOutputUnspokenStreams: new Map(),
   botOutputAggregationTypes: new Map(),
@@ -179,8 +168,6 @@ export const useConversationStore = create<ConversationState>()((set) => ({
   clearMessages: () =>
     set({
       messages: [],
-      llmTextStreams: new Map(),
-      ttsTextStreams: new Map(),
       botOutputSpokenStreams: new Map(),
       botOutputUnspokenStreams: new Map(),
       botOutputAggregationTypes: new Map(),
@@ -244,8 +231,6 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       // Check if message is empty in both parts and text streams
       const messageId = lastMessage.createdAt;
       const hasTextInStreams =
-        state.llmTextStreams.get(messageId) ||
-        state.ttsTextStreams.get(messageId) ||
         state.botOutputSpokenStreams.get(messageId) ||
         state.botOutputUnspokenStreams.get(messageId);
 
@@ -295,8 +280,6 @@ export const useConversationStore = create<ConversationState>()((set) => ({
 
       // Check if message has text in streams
       const hasTextInStreams =
-        state.llmTextStreams.get(messageId) ||
-        state.ttsTextStreams.get(messageId) ||
         state.botOutputSpokenStreams.get(messageId) ||
         state.botOutputUnspokenStreams.get(messageId);
 
@@ -402,69 +385,6 @@ export const useConversationStore = create<ConversationState>()((set) => ({
     });
   },
 
-  updateAssistantText: (text, final, source) => {
-    const now = new Date();
-    set((state) => {
-      const messages = [...state.messages];
-      const llmTextStreams = new Map(state.llmTextStreams);
-      const ttsTextStreams = new Map(state.ttsTextStreams);
-
-      const lastAssistantIndex = messages.findLastIndex(
-        (msg) => msg.role === "assistant",
-      );
-
-      let messageId: string;
-
-      if (lastAssistantIndex === -1) {
-        // Create new assistant message
-        messageId = now.toISOString();
-        const newMessage: ConversationMessage = {
-          role: "assistant",
-          final,
-          parts: [],
-          createdAt: messageId,
-          updatedAt: messageId,
-          mode: "tts/llm",
-        };
-        messages.push(newMessage);
-      } else {
-        // Update existing assistant message
-        const lastMessage = messages[lastAssistantIndex];
-        messageId = lastMessage.createdAt;
-
-        messages[lastAssistantIndex] = {
-          ...lastMessage,
-          mode: "tts/llm", // Ensure mode is set for legacy events
-          final: final ? true : lastMessage.final,
-          updatedAt: now.toISOString(),
-        };
-      }
-
-      // Update the appropriate text stream
-      if (source === "llm") {
-        const currentText = llmTextStreams.get(messageId) || "";
-        llmTextStreams.set(messageId, currentText + text);
-      } else {
-        const currentText = ttsTextStreams.get(messageId) || "";
-        // Add space between TTS chunks for proper word separation
-        const separator =
-          currentText && !currentText.endsWith(" ") && !text.startsWith(" ")
-            ? " "
-            : "";
-        ttsTextStreams.set(messageId, currentText + separator + text);
-      }
-
-      // Don't filter out messages that have text in the text streams
-      const processedMessages = mergeMessages(messages.sort(sortByCreatedAt));
-
-      return {
-        messages: processedMessages,
-        llmTextStreams,
-        ttsTextStreams,
-      };
-    });
-  },
-
   updateAssistantBotOutput: (text, final, spoken, aggregatedBy) => {
     const now = new Date();
     set((state) => {
@@ -539,60 +459,6 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         botOutputSpokenStreams,
         botOutputUnspokenStreams,
         botOutputAggregationTypes,
-      };
-    });
-  },
-
-  startAssistantLlmStream: () => {
-    set((state) => {
-      const messages = [...state.messages];
-      const llmTextStreams = new Map(state.llmTextStreams);
-      const now = new Date();
-
-      const lastIndex = messages.length - 1;
-      // Get the last assistant message
-      const lastAssistantIndex = messages.findLastIndex(
-        (msg) => msg.role === "assistant",
-      );
-      const lastAssistant =
-        lastAssistantIndex !== -1 ? messages[lastAssistantIndex] : undefined;
-
-      // Check if the last assistant message is final
-      if (!lastAssistant || lastIndex !== lastAssistantIndex) {
-        // Create a new assistant message
-        const newMessage: ConversationMessage = {
-          role: "assistant",
-          final: false,
-          parts: [],
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
-        };
-        messages.push(newMessage);
-      } else if (lastIndex === lastAssistantIndex) {
-        // The last assistant message is not final, so we need to add a space
-        // to the LLM stream to separate it from the previous content
-        const messageId = lastAssistant.createdAt;
-        const currentText = llmTextStreams.get(messageId) || "";
-
-        // Add a space if the current text doesn't end with one
-        if (currentText && !currentText.endsWith(" ")) {
-          llmTextStreams.set(messageId, currentText + " ");
-        }
-
-        messages[lastAssistantIndex] = {
-          ...lastAssistant,
-          final: false,
-          updatedAt: now.toISOString(),
-        };
-      }
-
-      const processedMessages = mergeMessages(
-        filterEmptyMessages(messages.sort(sortByCreatedAt)),
-      );
-
-      return {
-        messages: processedMessages,
-        llmTextStreams,
       };
     });
   },

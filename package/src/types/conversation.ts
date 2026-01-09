@@ -30,8 +30,3 @@ export interface ConversationMessage {
    */
   mode?: "tts/llm" | "botOutput";
 }
-
-/**
- * Text mode for conversation display (only used in TTS/LLM mode)
- */
-export type TextMode = "llm" | "tts";

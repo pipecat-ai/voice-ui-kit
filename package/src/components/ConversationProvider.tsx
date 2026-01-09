@@ -3,7 +3,6 @@ import {
   type ConversationMessage,
   type ConversationMessagePart,
 } from "@/types/conversation";
-import { useRawServiceMessages } from "@/hooks/useRawServiceMessages";
 import { BotOutputData, BotReadyData, RTVIEvent } from "@pipecat-ai/client-js";
 import { useRTVIClientEvent } from "@pipecat-ai/client-react";
 import { createContext, useContext, useRef, useState } from "react";
@@ -35,7 +34,6 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     removeEmptyLastMessage,
     injectMessage,
     upsertUserTranscript,
-    updateAssistantText,
     updateAssistantBotOutput,
   } = useConversationStore();
 
@@ -118,29 +116,6 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
       data.aggregated_by,
     );
   });
-
-  // Handle raw TTS/LLM events (when BotOutput not supported)
-  useRawServiceMessages(
-    {
-      onBotMessageStarted: () => {
-        ensureAssistantMessage();
-      },
-      onBotMessageChunk: (type, text) => {
-        updateAssistantText(text, false, type);
-      },
-      onBotMessageEnded: () => {
-        const store = useConversationStore.getState();
-        const lastAssistant = store.messages.findLast(
-          (m: ConversationMessage) => m.role === "assistant",
-        );
-
-        if (lastAssistant && !lastAssistant.final) {
-          finalizeLastMessage("assistant");
-        }
-      },
-    },
-    botOutputSupported === true,
-  );
 
   useRTVIClientEvent(RTVIEvent.BotStoppedSpeaking, () => {
     // Finalize the assistant message when bot stops speaking
