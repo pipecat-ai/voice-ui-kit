@@ -6,7 +6,7 @@ import {
   usePipecatClientTransportState,
   useRTVIClientEvent,
 } from "@pipecat-ai/client-react";
-import { useBotMessages } from "@/hooks/useBotMessages";
+import { useRawServiceMessages } from "@/hooks/useRawServiceMessages";
 import { isMinVersion } from "@/utils/version";
 import { cva } from "class-variance-authority";
 import { useCallback, useState } from "react";
@@ -211,8 +211,8 @@ export const TranscriptOverlay = ({
     }
   });
 
-  // Handle legacy TTS events (when BotOutput not supported)
-  useBotMessages(
+  // Handle raw TTS events (when BotOutput not supported)
+  useRawServiceMessages(
     {
       onBotMessageChunk: (type, text) => {
         if (participant === "local") {

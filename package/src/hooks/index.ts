@@ -13,5 +13,5 @@ export type {
   UsePipecatEventStreamOptions,
 } from "./usePipecatEventStream";
 export { useTheme } from "./useTheme";
-export { useBotMessages } from "./useBotMessages";
-export type { UseBotMessagesCallbacks } from "./useBotMessages";
+export { useRawServiceMessages } from "./useRawServiceMessages";
+export type { UseRawServiceMessagesCallbacks } from "./useRawServiceMessages";

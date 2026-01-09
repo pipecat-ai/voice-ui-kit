@@ -3,7 +3,7 @@ import {
   type ConversationMessage,
   type ConversationMessagePart,
 } from "@/types/conversation";
-import { useBotMessages } from "@/hooks/useBotMessages";
+import { useRawServiceMessages } from "@/hooks/useRawServiceMessages";
 import { BotOutputData, BotReadyData, RTVIEvent } from "@pipecat-ai/client-js";
 import { useRTVIClientEvent } from "@pipecat-ai/client-react";
 import { createContext, useContext, useRef, useState } from "react";
@@ -119,8 +119,8 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     );
   });
 
-  // Handle legacy TTS/LLM events (when BotOutput not supported)
-  useBotMessages(
+  // Handle raw TTS/LLM events (when BotOutput not supported)
+  useRawServiceMessages(
     {
       onBotMessageStarted: () => {
         ensureAssistantMessage();

@@ -5,7 +5,7 @@ import { useRTVIClientEvent } from "@pipecat-ai/client-react";
  * Callbacks for handling raw TTS/LLM bot message events.
  * This hook handles raw BotLlm* and BotTts* events.
  */
-export interface UseBotMessagesCallbacks {
+export interface UseRawServiceMessagesCallbacks {
   /**
    * Called when a bot message stream starts for a given type.
    * @param type - The message type: "llm" for LLM events, "tts" for TTS events
@@ -34,8 +34,8 @@ export interface UseBotMessagesCallbacks {
  * @param callbacks - Callback functions for handling raw TTS/LLM bot message events
  * @param botOutputSupported - Whether BotOutput is supported (if true, these handlers won't be called)
  */
-export function useBotMessages(
-  callbacks: UseBotMessagesCallbacks,
+export function useRawServiceMessages(
+  callbacks: UseRawServiceMessagesCallbacks,
   botOutputSupported: boolean = false,
 ) {
   // Handle raw BotLlmStarted events
