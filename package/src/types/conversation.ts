@@ -9,7 +9,12 @@ export interface BotOutputText {
 }
 
 export interface ConversationMessagePart {
-  text: string | ReactNode | BotOutputText;
+  /**
+   * Text content for the message part.
+   * - BotOutputText: For assistant messages with spoken/unspoken text
+   * - ReactNode: For user messages (strings) or custom injected content
+   */
+  text: ReactNode | BotOutputText;
   final: boolean;
   createdAt: string;
   /**
