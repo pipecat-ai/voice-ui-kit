@@ -2,7 +2,9 @@ import CopyText from "@/components/elements/CopyText";
 import DataList from "@/components/elements/DataList";
 import { TextDashBlankslate } from "@/index";
 import Daily from "@daily-co/daily-js";
-import { usePipecatClient } from "@pipecat-ai/client-react";
+import { BotReadyData, RTVIEvent } from "@pipecat-ai/client-js";
+import { usePipecatClient, useRTVIClientEvent } from "@pipecat-ai/client-react";
+import { useState } from "react";
 
 interface Props {
   noTransportType?: boolean;
@@ -22,6 +24,17 @@ export const SessionInfo: React.FC<Props> = ({
   participantId,
 }) => {
   const client = usePipecatClient();
+  const [serverVersion, setServerVersion] = useState<string | null>(null);
+
+  // Reset server version on disconnect
+  useRTVIClientEvent(RTVIEvent.Disconnected, () => {
+    setServerVersion(null);
+  });
+
+  // Track server RTVI version from BotReady event
+  useRTVIClientEvent(RTVIEvent.BotReady, (botData: BotReadyData) => {
+    setServerVersion(botData.version);
+  });
 
   let transportTypeName = "Unknown";
   if (client && "dailyCallClient" in client.transport) {
@@ -53,7 +66,17 @@ export const SessionInfo: React.FC<Props> = ({
     );
   }
   if (!noRTVIVersion) {
-    data["RTVI"] = client?.version || <TextDashBlankslate />;
+    const clientVersion = client?.version;
+    data["RTVI Client"] = clientVersion ? (
+      `v${clientVersion}`
+    ) : (
+      <TextDashBlankslate />
+    );
+    data["RTVI Server"] = serverVersion ? (
+      `v${serverVersion}`
+    ) : (
+      <TextDashBlankslate />
+    );
   }
 
   return (
