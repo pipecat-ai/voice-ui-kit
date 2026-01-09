@@ -198,9 +198,8 @@ export const TranscriptOverlay = ({
       return;
     }
 
-    // Only process word-level outputs that have been spoken
-    // These provide real-time word-by-word streaming for karaoke-like UI
-    if (data.aggregated_by === "word" && data.spoken === true && data.text) {
+    // Only process spoken outputs
+    if (data.spoken === true && data.text) {
       if (turnEnd) {
         setTranscript([]);
         setIsTurnEnd(false);
