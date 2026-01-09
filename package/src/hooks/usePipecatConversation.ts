@@ -80,24 +80,22 @@ export const usePipecatConversation = ({ onMessageAdded }: Props = {}) => {
       if (message.role === "assistant") {
         const messageId = message.createdAt; // Use createdAt as unique ID
 
-        // Handle BotOutput mode
-        if (message.mode === "botOutput") {
-          const spokenText = botOutputSpokenStreams.get(messageId) || "";
-          const unspokenText = botOutputUnspokenStreams.get(messageId) || "";
-          const aggregatedBy = botOutputAggregationTypes.get(messageId);
+        // All assistant messages use BotOutput streams
+        const spokenText = botOutputSpokenStreams.get(messageId) || "";
+        const unspokenText = botOutputUnspokenStreams.get(messageId) || "";
+        const aggregatedBy = botOutputAggregationTypes.get(messageId);
 
-          return {
-            ...message,
-            parts: [
-              {
-                text: { spoken: spokenText, unspoken: unspokenText },
-                final: message.final || false,
-                createdAt: message.createdAt,
-                aggregatedBy,
-              },
-            ],
-          };
-        }
+        return {
+          ...message,
+          parts: [
+            {
+              text: { spoken: spokenText, unspoken: unspokenText },
+              final: message.final || false,
+              createdAt: message.createdAt,
+              aggregatedBy,
+            },
+          ],
+        };
       }
       return message;
     });

@@ -25,8 +25,4 @@ export interface ConversationMessage {
   parts: ConversationMessagePart[];
   createdAt: string;
   updatedAt?: string;
-  /**
-   * Message mode: "tts/llm" for legacy TTS/LLM events, "botOutput" for BotOutput events
-   */
-  mode?: "tts/llm" | "botOutput";
 }

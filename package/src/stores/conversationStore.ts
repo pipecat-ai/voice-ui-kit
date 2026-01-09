@@ -410,7 +410,6 @@ export const useConversationStore = create<ConversationState>()((set) => ({
           parts: [],
           createdAt: messageId,
           updatedAt: messageId,
-          mode: "botOutput",
         };
         messages.push(newMessage);
       } else {
@@ -418,10 +417,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         const lastMessage = messages[lastAssistantIndex];
         messageId = lastMessage.createdAt;
 
-        // Ensure mode is set to botOutput
         messages[lastAssistantIndex] = {
           ...lastMessage,
-          mode: "botOutput",
           final: final ? true : lastMessage.final,
           updatedAt: now.toISOString(),
         };
