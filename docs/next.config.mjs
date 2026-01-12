@@ -12,6 +12,10 @@ const config = {
         source: "/api/:path*",
         destination: "http://0.0.0.0:7860/api/:path*",
       },
+      {
+        source: "/:path*.mdx",
+        destination: "/llms.mdx/docs/:path*",
+      },
     ];
   },
 };
