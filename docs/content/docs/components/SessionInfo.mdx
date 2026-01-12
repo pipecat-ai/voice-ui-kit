@@ -99,6 +99,7 @@ Hide fields you don't need.
   <SessionInfo 
     noRTVIVersion={true}
     noTransportType={true}
+    participantId="custom-participant-456"
   />
 `}
 </LiveComponent>
@@ -114,22 +115,6 @@ Provide custom session and participant IDs.
   <SessionInfo 
     sessionId="custom-session-123"
     participantId="custom-participant-456"
-  />
-`}
-</LiveComponent>
-
-#### Show Only Session ID
-
-Display only the session ID field.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { SessionInfo } from "@pipecat-ai/voice-ui-kit";
-
-  <SessionInfo 
-    noTransportType={true}
-    noParticipantId={true}
-    noRTVIVersion={true}
   />
 `}
 </LiveComponent>
