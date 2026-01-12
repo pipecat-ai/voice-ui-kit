@@ -9,7 +9,7 @@ const { ConversationProvider } = VoiceUIKit;
 import { CodeBlock, Pre as CodePre } from "fumadocs-ui/components/codeblock";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
-import * as LucideIcons from "lucide-react";
+import { Loader2Icon, MoonIcon, SunIcon, MessageSquareIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useMemo, useState } from "react";
 import { LiveError, LivePreview, LiveProvider } from "react-live";
@@ -125,20 +125,19 @@ export function LiveComponent({
     () => stripImportsExportsRequires(displaySource),
     [displaySource]
   );
-  const mergedScope = useMemo(() => {
-    // Filter LucideIcons to only include components with "Icon" in their name
-    const lucideIconsOnly = Object.fromEntries(
-      Object.entries(LucideIcons).filter(([key]) => key.includes("Icon"))
-    );
-
-    return {
+  const mergedScope = useMemo(
+    () => ({
       React,
-      ...lucideIconsOnly,
+      // Only include specific lucide icons that are used in docs
+      MoonIcon,
+      SunIcon,
+      MessageSquareIcon,
       ...VoiceUIKit,
       ...VoiceUIKitWebGL,
       ...(scope ?? {}),
-    };
-  }, [scope]);
+    }),
+    [scope]
+  );
 
   const h = typeof height === "number" ? `h-[${height}px]` : height;
   const previewOrientationClass =
@@ -248,7 +247,7 @@ export function LiveComponent({
                 previewComp
               ) : (
                 <div className="h-full w-full flex items-center justify-center">
-                  <LucideIcons.Loader2
+                  <Loader2Icon
                     className="animate-spin text-muted-foreground"
                     size={24}
                   />
