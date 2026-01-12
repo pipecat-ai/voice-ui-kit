@@ -227,7 +227,7 @@ export function LiveComponent({
   }
 
   return (
-    <div className={className}>
+    <div className={"not-prose " + className}>
       <LiveProvider
         code={execSource}
         scope={mergedScope}
