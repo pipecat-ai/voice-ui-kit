@@ -9,7 +9,7 @@ const { ConversationProvider } = VoiceUIKit;
 import { CodeBlock, Pre as CodePre } from "fumadocs-ui/components/codeblock";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
-import { Loader2Icon, MoonIcon, SunIcon, MessageSquareIcon } from "lucide-react";
+import { CircleAlertIcon, Loader2Icon, MoonIcon, SunIcon, MessageSquareIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useMemo, useState } from "react";
 import { LiveError, LivePreview, LiveProvider } from "react-live";
@@ -129,6 +129,7 @@ export function LiveComponent({
     () => ({
       React,
       // Only include specific lucide icons that are used in docs
+      CircleAlertIcon,
       MoonIcon,
       SunIcon,
       MessageSquareIcon,
