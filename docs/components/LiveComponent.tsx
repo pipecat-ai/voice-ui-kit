@@ -125,16 +125,20 @@ export function LiveComponent({
     () => stripImportsExportsRequires(displaySource),
     [displaySource]
   );
-  const mergedScope = useMemo(
-    () => ({
+  const mergedScope = useMemo(() => {
+    // Filter LucideIcons to only include components with "Icon" in their name
+    const lucideIconsOnly = Object.fromEntries(
+      Object.entries(LucideIcons).filter(([key]) => key.includes("Icon"))
+    );
+
+    return {
       React,
+      ...lucideIconsOnly,
       ...VoiceUIKit,
       ...VoiceUIKitWebGL,
-      ...LucideIcons,
       ...(scope ?? {}),
-    }),
-    [scope]
-  );
+    };
+  }, [scope]);
 
   const h = typeof height === "number" ? `h-[${height}px]` : height;
   const previewOrientationClass =

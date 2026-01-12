@@ -269,13 +269,13 @@ You can use a custom icon for the send button.
 <LiveComponent language="tsx" noInline>
 {`
   import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
-  import { MessageCircle } from "lucide-react";
+  import { MessageSquareIcon } from "lucide-react";
 
   function Demo() {
     return (
       <TextInputComponent
         placeholder="Send a message..."
-        buttonIcon={<CircleIcon size={16} />}
+        buttonIcon={<MessageSquareIcon size={16} />}
         onSend={(message) => console.log("Sending:", message)}
       />
     );
