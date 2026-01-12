@@ -18,22 +18,6 @@ The ConversationPanel component provides a tabbed interface combining conversati
 
 ---
 
-## Component Variants
-
-### ConversationPanel
-
-The ConversationPanel component provides tabs for conversation and metrics.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ConversationPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <ConversationPanel />
-  </div>
-`}
-</LiveComponent>
-
 <TypeTable
   className="text-sm"
   type={{
@@ -80,20 +64,6 @@ The ConversationPanel component provides tabs for conversation and metrics.
 
 ## Usage
 
-#### Basic Usage
-
-Display both conversation and metrics tabs.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ConversationPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <ConversationPanel />
-  </div>
-`}
-</LiveComponent>
-
 #### Conversation Only
 
 Show only the conversation tab.
@@ -122,64 +92,7 @@ Show only the metrics tab.
 `}
 </LiveComponent>
 
-#### Text Mode Toggle
-
-The panel includes a toggle button to switch between LLM and TTS text modes.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ConversationPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <ConversationPanel noTextModeToggle={false} />
-  </div>
-`}
-</LiveComponent>
-
-#### Custom Conversation Props
-
-Pass custom props to the Conversation component.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ConversationPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <ConversationPanel
-      conversationElementProps={{
-        assistantLabel: "AI Assistant",
-        clientLabel: "You",
-        noAutoscroll: false
-      }}
-    />
-  </div>
-`}
-</LiveComponent>
-
-#### Without Text Input
-
-Hide the text input in the conversation.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ConversationPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <ConversationPanel noTextInput={true} />
-  </div>
-`}
-</LiveComponent>
-
 ---
-
-## Features
-
-- **Tabbed Interface**: Provides tabs for conversation and metrics
-- **Text Mode Toggle**: Button to switch between LLM and TTS text display modes
-- **Flexible Configuration**: Can show/hide individual tabs
-- **Conversation Integration**: Uses the Conversation component for message display
-- **Metrics Integration**: Uses the Metrics component for performance data
-- **Customizable**: Supports all Conversation component props
 
 ## Tabs
 

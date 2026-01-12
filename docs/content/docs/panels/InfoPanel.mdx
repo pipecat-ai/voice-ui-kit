@@ -18,22 +18,6 @@ The InfoPanel component provides a comprehensive information panel that displays
 
 ---
 
-## Component Variants
-
-### InfoPanel
-
-The InfoPanel component automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { InfoPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <InfoPanel />
-  </div>
-`}
-</LiveComponent>
-
 <TypeTable
   className="text-sm"
   type={{
@@ -86,20 +70,6 @@ The InfoPanel component automatically integrates with the Pipecat Client SDK. It
 
 ## Usage
 
-#### Basic Usage
-
-Display all information sections.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { InfoPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <InfoPanel />
-  </div>
-`}
-</LiveComponent>
-
 #### Hide Specific Sections
 
 Hide sections you don't need.
@@ -117,52 +87,7 @@ Hide sections you don't need.
 `}
 </LiveComponent>
 
-#### Status Only
-
-Show only the status section.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { InfoPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <InfoPanel 
-      noSessionInfo={true}
-      noUserAudio={true}
-      noUserVideo={true}
-      noScreenControl={true}
-    />
-  </div>
-`}
-</LiveComponent>
-
-#### Custom Session IDs
-
-Provide custom session and participant IDs.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { InfoPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <InfoPanel 
-      sessionId="custom-session-123"
-      participantId="custom-participant-456"
-    />
-  </div>
-`}
-</LiveComponent>
-
 ---
-
-## Features
-
-- **Status Display**: Shows client and agent connection status
-- **Device Controls**: Includes controls for audio, video, and screen sharing
-- **Session Information**: Displays transport type, session ID, participant ID, and RTVI version
-- **Flexible Configuration**: Can show/hide individual sections
-- **Organized Layout**: Sections are clearly separated with headers
-- **Scrollable**: Panel content is scrollable when it exceeds available height
 
 ## Panel Sections
 

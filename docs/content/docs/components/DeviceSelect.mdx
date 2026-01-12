@@ -6,38 +6,18 @@ component: DeviceSelect
 
 The DeviceSelect component provides a user interface for selecting and managing microphone input devices in your voice application. It integrates with the Pipecat Client SDK to automatically detect available microphones and allow users to switch between them.
 
-<LiveComponent language="tsx">
+<LiveComponent language="tsx" withPipecat>
 {`
-  import { DeviceSelectComponent } from "@pipecat-ai/voice-ui-kit";
+  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
 
-  <DeviceSelectComponent
+  <DeviceSelect
     placeholder="Select input device"
     guide="Microphone"
-    availableDevices={[
-      {deviceId: "microphone1", label: "Microphone 1"},
-      {deviceId: "microphone2", label: "Microphone 2"},
-    ]}
-    selectedDevice={null}
-    updateDevice={(deviceId) => console.log("Selected:", deviceId)}
   />
 `}
 </LiveComponent>
 
 ---
-
-## Component Variants
-
-### DeviceSelect
-
-The `DeviceSelect` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
-<LiveComponent language="tsx" withPipecat withDevices>
-{`
-  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
-
-  <DeviceSelect />
-`}
-</LiveComponent>
 
 <TypeTable
   className="text-sm"
@@ -170,76 +150,6 @@ The `DeviceSelectComponent` is the headless variant that accepts all device data
 />
 
 ---
-
-## Usage
-
-#### Basic Usage
-
-The DeviceSelect component automatically detects available microphone devices and provides a dropdown interface for selection.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
-
-  <DeviceSelect />
-`}
-</LiveComponent>
-
-#### Custom Placeholder
-
-You can customize the placeholder text shown in the select input.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
-
-  <DeviceSelect placeholder="Choose your microphone" />
-`}
-</LiveComponent>
-
-#### Guide Content
-
-You can add guide content to the select trigger for additional context.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
-
-  <DeviceSelect
-    guide="Microphone"
-    placeholder="Please select"
-  />
-`}
-</LiveComponent>
-
-#### Custom Styling
-
-Pass class names to target child components to customize the styling.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { DeviceSelect } from "@pipecat-ai/voice-ui-kit";
-
-  <DeviceSelect
-    classNames={{
-      selectTrigger: "border-2 border-primary",
-      selectContent: "border-2 border-primary shadow-xlong",
-      selectItem: "font-mono text-xs uppercase",
-    }}
-  />
-`}
-</LiveComponent>
-
----
-
-## Features
-
-- **Automatic Device Detection**: Automatically discovers available microphone devices on the user's system
-- **Real-time Updates**: Updates the available devices list when devices are connected or disconnected
-- **Accessible**: Includes proper ARIA labels and keyboard navigation
-- **Responsive**: Adapts to different screen sizes and container widths
-- **Theme Support**: Integrates with the Voice UI Kit theming system
-- **Flexible**: Available in both connected and headless variants
 
 ## Integration
 

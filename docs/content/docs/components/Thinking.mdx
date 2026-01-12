@@ -22,14 +22,6 @@ The Thinking component displays an animated thinking indicator using dots. It's 
 
 The Thinking component displays animated dots to indicate processing.
 
-<LiveComponent language="tsx">
-{`
-  import { Thinking } from "@pipecat-ai/voice-ui-kit";
-
-  <Thinking />
-`}
-</LiveComponent>
-
 <TypeTable
   className="text-sm"
   type={{
@@ -70,18 +62,6 @@ The Thinking component displays animated dots to indicate processing.
 
 ## Usage
 
-#### Basic Usage
-
-Display the default thinking indicator with 1-3 dots.
-
-<LiveComponent language="tsx">
-{`
-  import { Thinking } from "@pipecat-ai/voice-ui-kit";
-
-  <Thinking />
-`}
-</LiveComponent>
-
 #### Custom Dot Count
 
 Adjust the maximum number of dots.
@@ -119,7 +99,7 @@ Apply custom classes for styling.
   import { Thinking } from "@pipecat-ai/voice-ui-kit";
 
   <Thinking 
-    className="text-primary text-lg font-bold"
+    className="text-primary text-lg font-bold tracking-widest"
   />
 `}
 </LiveComponent>

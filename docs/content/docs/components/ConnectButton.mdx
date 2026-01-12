@@ -6,7 +6,7 @@ component: ConnectButton
 
 The ConnectButton component provides a button that automatically adapts its appearance and behavior based on the current transport connection state. It handles connect and disconnect actions automatically and supports custom state content configuration.
 
-<LiveComponent language="tsx" withPipecat>
+<LiveComponent language="tsx">
 {`
   import { ConnectButton } from "@pipecat-ai/voice-ui-kit";
 
@@ -15,20 +15,6 @@ The ConnectButton component provides a button that automatically adapts its appe
 </LiveComponent>
 
 ---
-
-## Component Variants
-
-### ConnectButton
-
-The `ConnectButton` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ConnectButton } from "@pipecat-ai/voice-ui-kit";
-
-  <ConnectButton />
-`}
-</LiveComponent>
 
 <TypeTable
   className="text-sm"
@@ -103,70 +89,25 @@ The `ConnectButtonComponent` is a headless variant that accepts transport state 
 
 ## Usage
 
-#### Basic Usage
-
-The ConnectButton automatically adapts to the current connection state.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ConnectButton } from "@pipecat-ai/voice-ui-kit";
-
-  <ConnectButton />
-`}
-</LiveComponent>
-
-#### Custom Size
-
-You can customize the button size.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ConnectButton } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="flex gap-2">
-    <ConnectButton size="sm" />
-    <ConnectButton size="md" />
-    <ConnectButton size="lg" />
-    <ConnectButton size="xl" />
-  </div>
-`}
-</LiveComponent>
-
 #### Custom State Content
 
 You can customize the button content and appearance for specific states.
 
-<LiveComponent language="tsx" withPipecat>
+<LiveComponent language="tsx">
 {`
   import { ConnectButton } from "@pipecat-ai/voice-ui-kit";
 
   <ConnectButton
     stateContent={{
-      initialized: {
+      disconnected: {
         children: "Start Session",
-        variant: "active",
+        variant: "secondary",
       },
       ready: {
         children: "End Session",
         variant: "destructive",
       },
     }}
-  />
-`}
-</LiveComponent>
-
-#### With Callbacks
-
-You can provide callbacks to handle connect and disconnect actions.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ConnectButton } from "@pipecat-ai/voice-ui-kit";
-
-  <ConnectButton
-    onConnect={() => console.log("Connecting...")}
-    onDisconnect={() => console.log("Disconnecting...")}
-    onClick={() => console.log("Button clicked")}
   />
 `}
 </LiveComponent>
@@ -185,14 +126,6 @@ The ConnectButton automatically displays different content based on the transpor
 - **Other connecting states**: "Connecting..." button with "secondary" variant (disabled, loading)
 
 The button is automatically disabled during connecting/disconnecting states and shows a loading indicator.
-
-## Features
-
-- **Automatic State Adaptation**: Button appearance and behavior adapts to connection state
-- **Loading States**: Shows loading indicator during connection operations
-- **Customizable Content**: Supports custom content for each state
-- **Accessible**: Properly disabled states and ARIA labels
-- **Flexible**: Available in both connected and headless variants
 
 ## Integration
 

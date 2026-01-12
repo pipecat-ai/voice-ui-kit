@@ -6,7 +6,7 @@ component: ClientStatus
 
 The ClientStatus component displays the connection status of both the client and agent (bot) in a structured data list format. It automatically integrates with the Pipecat Client SDK to show real-time connection states.
 
-<LiveComponent language="tsx" withPipecat>
+<LiveComponent language="tsx">
 {`
   import { ClientStatus } from "@pipecat-ai/voice-ui-kit";
 
@@ -15,20 +15,6 @@ The ClientStatus component displays the connection status of both the client and
 </LiveComponent>
 
 ---
-
-## Component Variants
-
-### ClientStatus
-
-The `ClientStatus` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ClientStatus } from "@pipecat-ai/voice-ui-kit";
-
-  <ClientStatus />
-`}
-</LiveComponent>
 
 <TypeTable
   className="text-sm"
@@ -62,14 +48,15 @@ The `ClientStatusComponent` is a headless variant that accepts transport state a
 {`
   import { ClientStatusComponent } from "@pipecat-ai/voice-ui-kit";
 
-  function Demo() {
-    return (
-      <ClientStatusComponent transportState="connected" />
-    );
-  }
+function Demo() {
+return (
+<ClientStatusComponent transportState="connected" />
+);
+}
 
-  render(<Demo />);
+render(<Demo />);
 `}
+
 </LiveComponent>
 
 <TypeTable
@@ -92,74 +79,6 @@ The `ClientStatusComponent` is a headless variant that accepts transport state a
 
 ---
 
-## Usage
-
-#### Basic Usage
-
-The ClientStatus component automatically detects and displays both client and agent connection states.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ClientStatus } from "@pipecat-ai/voice-ui-kit";
-
-  <ClientStatus />
-`}
-</LiveComponent>
-
-#### Hide Agent State
-
-You can hide the agent status if you only want to show the client status.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ClientStatus } from "@pipecat-ai/voice-ui-kit";
-
-  <ClientStatus noAgentState={true} />
-`}
-</LiveComponent>
-
-#### Hide Client State
-
-You can hide the client status if you only want to show the agent status.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ClientStatus } from "@pipecat-ai/voice-ui-kit";
-
-  <ClientStatus noClientState={true} />
-`}
-</LiveComponent>
-
-#### Custom Styling
-
-Pass class names to customize the styling of different parts of the component.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { ClientStatus } from "@pipecat-ai/voice-ui-kit";
-
-  <ClientStatus
-    classNames={{
-      container: "border rounded-lg p-4",
-      key: "font-bold",
-      value: "text-primary",
-      agentValue: "text-green-500",
-      clientValue: "text-blue-500",
-    }}
-  />
-`}
-</LiveComponent>
-
----
-
-## Features
-
-- **Automatic State Detection**: Automatically detects connection states from the Pipecat Client SDK
-- **Real-time Updates**: Updates status display when connection states change
-- **Visual Indicators**: Shows loading spinner for connecting states and color-coded status text
-- **Flexible Display**: Can show client status, agent status, or both
-- **Customizable**: Supports custom styling for all parts of the component
-
 ## Connection States
 
 The component displays the following connection states:
@@ -176,6 +95,7 @@ The component displays the following connection states:
 - **error** - An error occurred
 
 States are color-coded:
+
 - **Active states** (connected, ready): Green text
 - **Error state**: Red text
 - **Disconnected state**: Muted text
@@ -184,8 +104,8 @@ States are color-coded:
 ## Integration
 
 The connected `ClientStatus` component uses hooks from the Pipecat Client React SDK:
+
 - `usePipecatClientTransportState` - Gets the current transport state
 - `useRTVIClientEvent` - Listens for bot connection events
 
 This means it must be used within a `PipecatClientProvider` context to function properly.
-

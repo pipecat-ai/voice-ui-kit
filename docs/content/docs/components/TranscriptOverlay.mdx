@@ -226,82 +226,26 @@ The `TranscriptOverlayComponent` is the headless variant that accepts an array o
 
 ---
 
-## Usage Examples
+## Usage
 
+#### Display Bot Transcripts
 
-#### Connected Component Usage
-
-The `TranscriptOverlay` component automatically integrates with Pipecat Client events:
+Display transcripts from the remote bot:
 
 ```tsx
 import { TranscriptOverlay } from "@pipecat-ai/voice-ui-kit";
 
-// Display bot speech transcripts
 <TranscriptOverlay participant="remote" />
-
-// Display user speech transcripts
-<TranscriptOverlay participant="local" />
-
-// With custom styling and size
-<TranscriptOverlay 
-  participant="remote"
-  size="lg"
-  className="bg-blue-500/20 border border-blue-300 rounded-lg p-4"
-/>
-
-// With custom animation durations
-<TranscriptOverlay 
-  participant="remote"
-  fadeInDuration={500}
-  fadeOutDuration={1500}
-/>
 ```
 
-#### Headless Component Usage
+#### Display User Transcripts
 
-The `TranscriptOverlayComponent` allows manual control over transcript display:
-
-```tsx
-import { TranscriptOverlayComponent } from "@pipecat-ai/voice-ui-kit";
-
-// Basic usage with word array
-<TranscriptOverlayComponent
-  words={["Hello", "world", "this", "is", "a", "test"]}
-/>
-
-// With turn end animation
-<TranscriptOverlayComponent
-  words={["Speech", "has", "ended"]}
-  turnEnd={true}
-/>
-
-// With custom styling and animations
-<TranscriptOverlayComponent
-  words={["Custom", "styling", "example"]}
-  size="lg"
-  fadeInDuration={200}
-  fadeOutDuration={800}
-  className="max-w-md"
-/>
-```
-
-#### Multiple Transcript Overlays
-
-You can display both user and bot transcripts simultaneously:
+Display transcripts from the local user:
 
 ```tsx
 import { TranscriptOverlay } from "@pipecat-ai/voice-ui-kit";
 
-<div className="space-y-4">
-  <div>
-    <h4 className="text-sm font-medium mb-2">Bot Speech</h4>
-    <TranscriptOverlay participant="remote" />
-  </div>
-  <div>
-    <h4 className="text-sm font-medium mb-2">User Speech</h4>
-    <TranscriptOverlay participant="local" />
-  </div>
-</div>
+<TranscriptOverlay participant="local" />
 ```
 
 ---

@@ -18,22 +18,6 @@ The BotVideoPanel component displays the bot's video feed in a panel. It automat
 
 ---
 
-## Component Variants
-
-### BotVideoPanel
-
-The BotVideoPanel component automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { BotVideoPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-64 w-full">
-    <BotVideoPanel />
-  </div>
-`}
-</LiveComponent>
-
 <TypeTable
   className="text-sm"
   type={{
@@ -56,20 +40,6 @@ The BotVideoPanel component automatically integrates with the Pipecat Client SDK
 
 ## Usage
 
-#### Basic Usage
-
-Display bot video feed in a panel.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { BotVideoPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-64 w-full">
-    <BotVideoPanel />
-  </div>
-`}
-</LiveComponent>
-
 #### Collapsed Mode
 
 Display the panel in a compact collapsed format.
@@ -84,29 +54,7 @@ Display the panel in a compact collapsed format.
 `}
 </LiveComponent>
 
-#### Custom Styling
-
-Apply custom classes to style the panel.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { BotVideoPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-64 w-full">
-    <BotVideoPanel className="border-2 border-primary" />
-  </div>
-`}
-</LiveComponent>
-
 ---
-
-## Features
-
-- **Video Display**: Shows bot video feed using PipecatClientVideo
-- **Aspect Ratio**: Maintains 16:9 aspect ratio
-- **No Video State**: Shows "No video" message with icon when no video track is available
-- **Contain Fit**: Video uses "contain" fit to preserve aspect ratio
-- **Collapsed Mode**: Supports compact display mode
 
 ## Video Display
 

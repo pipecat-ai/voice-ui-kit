@@ -6,7 +6,7 @@ component: SessionInfo
 
 The SessionInfo component displays session-related information in a structured format, including transport type, session ID, participant ID, and RTVI version. It automatically integrates with the Pipecat Client SDK to fetch this information.
 
-<LiveComponent language="tsx" withPipecat>
+<LiveComponent language="tsx">
 {`
   import { SessionInfo } from "@pipecat-ai/voice-ui-kit";
 
@@ -15,20 +15,6 @@ The SessionInfo component displays session-related information in a structured f
 </LiveComponent>
 
 ---
-
-## Component Variants
-
-### SessionInfo
-
-The `SessionInfo` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { SessionInfo } from "@pipecat-ai/voice-ui-kit";
-
-  <SessionInfo />
-`}
-</LiveComponent>
 
 <TypeTable
   className="text-sm"
@@ -76,43 +62,17 @@ The `SessionInfo` component is the connected variant that automatically integrat
 
 ## Usage
 
-#### Basic Usage
-
-Display all session information.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { SessionInfo } from "@pipecat-ai/voice-ui-kit";
-
-  <SessionInfo />
-`}
-</LiveComponent>
-
 #### Hide Specific Fields
 
-Hide fields you don't need.
+Hide fields you don't need or override IDs with custom values.
 
-<LiveComponent language="tsx" withPipecat>
+<LiveComponent language="tsx">
 {`
   import { SessionInfo } from "@pipecat-ai/voice-ui-kit";
 
   <SessionInfo 
     noRTVIVersion={true}
     noTransportType={true}
-    participantId="custom-participant-456"
-  />
-`}
-</LiveComponent>
-
-#### Override IDs
-
-Provide custom session and participant IDs.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { SessionInfo } from "@pipecat-ai/voice-ui-kit";
-
-  <SessionInfo 
     sessionId="custom-session-123"
     participantId="custom-participant-456"
   />
@@ -120,15 +80,6 @@ Provide custom session and participant IDs.
 </LiveComponent>
 
 ---
-
-## Features
-
-- **Automatic Detection**: Automatically detects transport type (Daily or Small WebRTC)
-- **Copy Functionality**: Session ID and Participant ID are displayed with copy buttons
-- **Version Display**: Shows RTVI version from the client
-- **Flexible Display**: Can show/hide individual fields
-- **Override Support**: Supports overriding IDs with custom values
-- **Blankslate Handling**: Shows blankslate (---) when values are not available
 
 ## Transport Types
 

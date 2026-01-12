@@ -18,22 +18,6 @@ The EventsPanel component displays a real-time log of RTVI events from the Pipec
 
 ---
 
-## Component Variants
-
-### EventsPanel
-
-The EventsPanel component automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { EventsPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <EventsPanel />
-  </div>
-`}
-</LiveComponent>
-
 <TypeTable
   className="text-sm"
   type={{
@@ -50,20 +34,6 @@ The EventsPanel component automatically integrates with the Pipecat Client SDK. 
 
 ## Usage
 
-#### Basic Usage
-
-Display events panel with all RTVI events.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { EventsPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-96 w-full">
-    <EventsPanel />
-  </div>
-`}
-</LiveComponent>
-
 #### Collapsed Mode
 
 Display the panel in collapsed mode.
@@ -79,22 +49,6 @@ Display the panel in collapsed mode.
 </LiveComponent>
 
 ---
-
-## Features
-
-- **Real-time Events**: Automatically captures and displays RTVI events
-- **Event Filtering**: Search/filter events by event name or message content
-- **Auto-scroll**: Automatically scrolls to bottom when new events arrive (if user is at bottom)
-- **Event Types**: Captures various event types including:
-  - Transport state changes
-  - Bot connection/disconnection
-  - Bot ready events
-  - Speaking events (bot and user)
-  - Track events (audio, video, screen)
-  - Participant events
-  - Error events
-  - Server messages
-- **Formatted Display**: Shows timestamp, event name, and message for each event
 
 ## Event Types
 

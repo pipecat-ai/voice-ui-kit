@@ -18,22 +18,6 @@ The BotAudioPanel component displays a visual representation of the bot's audio 
 
 ---
 
-## Component Variants
-
-### BotAudioPanel
-
-The BotAudioPanel component automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { BotAudioPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-64 w-full">
-    <BotAudioPanel />
-  </div>
-`}
-</LiveComponent>
-
 <TypeTable
   className="text-sm"
   type={{
@@ -56,20 +40,6 @@ The BotAudioPanel component automatically integrates with the Pipecat Client SDK
 
 ## Usage
 
-#### Basic Usage
-
-Display bot audio visualization in a panel.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { BotAudioPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-64 w-full">
-    <BotAudioPanel />
-  </div>
-`}
-</LiveComponent>
-
 #### Collapsed Mode
 
 Display the panel in a compact collapsed format.
@@ -84,29 +54,7 @@ Display the panel in a compact collapsed format.
 `}
 </LiveComponent>
 
-#### Custom Styling
-
-Apply custom classes to style the panel.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { BotAudioPanel } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="h-64 w-full">
-    <BotAudioPanel className="border-2 border-primary" />
-  </div>
-`}
-</LiveComponent>
-
 ---
-
-## Features
-
-- **Audio Visualization**: Displays real-time audio waveform using VoiceVisualizer
-- **Automatic Sizing**: Automatically adjusts bar width and height based on container size
-- **No Audio State**: Shows "No audio" message with icon when no audio track is available
-- **Responsive**: Adapts to container size using ResizeObserver
-- **Collapsed Mode**: Supports compact display mode
 
 ## Visualization
 
