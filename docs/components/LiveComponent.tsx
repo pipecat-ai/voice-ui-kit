@@ -9,10 +9,17 @@ const { ConversationProvider } = VoiceUIKit;
 import { CodeBlock, Pre as CodePre } from "fumadocs-ui/components/codeblock";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
-import { CircleAlertIcon, Loader2Icon, MoonIcon, SunIcon, MessageSquareIcon } from "lucide-react";
+import {
+  CircleAlertIcon,
+  Loader2Icon,
+  MoonIcon,
+  SunIcon,
+  MessageSquareIcon,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useMemo, useState } from "react";
 import { LiveError, LivePreview, LiveProvider } from "react-live";
+import { cn } from "../lib/cn";
 
 type LiveComponentProps = {
   code?: string;
@@ -90,7 +97,7 @@ export function LiveComponent({
   withPipecat,
   withConfirm,
 }: LiveComponentProps) {
-  const { theme: themeFromProvider } = useTheme();
+  const { resolvedTheme: themeFromProvider } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [intent, setIntent] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -211,9 +218,7 @@ export function LiveComponent({
     } else {
       previewComp = (
         <PipecatClientProvider client={client!}>
-          <ConversationProvider>
-            {previewComp}
-          </ConversationProvider>
+          <ConversationProvider>{previewComp}</ConversationProvider>
         </PipecatClientProvider>
       );
     }
@@ -223,15 +228,13 @@ export function LiveComponent({
   if (withConfirm && confirmed && withPipecat && client) {
     previewComp = (
       <PipecatClientProvider client={client}>
-        <ConversationProvider>
-          {previewComp}
-        </ConversationProvider>
+        <ConversationProvider>{previewComp}</ConversationProvider>
       </PipecatClientProvider>
     );
   }
 
   return (
-    <div className={"not-prose " + className}>
+    <div className={cn("not-prose ", className)}>
       <LiveProvider
         code={execSource}
         scope={mergedScope}
@@ -244,16 +247,23 @@ export function LiveComponent({
             className="min-h-[200px] flex items-center p-6 md:p-10 lg:p-12 xl:p-14"
           >
             <div className={`${previewClassName} relative w-full`}>
-              {mounted ? (
-                previewComp
-              ) : (
-                <div className="h-full w-full flex items-center justify-center">
-                  <Loader2Icon
-                    className="animate-spin text-muted-foreground"
-                    size={24}
-                  />
-                </div>
-              )}
+              <div
+                className={cn(
+                  "voice-ui-kit",
+                  themeFromProvider === "dark" ? "dark" : ""
+                )}
+              >
+                {mounted ? (
+                  previewComp
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center">
+                    <Loader2Icon
+                      className="animate-spin text-muted-foreground"
+                      size={24}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </Tab>
           <Tab value="Code" className={`${h} ${editorClassName}`}>
@@ -284,13 +294,6 @@ export function LiveComponent({
           <LiveError />
         </div>
       </LiveProvider>
-      <div className="vkui-root">
-        <div
-          className={`voice-ui-kit ${
-            themeFromProvider === "dark" ? "dark" : ""
-          }`}
-        />
-      </div>
     </div>
   );
 }
