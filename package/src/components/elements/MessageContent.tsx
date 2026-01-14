@@ -44,8 +44,8 @@ interface Props {
 
 /**
  * Renders BotOutput content based on the aggregation type. Uses a custom renderer if provided, otherwise renders the spoken and unspoken text.
- * @param spoken - The spoken text
- * @param unspoken - The unspoken text
+ * @param spoken - The spoken text (already split from unspoken text to preserve punctuation)
+ * @param unspoken - The unspoken text (remaining portion after spoken position)
  * @param aggregatedBy - The aggregation type
  * @param customRenderer - A custom renderer function
  * @returns The rendered content
@@ -62,16 +62,11 @@ const renderBotOutput = (
     return customRenderer(content, { spoken, unspoken });
   }
 
-  // Default rendering
-  const spokenLength = spoken?.length || 0;
-  const remainingUnspoken = unspoken ? unspoken.slice(spokenLength) : "";
-
+  // Default rendering - unspoken is already split at the correct position
   return (
     <span>
       {spoken}
-      {remainingUnspoken && (
-        <span className="text-muted-foreground">{remainingUnspoken}</span>
-      )}
+      {unspoken && <span className="text-muted-foreground">{unspoken}</span>}
     </span>
   );
 };

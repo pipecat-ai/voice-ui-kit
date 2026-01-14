@@ -72,6 +72,12 @@ export const usePipecatConversation = ({ onMessageAdded }: Props = {}) => {
   const botOutputAggregationTypes = useConversationStore(
     (state) => state.botOutputAggregationTypes,
   );
+  const botOutputUnspokenAggregationTypes = useConversationStore(
+    (state) => state.botOutputUnspokenAggregationTypes,
+  );
+  const botOutputSpokenPositions = useConversationStore(
+    (state) => state.botOutputSpokenPositions,
+  );
 
   // Memoize the filtered messages to prevent infinite loops
   const filteredMessages = useMemo(() => {
@@ -84,12 +90,44 @@ export const usePipecatConversation = ({ onMessageAdded }: Props = {}) => {
         const spokenText = botOutputSpokenStreams.get(messageId) || "";
         const unspokenText = botOutputUnspokenStreams.get(messageId) || "";
         const aggregatedBy = botOutputAggregationTypes.get(messageId);
+        const unspokenAggregationType =
+          botOutputUnspokenAggregationTypes.get(messageId);
+        const spokenPosition = botOutputSpokenPositions.get(messageId) || 0;
+
+        // Only use position-based splitting for sentence-level unspoken + word/sentence-level spoken
+        // For other aggregation types, custom renderers should be used
+        const isSentenceLevelUnspoken = unspokenAggregationType === "sentence";
+        const isWordOrSentenceSpoken =
+          aggregatedBy === "word" ||
+          aggregatedBy === "sentence" ||
+          !aggregatedBy;
+        const shouldUsePositionSplitting =
+          isSentenceLevelUnspoken && isWordOrSentenceSpoken && unspokenText;
+
+        let finalSpoken = "";
+        let finalUnspoken = "";
+
+        if (shouldUsePositionSplitting) {
+          // Split unspoken text at the spoken position to preserve punctuation
+          // The spoken part comes from the unspoken text (with punctuation), not from word-level events
+          const spokenPart = unspokenText.slice(0, spokenPosition);
+          const unspokenPart = unspokenText.slice(spokenPosition);
+          finalSpoken = spokenPart;
+          finalUnspoken = unspokenPart;
+        } else {
+          // For other cases, use the streams directly (custom renderers handle these)
+          finalSpoken = spokenText;
+          finalUnspoken = unspokenText;
+        }
 
         return {
           ...message,
           parts: [
             {
-              text: { spoken: spokenText, unspoken: unspokenText },
+              text: {
+                spoken: finalSpoken,
+                unspoken: finalUnspoken,
+              },
               final: message.final || false,
               createdAt: message.createdAt,
               aggregatedBy,
@@ -111,6 +149,8 @@ export const usePipecatConversation = ({ onMessageAdded }: Props = {}) => {
     botOutputSpokenStreams,
     botOutputUnspokenStreams,
     botOutputAggregationTypes,
+    botOutputUnspokenAggregationTypes,
+    botOutputSpokenPositions,
   ]);
 
   return {

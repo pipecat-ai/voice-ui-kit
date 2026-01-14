@@ -13,6 +13,11 @@ interface ConversationState {
   botOutputUnspokenStreams: Map<string, string>; // messageId -> accumulated unspoken text
   // Store BotOutput aggregation types per message
   botOutputAggregationTypes: Map<string, string>; // messageId -> last aggregation type
+  // Track last unspoken aggregation type to determine if we should use position-based splitting
+  botOutputUnspokenAggregationTypes: Map<string, string>; // messageId -> last unspoken aggregation type
+  // Track spoken position in unspoken text (character index)
+  // Only used when unspoken is sentence-level and spoken is word/sentence-level
+  botOutputSpokenPositions: Map<string, number>; // messageId -> position in unspoken text
 
   // Actions
   registerMessageCallback: (
@@ -44,6 +49,12 @@ interface ConversationState {
     spoken: boolean, // true if text has been spoken, false if unspoken
     aggregatedBy?: string, // aggregation type (e.g., "code", "link", "sentence", "word")
   ) => void;
+  // Helper to find position of spoken text in unspoken text
+  findSpokenPositionInUnspoken: (
+    spoken: string,
+    unspoken: string,
+    startPosition: number,
+  ) => number;
 }
 
 export const sortByCreatedAt = (
@@ -144,12 +155,130 @@ const callAllMessageCallbacks = (
   });
 };
 
+// Helper function to normalize text for matching (lowercase, remove punctuation)
+const normalizeForMatching = (text: string): string => {
+  return text.toLowerCase().replace(/[^\w\s]/g, "");
+};
+
+// Helper function to find where spoken words appear in unspoken text
+const findSpokenPositionInUnspoken = (
+  spoken: string,
+  unspoken: string,
+  startPosition: number,
+): number => {
+  if (!spoken || !unspoken || startPosition >= unspoken.length) {
+    return startPosition;
+  }
+
+  // Normalize spoken text for matching (lowercase, remove punctuation)
+  const normalizedSpoken = normalizeForMatching(spoken);
+  const spokenWords = normalizedSpoken.split(/\s+/).filter((w) => w.length > 0);
+
+  if (spokenWords.length === 0) {
+    return startPosition;
+  }
+
+  // Find where we are in the unspoken words
+  const unspokenSubstring = unspoken.slice(startPosition);
+  const normalizedUnspokenSubstring = normalizeForMatching(unspokenSubstring);
+  const unspokenSubstringWords = normalizedUnspokenSubstring
+    .split(/\s+/)
+    .filter((w) => w.length > 0);
+
+  // Try to match spoken words sequentially against unspoken words
+  // Handle contractions: if a spoken word doesn't match exactly, check if it's a prefix
+  // (e.g., "I" should match "I'm" -> "im" after normalization)
+  let matchedWords = 0;
+  for (
+    let i = 0;
+    i < unspokenSubstringWords.length && matchedWords < spokenWords.length;
+    i++
+  ) {
+    const spokenWord = spokenWords[matchedWords];
+    const unspokenWord = unspokenSubstringWords[i];
+
+    if (unspokenWord === spokenWord) {
+      // Exact match
+      matchedWords++;
+    } else if (unspokenWord.startsWith(spokenWord)) {
+      // Prefix match (handles contractions like "I" matching "I'm")
+      matchedWords++;
+    } else {
+      // Sequential matching: if a word doesn't match, stop (don't reset)
+      break;
+    }
+  }
+
+  if (matchedWords === 0) {
+    // No match found, return start position
+    return startPosition;
+  }
+
+  // Find the character position after the matched words in the original unspoken text
+  // Walk through the unspoken text from startPosition and count words
+  // Only letters and numbers are word characters - everything else (including apostrophes) is punctuation
+  const isWordChar = (char: string): boolean => {
+    return /[a-zA-Z0-9]/.test(char);
+  };
+
+  let wordCount = 0;
+  let i = startPosition;
+  let inWord = false;
+
+  // Continue until we've counted all matched words AND passed the end of the last word
+  while (i < unspoken.length) {
+    const char = unspoken[i];
+    const charIsWord = isWordChar(char);
+
+    if (charIsWord && !inWord) {
+      // Start of a new word
+      inWord = true;
+      wordCount++;
+      // If we've matched all words, we need to continue to find the end of this word
+      if (wordCount === matchedWords) {
+        // Continue until we find the end of this word (letters and numbers only)
+        i++;
+        while (i < unspoken.length && isWordChar(unspoken[i])) {
+          i++;
+        }
+        // Now i is at the first non-letter/non-number character after the last matched word
+        // Continue including ALL characters (letters, numbers, apostrophes, punctuation, etc.)
+        // until we hit a space - this handles contractions like "I'm" where "I" matches "I'm"
+        while (i < unspoken.length) {
+          const nextChar = unspoken[i];
+          if (nextChar === " ") {
+            // Include space after the word/contraction, then stop
+            i++;
+            break;
+          } else {
+            // Include any character (letters, numbers, apostrophes, punctuation, em dashes, etc.)
+            // This ensures contractions like "I'm" are fully included when matching "I"
+            i++;
+          }
+        }
+        // Return position after the last matched word and its trailing characters/space
+        return i;
+      }
+    } else if (!charIsWord && inWord) {
+      // End of a word
+      inWord = false;
+    }
+
+    i++;
+  }
+
+  // If we reached the end of the string, return the end position
+  return unspoken.length;
+};
+
 export const useConversationStore = create<ConversationState>()((set) => ({
   messages: [],
   messageCallbacks: new Map(),
   botOutputSpokenStreams: new Map(),
   botOutputUnspokenStreams: new Map(),
   botOutputAggregationTypes: new Map(),
+  botOutputUnspokenAggregationTypes: new Map(),
+  botOutputSpokenPositions: new Map(),
 
   registerMessageCallback: (id, callback) =>
     set((state) => {
@@ -171,6 +300,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       botOutputSpokenStreams: new Map(),
       botOutputUnspokenStreams: new Map(),
       botOutputAggregationTypes: new Map(),
+      botOutputUnspokenAggregationTypes: new Map(),
+      botOutputSpokenPositions: new Map(),
     }),
 
   addMessage: (messageData) => {
@@ -385,6 +516,10 @@ export const useConversationStore = create<ConversationState>()((set) => ({
     });
   },
 
+  findSpokenPositionInUnspoken: (spoken, unspoken, startPosition) => {
+    return findSpokenPositionInUnspoken(spoken, unspoken, startPosition);
+  },
+
   updateAssistantBotOutput: (text, final, spoken, aggregatedBy) => {
     const now = new Date();
     set((state) => {
@@ -394,6 +529,10 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       const botOutputAggregationTypes = new Map(
         state.botOutputAggregationTypes,
       );
+      const botOutputUnspokenAggregationTypes = new Map(
+        state.botOutputUnspokenAggregationTypes,
+      );
+      const botOutputSpokenPositions = new Map(state.botOutputSpokenPositions);
 
       const lastAssistantIndex = messages.findLastIndex(
         (msg) => msg.role === "assistant",
@@ -437,7 +576,42 @@ export const useConversationStore = create<ConversationState>()((set) => ({
           currentText && !currentText.endsWith(" ") && !text.startsWith(" ")
             ? " "
             : "";
-        botOutputSpokenStreams.set(messageId, currentText + separator + text);
+        const newSpokenText = currentText + separator + text;
+        botOutputSpokenStreams.set(messageId, newSpokenText);
+
+        // Only use position-based splitting for sentence-level unspoken + word/sentence-level spoken
+        const unspokenAggregationType =
+          botOutputUnspokenAggregationTypes.get(messageId);
+        const isSentenceLevelUnspoken = unspokenAggregationType === "sentence";
+        const isWordOrSentenceSpoken =
+          aggregatedBy === "word" ||
+          aggregatedBy === "sentence" ||
+          !aggregatedBy;
+
+        if (isSentenceLevelUnspoken && isWordOrSentenceSpoken) {
+          // Update spoken position by matching against unspoken text
+          const unspokenText = botOutputUnspokenStreams.get(messageId) || "";
+          if (unspokenText) {
+            const currentPosition =
+              botOutputSpokenPositions.get(messageId) || 0;
+
+            // Match incrementally: find where the new portion appears starting from current position
+            const newSpokenPortion = separator + text;
+
+            // If we're at position 0, match the full accumulated text to establish initial position
+            // Otherwise, match only the new portion incrementally
+            const textToMatch =
+              currentPosition === 0 ? newSpokenText : newSpokenPortion;
+            const startPos = currentPosition === 0 ? 0 : currentPosition;
+
+            const newPosition = findSpokenPositionInUnspoken(
+              textToMatch,
+              unspokenText,
+              startPos,
+            );
+            botOutputSpokenPositions.set(messageId, newPosition);
+          }
+        }
       } else {
         const currentText = botOutputUnspokenStreams.get(messageId) || "";
         // Add space separator if needed
@@ -445,7 +619,18 @@ export const useConversationStore = create<ConversationState>()((set) => ({
           currentText && !currentText.endsWith(" ") && !text.startsWith(" ")
             ? " "
             : "";
-        botOutputUnspokenStreams.set(messageId, currentText + separator + text);
+        const newUnspokenText = currentText + separator + text;
+        botOutputUnspokenStreams.set(messageId, newUnspokenText);
+
+        // Store the unspoken aggregation type
+        if (aggregatedBy !== undefined) {
+          botOutputUnspokenAggregationTypes.set(messageId, aggregatedBy);
+        }
+
+        // When a new sentence-level unspoken chunk arrives, reset the spoken position
+        if (aggregatedBy === "sentence") {
+          botOutputSpokenPositions.set(messageId, 0);
+        }
       }
 
       // Don't filter out messages that have text in the text streams
@@ -456,6 +641,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         botOutputSpokenStreams,
         botOutputUnspokenStreams,
         botOutputAggregationTypes,
+        botOutputUnspokenAggregationTypes,
+        botOutputSpokenPositions,
       };
     });
   },
