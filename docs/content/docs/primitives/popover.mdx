@@ -1,0 +1,253 @@
+---
+title: Popover
+description: Popover component built on Radix UI for displaying floating content
+component: Popover
+---
+
+The Popover component provides a floating content panel that appears above other content. It's built on Radix UI and includes proper portal rendering and animations.
+
+<LiveComponent language="tsx">
+{`
+  import { Popover, PopoverTrigger, PopoverContent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button variant="outline">Open Popover</Button>
+    </PopoverTrigger>
+    <PopoverContent>
+      <div className="space-y-2">
+        <h4 className="font-medium">Popover Title</h4>
+        <p className="text-sm text-muted-foreground">
+          This is the popover content.
+        </p>
+      </div>
+    </PopoverContent>
+  </Popover>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### Popover
+
+The Popover component is a compound component with multiple parts.
+
+<LiveComponent language="tsx">
+{`
+  import { Popover, PopoverTrigger, PopoverContent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button>Open</Button>
+    </PopoverTrigger>
+    <PopoverContent>
+      Popover content
+    </PopoverContent>
+  </Popover>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    "Popover (Root)": {
+      description: "Root component that manages popover state",
+      type: "React.ComponentProps<typeof PopoverPrimitive.Root>",
+      required: true,
+    },
+    "PopoverTrigger": {
+      description: "Element that triggers the popover",
+      type: "React.ComponentProps<typeof PopoverPrimitive.Trigger>",
+      required: true,
+    },
+    "PopoverContent": {
+      description: "Content displayed in the popover",
+      type: "React.ComponentProps<typeof PopoverPrimitive.Content>",
+      required: true,
+    },
+    "PopoverAnchor": {
+      description: "Anchor element for positioning",
+      type: "React.ComponentProps<typeof PopoverPrimitive.Anchor>",
+      required: false,
+    },
+  }}
+/>
+
+### PopoverContent Props
+
+<TypeTable
+  className="text-sm"
+  type={{
+    align: {
+      description: "Alignment of the popover relative to the trigger",
+      type: '"start" | "center" | "end"',
+      required: false,
+      default: '"center"',
+    },
+    sideOffset: {
+      description: "Distance in pixels from the trigger",
+      type: "number",
+      required: false,
+      default: "4",
+    },
+    className: {
+      description: "Additional CSS classes to apply",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Create a simple popover with trigger and content.
+
+<LiveComponent language="tsx">
+{`
+  import { Popover, PopoverTrigger, PopoverContent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button variant="outline">Open Popover</Button>
+    </PopoverTrigger>
+    <PopoverContent>
+      <p>This is the popover content.</p>
+    </PopoverContent>
+  </Popover>
+`}
+</LiveComponent>
+
+#### Custom Alignment
+
+Control the alignment of the popover.
+
+<LiveComponent language="tsx">
+{`
+  import { Popover, PopoverTrigger, PopoverContent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="flex gap-2">
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline">Start</Button>
+      </PopoverTrigger>
+      <PopoverContent align="start">
+        Aligned to start
+      </PopoverContent>
+    </Popover>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline">Center</Button>
+      </PopoverTrigger>
+      <PopoverContent align="center">
+        Aligned to center
+      </PopoverContent>
+    </Popover>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline">End</Button>
+      </PopoverTrigger>
+      <PopoverContent align="end">
+        Aligned to end
+      </PopoverContent>
+    </Popover>
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Offset
+
+Adjust the distance from the trigger.
+
+<LiveComponent language="tsx">
+{`
+  import { Popover, PopoverTrigger, PopoverContent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button variant="outline">More Spacing</Button>
+    </PopoverTrigger>
+    <PopoverContent sideOffset={20}>
+      This popover has more spacing from the trigger
+    </PopoverContent>
+  </Popover>
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to style the popover content.
+
+<LiveComponent language="tsx">
+{`
+  import { Popover, PopoverTrigger, PopoverContent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button variant="outline">Styled</Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-96 bg-primary text-primary-foreground">
+      Custom styled popover content
+    </PopoverContent>
+  </Popover>
+`}
+</LiveComponent>
+
+#### Controlled State
+
+Control the popover state programmatically.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { Popover, PopoverTrigger, PopoverContent, Button } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    const [open, setOpen] = React.useState(false);
+    
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline">Controlled</Button>
+        </PopoverTrigger>
+        <PopoverContent>
+          <p>This popover is controlled by state.</p>
+          <Button onClick={() => setOpen(false)} className="mt-2">
+            Close
+          </Button>
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+---
+
+## Animations
+
+The popover includes:
+- Fade in/out animations
+- Zoom in/out animations
+- Slide animations based on side (top, bottom, left, right)
+
+## Portal Container
+
+The popover content is rendered in a portal container obtained from `getPipecatUIContainer()`, ensuring proper z-index stacking and avoiding overflow issues.
+
+## Integration
+
+The Popover component is built on Radix UI's Popover primitive and integrates with:
+- Theme colors (`bg-popover`, `text-popover-foreground`)
+- Animation utilities
+- Portal rendering system
+
+It's a standalone component that doesn't require any context providers, but works best when used within the Voice UI Kit's theme system.
+

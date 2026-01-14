@@ -1,0 +1,102 @@
+---
+title: Blankslates
+description: Empty state components for displaying placeholder content
+component: TextDashBlankslate
+---
+
+Blankslates are components used to display empty or placeholder states. The Voice UI Kit provides a simple text-based blankslate component.
+
+<LiveComponent language="tsx">
+{`
+  import { TextDashBlankslate } from "@pipecat-ai/voice-ui-kit";
+
+  <TextDashBlankslate />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### TextDashBlankslate
+
+The TextDashBlankslate component displays three dashes (---) as a placeholder for empty or unavailable content.
+
+<LiveComponent language="tsx">
+{`
+  import { TextDashBlankslate } from "@pipecat-ai/voice-ui-kit";
+
+  <TextDashBlankslate />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    className: {
+      description: "Additional CSS classes to apply",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display the default blankslate placeholder.
+
+<LiveComponent language="tsx">
+{`
+  import { TextDashBlankslate } from "@pipecat-ai/voice-ui-kit";
+
+  <TextDashBlankslate />
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to style the blankslate.
+
+<LiveComponent language="tsx">
+{`
+  import { TextDashBlankslate } from "@pipecat-ai/voice-ui-kit";
+
+  <TextDashBlankslate className="text-lg text-muted-foreground" />
+`}
+</LiveComponent>
+
+#### In Data Lists
+
+Commonly used in data lists to indicate missing values.
+
+<LiveComponent language="tsx">
+{`
+  import { DataList, TextDashBlankslate } from "@pipecat-ai/voice-ui-kit";
+
+  <DataList
+    data={{
+      "Status": "Active",
+      "Session ID": <TextDashBlankslate />,
+      "Version": "1.0.0"
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Integration
+
+The TextDashBlankslate component is commonly used:
+- In `DataList` components to show empty values
+- In `SessionInfo` to indicate missing session data
+- In `ClientStatus` to show unavailable status
+- Anywhere you need to indicate an empty or unavailable value
+
+It's a standalone component that doesn't require any context providers.
+

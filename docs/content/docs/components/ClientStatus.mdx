@@ -1,0 +1,111 @@
+---
+title: Client Status
+description: Displays client and agent connection status
+component: ClientStatus
+---
+
+The ClientStatus component displays the connection status of both the client and agent (bot) in a structured data list format. It automatically integrates with the Pipecat Client SDK to show real-time connection states.
+
+<LiveComponent language="tsx">
+{`
+  import { ClientStatus } from "@pipecat-ai/voice-ui-kit";
+
+  <ClientStatus />
+`}
+</LiveComponent>
+
+---
+
+<TypeTable
+  className="text-sm"
+  type={{
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ container?: string; key?: string; value?: string; agentValue?: string; clientValue?: string; }",
+      required: false,
+      default: "{}",
+    },
+    noAgentState: {
+      description: "Hide the agent/bot status display",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noClientState: {
+      description: "Hide the client status display",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+  }}
+/>
+
+### ClientStatusComponent
+
+The `ClientStatusComponent` is a headless variant that accepts transport state as a prop. This allows you to use it with any state management solution.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { ClientStatusComponent } from "@pipecat-ai/voice-ui-kit";
+
+function Demo() {
+return (
+<ClientStatusComponent transportState="connected" />
+);
+}
+
+render(<Demo />);
+`}
+
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    className: {
+      description: "Additional CSS classes to apply",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    transportState: {
+      description: "The current transport state to display",
+      type: "string | null",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Connection States
+
+The component displays the following connection states:
+
+- **initialized** - Client is initialized but not connected
+- **initializing** - Client is being initialized
+- **authenticating** - Client is authenticating with the server
+- **authenticated** - Client has been authenticated
+- **connecting** - Client is connecting to the session
+- **connected** - Client is connected to the session
+- **ready** - Agent is ready and connected
+- **disconnected** - Client or agent is disconnected
+- **disconnecting** - Client is disconnecting
+- **error** - An error occurred
+
+States are color-coded:
+
+- **Active states** (connected, ready): Green text
+- **Error state**: Red text
+- **Disconnected state**: Muted text
+- **Connecting states**: Animated pulse effect with spinner
+
+## Integration
+
+The connected `ClientStatus` component uses hooks from the Pipecat Client React SDK:
+
+- `usePipecatClientTransportState` - Gets the current transport state
+- `useRTVIClientEvent` - Listens for bot connection events
+
+This means it must be used within a `PipecatClientProvider` context to function properly.

@@ -16,6 +16,7 @@ export * from "@/visualizers";
 
 // Templates
 export { ConsoleTemplate } from "@/templates/Console";
+export { WidgetTemplate } from "@/templates/Widget";
 
 // Types
 export type {

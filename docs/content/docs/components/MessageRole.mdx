@@ -1,0 +1,135 @@
+---
+title: Message Role
+description: Component for displaying message role labels
+component: MessageRole
+---
+
+The MessageRole component displays the role label for a conversation message (user, assistant, or system). It uses color-coded styling to distinguish between different roles and supports custom labels.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageRole } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-2">
+    <MessageRole role="user" />
+    <MessageRole role="assistant" />
+    <MessageRole role="system" />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### MessageRole
+
+The MessageRole component displays a role label with color-coded styling.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageRole } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageRole role="assistant" />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    role: {
+      description: "The role of the message",
+      type: '"user" | "assistant" | "system"',
+      required: true,
+    },
+    assistantLabel: {
+      description: "Custom label for assistant messages",
+      type: "string",
+      required: false,
+      default: '"assistant"',
+    },
+    clientLabel: {
+      description: "Custom label for user/client messages",
+      type: "string",
+      required: false,
+      default: '"user"',
+    },
+    systemLabel: {
+      description: "Custom label for system messages",
+      type: "string",
+      required: false,
+      default: '"system"',
+    },
+    className: {
+      description: "Custom CSS classes to apply to the role label",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display role labels with default styling.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageRole } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-2">
+    <MessageRole role="user" />
+    <MessageRole role="assistant" />
+    <MessageRole role="system" />
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Labels
+
+Customize the labels for each role.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageRole } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-2">
+    <MessageRole role="user" clientLabel="You" />
+    <MessageRole role="assistant" assistantLabel="AI Assistant" />
+    <MessageRole role="system" systemLabel="System Message" />
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to override default styling.
+
+<LiveComponent language="tsx">
+{`
+  import { MessageRole } from "@pipecat-ai/voice-ui-kit";
+
+  <MessageRole 
+    role="assistant" 
+    className="text-lg font-bold uppercase"
+  />
+`}
+</LiveComponent>
+
+---
+
+## Color Coding
+
+The component applies different text colors based on role:
+- **user**: `text-client` (typically blue)
+- **assistant**: `text-agent` (typically green)
+- **system**: `text-subtle` (muted color)
+
+## Integration
+
+The MessageRole component is typically used within `MessageContainer` to display the role label for each message in a conversation. It's designed to work with the `Conversation` component's label customization system.
+

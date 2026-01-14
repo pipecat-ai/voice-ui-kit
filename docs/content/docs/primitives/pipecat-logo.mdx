@@ -1,0 +1,176 @@
+---
+title: Pipecat Logo
+description: SVG logo component for Pipecat branding
+component: PipecatLogo
+---
+
+The PipecatLogo component renders the Pipecat logo as an SVG. It supports customizable size, color, and styling while maintaining the correct aspect ratio.
+
+<LiveComponent language="tsx">
+{`
+  import { PipecatLogo } from "@pipecat-ai/voice-ui-kit";
+
+  <PipecatLogo />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### PipecatLogo
+
+The PipecatLogo component renders the Pipecat logo SVG.
+
+<LiveComponent language="tsx">
+{`
+  import { PipecatLogo } from "@pipecat-ai/voice-ui-kit";
+
+  <PipecatLogo />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    width: {
+      description: "Width of the logo in pixels. If not provided, defaults to 200px or calculated from height",
+      type: "number",
+      required: false,
+      default: "200 (if height not provided)",
+    },
+    height: {
+      description: "Height of the logo in pixels. If not provided, defaults to 100px or calculated from width",
+      type: "number",
+      required: false,
+      default: "100 (if width not provided)",
+    },
+    color: {
+      description: "Color of the logo. Can be any valid CSS color value",
+      type: "string",
+      required: false,
+      default: '"currentColor"',
+    },
+    className: {
+      description: "Additional CSS classes to apply to the SVG element",
+      type: "string",
+      required: false,
+      default: '""',
+    },
+    alt: {
+      description: "Alternative text for accessibility",
+      type: "string",
+      required: false,
+      default: '"Pipecat Logo"',
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display the logo with default size and color.
+
+<LiveComponent language="tsx">
+{`
+  import { PipecatLogo } from "@pipecat-ai/voice-ui-kit";
+
+  <PipecatLogo />
+`}
+</LiveComponent>
+
+#### Custom Size
+
+Specify custom width and height.
+
+<LiveComponent language="tsx">
+{`
+  import { PipecatLogo } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="flex gap-4 items-center">
+    <PipecatLogo width={100} height={58} />
+    <PipecatLogo width={200} height={116} />
+    <PipecatLogo width={300} height={174} />
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Color
+
+Change the logo color.
+
+<LiveComponent language="tsx">
+{`
+  import { PipecatLogo } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="flex gap-4 items-center">
+    <PipecatLogo color="currentColor" />
+    <PipecatLogo color="#3b82f6" />
+    <PipecatLogo color="#10b981" />
+    <PipecatLogo color="#ef4444" />
+  </div>
+`}
+</LiveComponent>
+
+#### Width Only
+
+Specify only width, height will be calculated automatically.
+
+<LiveComponent language="tsx">
+{`
+  import { PipecatLogo } from "@pipecat-ai/voice-ui-kit";
+
+  <PipecatLogo width={150} />
+`}
+</LiveComponent>
+
+#### Height Only
+
+Specify only height, width will be calculated automatically.
+
+<LiveComponent language="tsx">
+{`
+  import { PipecatLogo } from "@pipecat-ai/voice-ui-kit";
+
+  <PipecatLogo height={80} />
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes for additional styling.
+
+<LiveComponent language="tsx">
+{`
+  import { PipecatLogo } from "@pipecat-ai/voice-ui-kit";
+
+  <PipecatLogo 
+    className="opacity-50 hover:opacity-100 transition-opacity"
+    width={200}
+  />
+`}
+</LiveComponent>
+
+---
+
+## Aspect Ratio
+
+The logo maintains a 45:26 aspect ratio. When only width or height is specified, the other dimension is automatically calculated to preserve this ratio.
+
+## Default Size
+
+If neither width nor height is provided, the logo defaults to:
+- Width: 200px
+- Height: 100px (calculated to maintain aspect ratio)
+
+## Color
+
+The default color is `currentColor`, which means the logo will inherit the text color of its parent element. This makes it easy to style with theme colors.
+
+## Integration
+
+The PipecatLogo component is a standalone SVG component that doesn't require any context providers. It can be used anywhere in your application for branding purposes.
+

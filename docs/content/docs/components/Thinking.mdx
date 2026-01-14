@@ -1,0 +1,145 @@
+---
+title: Thinking
+description: Animated thinking/loading indicator component
+component: Thinking
+---
+
+The Thinking component displays an animated thinking indicator using dots. It's commonly used to show that the system is processing or waiting for a response.
+
+<LiveComponent language="tsx">
+{`
+  import { Thinking } from "@pipecat-ai/voice-ui-kit";
+
+  <Thinking />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### Thinking
+
+The Thinking component displays animated dots to indicate processing.
+
+<TypeTable
+  className="text-sm"
+  type={{
+    initialDots: {
+      description: "Initial number of dots to display",
+      type: "number",
+      required: false,
+      default: "1",
+    },
+    maxDots: {
+      description: "Maximum number of dots to display before cycling back",
+      type: "number",
+      required: false,
+      default: "3",
+    },
+    interval: {
+      description: "Interval in milliseconds between dot updates",
+      type: "number",
+      required: false,
+      default: "500",
+    },
+    className: {
+      description: "Additional CSS classes to apply",
+      type: "string",
+      required: false,
+      default: '""',
+    },
+    "aria-label": {
+      description: "Accessibility label for screen readers",
+      type: "string",
+      required: false,
+      default: '"Loading"',
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Custom Dot Count
+
+Adjust the maximum number of dots.
+
+<LiveComponent language="tsx">
+{`
+  import { Thinking } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-2">
+    <Thinking maxDots={5} />
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Animation Speed
+
+Adjust the animation interval.
+
+<LiveComponent language="tsx">
+{`
+  import { Thinking } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-2">
+    <Thinking interval={1000} />
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes for styling.
+
+<LiveComponent language="tsx">
+{`
+  import { Thinking } from "@pipecat-ai/voice-ui-kit";
+
+  <Thinking 
+    className="text-primary text-lg font-bold tracking-widest"
+  />
+`}
+</LiveComponent>
+
+#### Custom Initial State
+
+Start with a different number of dots.
+
+<LiveComponent language="tsx">
+{`
+  import { Thinking } from "@pipecat-ai/voice-ui-kit";
+
+  <Thinking initialDots={2} maxDots={4} />
+`}
+</LiveComponent>
+
+---
+
+## Animation Behavior
+
+The component:
+1. Starts with `initialDots` number of dots
+2. Increments the dot count every `interval` milliseconds
+3. Cycles back to 1 when it reaches `maxDots`
+4. Continues animating until the component is unmounted
+
+## Default Behavior
+
+By default:
+- Starts with 1 dot
+- Cycles through 1, 2, 3 dots
+- Updates every 500ms
+- Displays "Loading" as the ARIA label
+
+## Integration
+
+The Thinking component is commonly used:
+- In `MessageContent` to show when the assistant is processing
+- As a loading indicator in various UI contexts
+- To indicate waiting states in conversation flows
+
+It's a standalone component that doesn't require any context providers.
+

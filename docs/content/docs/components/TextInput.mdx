@@ -8,15 +8,11 @@ The TextInput component provides a user interface for entering and sending textu
 
 <LiveComponent language="tsx">
 {`
-  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+  import { TextInput, ConversationProvider } from "@pipecat-ai/voice-ui-kit";
 
-  <TextInputComponent
-    placeholder="Type your message..."
-    onSend={(message) => console.log("Sending:", message)}
-    classNames={{
-      container: "w-full",
-    }}
-  />
+  <ConversationProvider>
+    <TextInput placeholder="Ask me anything..." />
+  </ConversationProvider>
 `}
 </LiveComponent>
 
@@ -27,14 +23,6 @@ The TextInput component provides a user interface for entering and sending textu
 ### TextInput
 
 The `TextInput` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { TextInput } from "@pipecat-ai/voice-ui-kit";
-
-  <TextInput placeholder="Ask me anything..." />
-`}
-</LiveComponent>
 
 <TypeTable
   className="text-sm"
@@ -238,160 +226,25 @@ The `TextInputComponent` is the headless variant that accepts all callbacks and 
 
 ---
 
-## Usage Examples
-
-#### Custom Button Label
-
-You can customize the send button with a custom label.
-
-<LiveComponent language="tsx" noInline>
-{`
-  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
-
-  function Demo() {
-    return (
-      <TextInputComponent
-        placeholder="Ask a question..."
-        buttonLabel="Ask Bot"
-        onSend={(message) => console.log("Asking:", message)}
-      />
-    );
-  }
-
-  render(<Demo />);
-`}
-</LiveComponent>
-
-#### Custom Button Icon
-
-You can use a custom icon for the send button.
-
-<LiveComponent language="tsx" noInline>
-{`
-  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
-  import { MessageCircle } from "lucide-react";
-
-  function Demo() {
-    return (
-      <TextInputComponent
-        placeholder="Send a message..."
-        buttonIcon={<CircleIcon size={16} />}
-        onSend={(message) => console.log("Sending:", message)}
-      />
-    );
-  }
-
-  render(<Demo />);
-`}
-</LiveComponent>
-
-#### Multiline Input
-
-Enable multiline input for longer messages.
-
-<LiveComponent language="tsx" noInline>
-{`
-  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
-
-  function Demo() {
-    return (
-      <TextInputComponent
-        placeholder="Type a longer message..."
-        multiline={true}
-        onSend={(message) => console.log("Sending:", message)}
-      />
-    );
-  }
-
-  render(<Demo />);
-`}
-</LiveComponent>
-
-#### Custom Styling
-
-Apply custom CSS classes to different parts of the component.
-
-<LiveComponent language="tsx" noInline>
-{`
-  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
-
-  function Demo() {
-    return (
-      <TextInputComponent
-        placeholder="Styled input..."
-        classNames={{
-          container: "border-2 border-primary rounded-lg p-2",
-          input: "bg-gray-50 border-none focus:ring-2 focus:ring-primary",
-          button: "bg-primary text-white hover:bg-primary/90",
-        }}
-        onSend={(message) => console.log("Sending:", message)}
-      />
-    );
-  }
-
-  render(<Demo />);
-`}
-</LiveComponent>
-
-#### Disabled State
-
-The component can be disabled and shows appropriate visual feedback.
-
-<LiveComponent language="tsx" noInline>
-{`
-  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
-
-  function Demo() {
-    return (
-      <TextInputComponent
-        placeholder="This input is disabled..."
-        disabled={true}
-        onSend={(message) => console.log("Sending:", message)}
-      />
-    );
-  }
-
-  render(<Demo />);
-`}
-</LiveComponent>
-
-#### Size
-
-You can use different sizes for the input and button components.
-
-<LiveComponent language="tsx" noInline>
-{`
-  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
-
-  function Demo() {
-    return (
-      <TextInputComponent
-        placeholder="Type your message..."
-        size="lg"
-        onSend={(message) => console.log("Sending:", message)}
-      />
-    );
-  }
-
-  render(<Demo />);
-`}
-</LiveComponent>
+## Usage
 
 #### SendTextOptions
 
 You can customize how the bot handles text messages using the `sendTextOptions` prop.
 
-<LiveComponent language="tsx" withPipecat>
+<LiveComponent language="tsx">
 {`
-  import { TextInput } from "@pipecat-ai/voice-ui-kit";
+  import { TextInput, ConversationProvider } from "@pipecat-ai/voice-ui-kit";
 
-  <TextInput
-    placeholder="Send a text-only message..."
-    sendTextOptions={{
-      run_immediately: true,
-      audio_response: false, // Bot will respond with text only, no TTS
-    }}
-  />
+  <ConversationProvider>
+    <TextInput
+      placeholder="Send a text-only message..."
+      sendTextOptions={{
+        run_immediately: true,
+        audio_response: false, // Bot will respond with text only, no TTS
+      }}
+    />
+  </ConversationProvider>
 `}
 </LiveComponent>
 
@@ -399,44 +252,32 @@ You can customize how the bot handles text messages using the `sendTextOptions` 
 
 By default, messages sent via `TextInput` are automatically injected into the conversation store. You can disable this behavior with the `noInject` prop if you want to handle message injection manually.
 
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { TextInput } from "@pipecat-ai/voice-ui-kit";
-
-  <TextInput
-    placeholder="Send without auto-injecting..."
-    noInject={true}
-    onSend={(message) => {
-      console.log("Message sent:", message);
-      // Handle message injection manually if needed
-    }}
-  />
-`}
-</LiveComponent>
-
-#### Multiline Input
-
-The component can be configured for multiline or single-line input. When `multiline={false}`, it uses a single-line input field that prevents line breaks.
-
 <LiveComponent language="tsx">
 {`
-  import { TextInputComponent } from "@pipecat-ai/voice-ui-kit";
+  import { TextInput, ConversationProvider } from "@pipecat-ai/voice-ui-kit";
 
-  <TextInputComponent
-    placeholder="Press shift+enter to add a new line..."
-    multiline={true}
-    classNames={{
-      container: "w-full",
-    }}
-  />
+  <ConversationProvider>
+    <TextInput
+      placeholder="Send without auto-injecting..."
+      noInject={true}
+      onSend={(message) => {
+        console.log("Message sent:", message);
+        // Handle message injection manually if needed
+      }}
+    />
+  </ConversationProvider>
 `}
 </LiveComponent>
 
 ---
 
-## Multiline Behavior
+## Integration
 
-The component dynamically switches between input types based on the `multiline` prop:
+The `TextInput` component uses:
+- `usePipecatConnectionState` hook to check connection status
+- `usePipecatClient` hook to access the Pipecat client instance
+- `useConversationContext` hook to inject messages into the conversation store
 
-- **`multiline={true}`**: Uses a `Textarea` component that allows multiple lines and supports Shift+Enter for new lines
-- **`multiline={false}`**: Uses a single-line `Input` component that prevents line breaks and only allows Enter to send the message
+It must be used within:
+- `PipecatClientProvider` context (for client access and connection state)
+- `ConversationProvider` context (for message injection)

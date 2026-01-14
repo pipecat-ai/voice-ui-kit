@@ -1,0 +1,137 @@
+---
+title: Copy Text
+description: Component for copying text to clipboard with visual feedback
+component: CopyText
+---
+
+The CopyText component provides a convenient way to copy text to the clipboard with a built-in copy button and visual feedback. It displays the text with a copy icon that changes to a checkmark when the text is successfully copied.
+
+<LiveComponent language="tsx">
+{`
+  import { CopyText } from "@pipecat-ai/voice-ui-kit";
+
+  <CopyText text="This is some text to copy" />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### CopyText
+
+The CopyText component displays text with a copy button.
+
+<LiveComponent language="tsx">
+{`
+  import { CopyText } from "@pipecat-ai/voice-ui-kit";
+
+  <CopyText text="Copy this text" />
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    text: {
+      description: "The text to display and copy to clipboard",
+      type: "string",
+      required: true,
+    },
+    className: {
+      description: "Additional CSS classes to apply to the container",
+      type: "string",
+      required: false,
+      default: '""',
+    },
+    iconSize: {
+      description: "Size of the copy icon in pixels",
+      type: "number",
+      required: false,
+      default: "16",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Display text with a copy button.
+
+<LiveComponent language="tsx">
+{`
+  import { CopyText } from "@pipecat-ai/voice-ui-kit";
+
+  <CopyText text="Click to copy this text" />
+`}
+</LiveComponent>
+
+#### Custom Icon Size
+
+Adjust the size of the copy icon.
+
+<LiveComponent language="tsx">
+{`
+  import { CopyText } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="space-y-2">
+    <CopyText text="Small icon" iconSize={12} />
+    <CopyText text="Default icon" iconSize={16} />
+    <CopyText text="Large icon" iconSize={24} />
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to the container.
+
+<LiveComponent language="tsx">
+{`
+  import { CopyText } from "@pipecat-ai/voice-ui-kit";
+
+  <CopyText 
+    text="Styled text"
+    className="border rounded p-2 bg-muted"
+  />
+`}
+</LiveComponent>
+
+#### Long Text
+
+The component handles long text with truncation.
+
+<LiveComponent language="tsx">
+{`
+  import { CopyText } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="w-64">
+    <CopyText text="This is a very long text that will be truncated if it exceeds the container width" />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Behavior
+
+When the copy button is clicked:
+1. Text is copied to the clipboard using the Clipboard API
+2. Icon changes from `CopyIcon` to `CopyCheckIcon`
+3. Tooltip changes to "Copied!"
+4. After 2 seconds, the icon and tooltip reset to the original state
+
+If clipboard access fails, an error is logged to the console.
+
+## Integration
+
+The CopyText component uses:
+- `Button` component for the copy action
+- `Tooltip` component for feedback
+- Browser Clipboard API for copying text
+
+No special context providers are required.
+

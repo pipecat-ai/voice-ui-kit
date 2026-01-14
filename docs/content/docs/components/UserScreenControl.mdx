@@ -1,0 +1,151 @@
+---
+title: User Screen Control
+description: Component for controlling screen sharing with visual preview
+component: UserScreenControl
+---
+
+The UserScreenControl component provides a user interface for controlling screen sharing. It displays a preview of the shared screen and a toggle button to start/stop screen sharing. It automatically integrates with the Pipecat Client SDK.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { UserScreenControl } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="w-64">
+    <UserScreenControl />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+<TypeTable
+  className="text-sm"
+  type={{
+    variant: {
+      description: "Visual style variant for the control button",
+      type: "ButtonVariant",
+      required: false,
+      default: '"secondary"',
+    },
+    size: {
+      description: "Size of the control button",
+      type: "ButtonSize",
+      required: false,
+      default: '"md"',
+    },
+    state: {
+      description: "State of the control button (default, inactive, etc.)",
+      type: "ButtonState",
+      required: false,
+      default: "Automatically set based on screen sharing state",
+    },
+    buttonProps: {
+      description: "Additional props to pass to the main control button",
+      type: "Partial<React.ComponentProps<typeof Button>>",
+      required: false,
+      default: "{}",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ container?: string; screen?: string; buttongroup?: string; button?: string; screenOffContainer?: string; screenOffText?: string; activeText?: string; inactiveText?: string; }",
+      required: false,
+      default: "{}",
+    },
+    noScreen: {
+      description: "Hide the screen element entirely",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    screenProps: {
+      description: "Additional props to pass to the PipecatClientVideo component",
+      type: "Partial<React.ComponentProps<typeof PipecatClientVideo>>",
+      required: false,
+      default: "{}",
+    },
+    noScreenText: {
+      description: "Custom text to display when screen sharing is disabled",
+      type: "string | null",
+      required: false,
+      default: '"Screen sharing disabled"',
+    },
+    noIcon: {
+      description: "Hide the screen icon in the button",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    activeText: {
+      description: "Text to display when screen sharing is active",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    inactiveText: {
+      description: "Text to display when screen sharing is inactive",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    children: {
+      description: "Custom content to render inside the button",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+### UserScreenComponent
+
+The `UserScreenComponent` is a headless variant that accepts all screen sharing state and callbacks as props. This allows you to use it with any framework or state management solution.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { UserScreenComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    const [isEnabled, setIsEnabled] = React.useState(false);
+    
+    return (
+      <UserScreenComponent
+        isScreenEnabled={isEnabled}
+        onClick={() => setIsEnabled(!isEnabled)}
+        variant="outline"
+        size="lg"
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+---
+
+## Button States
+
+The button automatically adapts based on screen sharing state:
+- **Active**: When screen sharing is enabled, button shows active state
+- **Inactive**: When screen sharing is disabled, button shows inactive state
+- **Loading**: Shows loading spinner during screen share operations
+- **Disabled**: Button is disabled when not connected to a session
+
+## Screen Preview
+
+When `noScreen` is false:
+- Shows a video preview of the shared screen when active
+- Displays a placeholder when screen sharing is inactive
+- Uses `PipecatClientVideo` component with `trackType="screenVideo"`
+
+## Integration
+
+The connected `UserScreenControl` component uses:
+- `usePipecatConnectionState` hook to check connection status
+- `PipecatClientScreenShareToggle` component for screen share state management
+- `PipecatClientVideo` component for screen preview
+
+It must be used within a `PipecatClientProvider` context to function properly.
+
+The component automatically disables the button when not connected to a session.
+

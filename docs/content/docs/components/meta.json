@@ -1,6 +1,22 @@
 {
     "pages": [
         "overview",
-        "..."
+        "ClientStatus",
+        "ConnectButton",
+        "Conversation",
+        "DeviceDropDown",
+        "DeviceSelect",
+        "MessageContainer",
+        "MessageContent",
+        "MessageRole",
+        "PipecatAppBase",
+        "SessionInfo",
+        "TextInput",
+        "Thinking",
+        "TranscriptOverlay",
+        "UserAudioControl",
+        "UserAudioOutputControl",
+        "UserScreenControl",
+        "UserVideoControl"
     ]
 }

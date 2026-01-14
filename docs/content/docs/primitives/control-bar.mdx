@@ -1,0 +1,157 @@
+---
+title: Control Bar
+description: Container component for control elements with gradient border and animations
+component: ControlBar
+---
+
+The ControlBar component provides a styled container for organizing control elements like buttons, toggles, and other interactive components. It features a gradient border, shadow effects, and optional entrance animations.
+
+<LiveComponent language="tsx">
+{`
+  import { ControlBar, ControlBarDivider, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <ControlBar>
+    <Button variant="primary">Control 1</Button>
+    <ControlBarDivider />
+    <Button variant="secondary">Control 2</Button>
+    <Button variant="outline">Control 3</Button>
+  </ControlBar>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### ControlBar
+
+The main ControlBar component that wraps control elements.
+
+<LiveComponent language="tsx">
+{`
+  import { ControlBar, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <ControlBar>
+    <Button variant="primary">Action</Button>
+    <Button variant="secondary">Secondary</Button>
+  </ControlBar>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    children: {
+      description: "Control elements to display inside the bar",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    className: {
+      description: "Additional CSS classes to apply to the container",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    noAnimateIn: {
+      description: "Disable the entrance animation",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+  }}
+/>
+
+### ControlBarDivider
+
+A divider component for visually separating control elements within the ControlBar.
+
+<LiveComponent language="tsx">
+{`
+  import { ControlBar, ControlBarDivider, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <ControlBar>
+    <Button variant="primary">Left</Button>
+    <ControlBarDivider />
+    <Button variant="secondary">Right</Button>
+  </ControlBar>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    className: {
+      description: "Additional CSS classes to apply to the divider",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Basic Usage
+
+Create a control bar with multiple control elements.
+
+<LiveComponent language="tsx">
+{`
+  import { ControlBar, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <ControlBar>
+    <Button variant="primary">Connect</Button>
+    <Button variant="secondary">Settings</Button>
+  </ControlBar>
+`}
+</LiveComponent>
+
+#### With Dividers
+
+Use dividers to visually separate groups of controls.
+
+<LiveComponent language="tsx">
+{`
+  import { ControlBar, ControlBarDivider, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <ControlBar>
+    <Button variant="primary">Connect</Button>
+    <ControlBarDivider />
+    <Button variant="secondary">Audio</Button>
+    <Button variant="secondary">Video</Button>
+    <ControlBarDivider />
+    <Button variant="outline">Settings</Button>
+  </ControlBar>
+`}
+</LiveComponent>
+
+#### Without Animation
+
+Disable the entrance animation if needed.
+
+<LiveComponent language="tsx">
+{`
+  import { ControlBar, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <ControlBar noAnimateIn={true}>
+    <Button variant="primary">Static Control</Button>
+  </ControlBar>
+`}
+</LiveComponent>
+
+#### Custom Styling
+
+Apply custom classes to override default styling.
+
+<LiveComponent language="tsx">
+{`
+  import { ControlBar, Button } from "@pipecat-ai/voice-ui-kit";
+
+  <ControlBar className="bg-primary/10 border-2">
+    <Button variant="primary">Custom Styled</Button>
+  </ControlBar>
+`}
+</LiveComponent>

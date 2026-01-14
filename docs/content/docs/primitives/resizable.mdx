@@ -1,0 +1,257 @@
+---
+title: Resizable
+description: Resizable panel components for creating adjustable layouts
+component: ResizablePanelGroup
+---
+
+The Resizable components provide a way to create adjustable panel layouts where users can resize panels by dragging. Built on react-resizable-panels, these components support both horizontal and vertical layouts.
+
+<LiveComponent language="tsx">
+{`
+  import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 border rounded-lg">
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Left Panel</div>
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Right Panel</div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### ResizablePanelGroup
+
+The root component that contains resizable panels.
+
+<LiveComponent language="tsx">
+{`
+  import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 border rounded-lg">
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={50}>Panel 1</ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={50}>Panel 2</ResizablePanel>
+    </ResizablePanelGroup>
+  </div>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    "ResizablePanelGroup": {
+      description: "Container for resizable panels",
+      type: "React.ComponentProps<typeof ResizablePrimitive.PanelGroup>",
+      required: true,
+    },
+    "ResizablePanel": {
+      description: "Individual resizable panel",
+      type: "React.ComponentProps<typeof ResizablePrimitive.Panel>",
+      required: true,
+    },
+    "ResizableHandle": {
+      description: "Handle for resizing panels",
+      type: "React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & VariantProps",
+      required: false,
+    },
+  }}
+/>
+
+### ResizableHandle Props
+
+<TypeTable
+  className="text-sm"
+  type={{
+    withHandle: {
+      description: "Show a visible handle icon",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noBorder: {
+      description: "Remove the border styling from the handle",
+      type: "boolean",
+      required: false,
+      default: "true",
+    },
+    size: {
+      description: "Size of the handle icon",
+      type: '"sm" | "md" | "lg"',
+      required: false,
+      default: '"sm"',
+    },
+    icon: {
+      description: "Custom icon to display in the handle",
+      type: "React.ReactNode",
+      required: false,
+      default: "EllipsisVerticalIcon",
+    },
+    className: {
+      description: "Additional CSS classes to apply",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Horizontal Layout
+
+Create a horizontal resizable layout.
+
+<LiveComponent language="tsx">
+{`
+  import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 border rounded-lg">
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Left</div>
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Right</div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  </div>
+`}
+</LiveComponent>
+
+#### Vertical Layout
+
+Create a vertical resizable layout.
+
+<LiveComponent language="tsx">
+{`
+  import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 border rounded-lg">
+    <ResizablePanelGroup direction="vertical">
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Top</div>
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Bottom</div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  </div>
+`}
+</LiveComponent>
+
+#### With Visible Handle
+
+Show a visible handle icon for better UX.
+
+<LiveComponent language="tsx">
+{`
+  import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 border rounded-lg">
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Left</div>
+      </ResizablePanel>
+      <ResizableHandle withHandle={true} />
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Right</div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  </div>
+`}
+</LiveComponent>
+
+#### Multiple Panels
+
+Create layouts with multiple panels.
+
+<LiveComponent language="tsx">
+{`
+  import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 border rounded-lg">
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={33}>
+        <div className="h-full p-4 bg-muted">Panel 1</div>
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={33}>
+        <div className="h-full p-4 bg-muted">Panel 2</div>
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={34}>
+        <div className="h-full p-4 bg-muted">Panel 3</div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  </div>
+`}
+</LiveComponent>
+
+#### Custom Handle Styling
+
+Customize the handle appearance.
+
+<LiveComponent language="tsx">
+{`
+  import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-64 border rounded-lg">
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Left</div>
+      </ResizablePanel>
+      <ResizableHandle 
+        withHandle={true} 
+        size="lg" 
+        noBorder={false}
+      />
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full p-4 bg-muted">Right</div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Layout Directions
+
+- **Horizontal**: Panels are arranged side-by-side, handles are vertical
+- **Vertical**: Panels are stacked vertically, handles are horizontal
+
+## Handle Sizes
+
+The handle icon supports three sizes:
+- `sm`: Small (size-3)
+- `md`: Medium (size-4)
+- `lg`: Large (size-5)
+
+## Integration
+
+The Resizable components are built on `react-resizable-panels` and:
+- Disable global cursor styles for better UX
+- Use theme colors for borders and hover states
+- Support custom icons via the `icon` prop
+- Automatically adjust cursor based on direction (row-resize vs col-resize)
+
+These components are useful for:
+- Code editors with sidebars
+- Dashboard layouts
+- Split-pane interfaces
+- Adjustable content areas
+

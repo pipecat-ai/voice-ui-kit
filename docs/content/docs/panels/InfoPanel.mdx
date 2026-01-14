@@ -1,0 +1,127 @@
+---
+title: Info Panel
+description: Panel component displaying status, devices, and session information
+component: InfoPanel
+---
+
+The InfoPanel component provides a comprehensive information panel that displays connection status, device controls, and session information. It combines multiple components into a single organized panel.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { InfoPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-96 w-full">
+    <InfoPanel />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+<TypeTable
+  className="text-sm"
+  type={{
+    noSessionInfo: {
+      description: "Hide the session information section",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noStatusInfo: {
+      description: "Hide the status information section",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noUserAudio: {
+      description: "Hide the user audio control",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noUserVideo: {
+      description: "Hide the user video control",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noScreenControl: {
+      description: "Hide the screen sharing control",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    participantId: {
+      description: "Override the participant ID to display",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    sessionId: {
+      description: "Override the session ID to display",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Hide Specific Sections
+
+Hide sections you don't need.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { InfoPanel } from "@pipecat-ai/voice-ui-kit";
+
+  <div className="h-96 w-full">
+    <InfoPanel 
+      noSessionInfo={true}
+      noUserVideo={true}
+    />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+## Panel Sections
+
+The panel is organized into three main sections:
+
+### Status Section
+- Displays `ClientStatus` component
+- Shows client and agent connection states
+- Can be hidden with `noStatusInfo`
+
+### Devices Section
+- Displays device controls:
+  - `UserAudioControl` (can be hidden with `noUserAudio`)
+  - `UserVideoControl` (can be hidden with `noUserVideo`)
+  - `UserScreenControl` (can be hidden with `noScreenControl`)
+- Can hide entire section by hiding all device controls
+
+### Session Section
+- Displays `SessionInfo` component
+- Shows transport type, session ID, participant ID, and RTVI version
+- Can be hidden with `noSessionInfo`
+
+## Conditional Rendering
+
+The panel automatically hides itself if all sections are disabled (`noInfoPanel`). Individual sections can be hidden independently.
+
+## Integration
+
+The InfoPanel component uses:
+- `ClientStatus` for status display
+- `SessionInfo` for session information
+- `UserAudioControl`, `UserVideoControl`, `UserScreenControl` for device controls
+- `usePipecatClientCamControl` to check camera state
+- `Panel` component for consistent styling
+
+It must be used within a `PipecatClientProvider` context to function properly.
+

@@ -1,0 +1,104 @@
+---
+title: Session Info
+description: Component for displaying session information including transport type, session ID, and participant ID
+component: SessionInfo
+---
+
+The SessionInfo component displays session-related information in a structured format, including transport type, session ID, participant ID, and RTVI version. It automatically integrates with the Pipecat Client SDK to fetch this information.
+
+<LiveComponent language="tsx">
+{`
+  import { SessionInfo } from "@pipecat-ai/voice-ui-kit";
+
+  <SessionInfo />
+`}
+</LiveComponent>
+
+---
+
+<TypeTable
+  className="text-sm"
+  type={{
+    noTransportType: {
+      description: "Hide the transport type display",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noSessionId: {
+      description: "Hide the session ID display",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noParticipantId: {
+      description: "Hide the participant ID display",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noRTVIVersion: {
+      description: "Hide the RTVI version display",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    sessionId: {
+      description: "Override the session ID to display (instead of fetching from client)",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    participantId: {
+      description: "Override the participant ID to display (instead of fetching from client)",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+#### Hide Specific Fields
+
+Hide fields you don't need or override IDs with custom values.
+
+<LiveComponent language="tsx">
+{`
+  import { SessionInfo } from "@pipecat-ai/voice-ui-kit";
+
+  <SessionInfo 
+    noRTVIVersion={true}
+    noTransportType={true}
+    sessionId="custom-session-123"
+    participantId="custom-participant-456"
+  />
+`}
+</LiveComponent>
+
+---
+
+## Transport Types
+
+The component automatically detects and displays:
+- **Daily**: Shows "Daily (v[version])" when using Daily transport, where [version] is the Daily.js version number
+- **Small WebRTC**: Shows "Small WebRTC" when using Small WebRTC transport
+- **Unknown**: Shows "Unknown" if transport type cannot be determined
+
+## Copy Functionality
+
+Session ID and Participant ID fields use the `CopyText` component, allowing users to easily copy these values to their clipboard.
+
+## Integration
+
+The `SessionInfo` component uses:
+- `usePipecatClient` hook to access the Pipecat client instance
+- `DataList` component to display the information
+- `CopyText` component for copyable IDs
+- `TextDashBlankslate` component for empty values
+
+It must be used within a `PipecatClientProvider` context to function properly.
+

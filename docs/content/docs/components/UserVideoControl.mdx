@@ -6,18 +6,11 @@ component: UserVideoControl
 
 The `UserVideoControl` component provides a comprehensive camera control interface that includes camera toggle functionality, device selection, and optional video preview. It integrates with the Pipecat Client SDK to automatically manage camera state and device selection.
 
-<LiveComponent language="tsx">
+<LiveComponent language="tsx" withPipecat>
 {`
-  import { UserVideoComponent } from "@pipecat-ai/voice-ui-kit";
+  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
 
-  <UserVideoComponent
-    onClick={() => console.log("Toggle camera")}
-    availableCams={[
-      {deviceId: "cam1", label: "Built-in Camera"},
-      {deviceId: "cam2", label: "External USB Camera"},
-    ]}
-    selectedCam={{deviceId: "cam1", label: "Built-in Camera"}}
-    updateCam={(deviceId) => console.log("Selected:", deviceId)}
+  <UserVideoControl
     isCamEnabled={true}
   />
 `}
@@ -25,23 +18,9 @@ The `UserVideoControl` component provides a comprehensive camera control interfa
 
 ---
 
-## Component Variants
-
-### UserVideoControl
-
-The `UserVideoControl` component is the connected variant that automatically integrates with the Pipecat Client SDK. It must be used within a `PipecatClientProvider` context.
-
 <Callout>
 You must call `initDevices` on the client before using the component.
 </Callout>
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <UserVideoControl />
-`}
-</LiveComponent>
 
 <TypeTable
   className="text-sm"
@@ -305,181 +284,6 @@ The `UserVideoComponent` is the headless variant that accepts all camera state a
 
 ---
 
-## Usage Examples
-
-#### Basic Usage
-
-The UserVideoControl component automatically manages camera state and device selection.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <UserVideoControl />
-`}
-</LiveComponent>
-
-#### Custom Text Labels
-
-You can customize the text displayed when the camera is active or inactive.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <UserVideoControl
-    activeText="Camera is on"
-    inactiveText="Click to start camera"
-  />
-`}
-</LiveComponent>
-
-#### Different Variants
-
-The component supports different visual variants to match your design system.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="flex gap-4">
-    <UserVideoControl variant="primary" />
-    <UserVideoControl variant="outline" />
-    <UserVideoControl variant="ghost" />
-  </div>
-`}
-</LiveComponent>
-
-#### Different Sizes
-
-You can use different sizes for the video control.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <div className="flex gap-4 items-center">
-    <UserVideoControl size="sm" />
-    <UserVideoControl size="md" />
-    <UserVideoControl size="lg" />
-    <UserVideoControl size="xl" />
-  </div>
-`}
-</LiveComponent>
-
-#### Without Device Picker
-
-Hide the device selection dropdown for a simpler interface.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <UserVideoControl noDevicePicker />
-`}
-</LiveComponent>
-
-#### Without Video Preview
-
-Hide the video element for a minimal camera button.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <UserVideoControl noVideo />
-`}
-</LiveComponent>
-
-#### Disabled Video State
-
-Show a disabled state when video functionality is not available.
-
-<LiveComponent language="tsx" noInline>
-{`
-  import { UserVideoComponent } from "@pipecat-ai/voice-ui-kit";
-
-  function Demo() {
-    return (
-      <UserVideoComponent
-        noVideo={true}
-        noVideoText="Camera not available"
-        isCamEnabled={false}
-        onClick={() => {}}
-      />
-    );
-  }
-
-  render(<Demo />);
-`}
-</LiveComponent>
-
-#### Custom Video Configuration
-
-Customize the video element appearance and behavior.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <UserVideoControl
-    videoProps={{
-      className: "border-2 border-primary",
-      style: { borderRadius: "8px" }
-    }}
-  />
-`}
-</LiveComponent>
-
-#### Custom Device Dropdown Configuration
-
-Customize the device dropdown behavior and appearance.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <UserVideoControl
-    deviceDropDownProps={{
-      menuLabel: "Select Camera",
-      placeholder: "Choose a camera...",
-    }}
-  />
-`}
-</LiveComponent>
-
-#### Custom Styling
-
-Apply custom CSS classes to different parts of the component.
-
-<LiveComponent language="tsx" withPipecat>
-{`
-  import { UserVideoControl } from "@pipecat-ai/voice-ui-kit";
-
-  <UserVideoControl
-    classNames={{
-      container: "border-2 border-primary",
-      button: "bg-primary text-white",
-      videoOffContainer: "bg-muted/50",
-      activeText: "font-bold text-green-600",
-      inactiveText: "text-gray-500",
-    }}
-  />
-`}
-</LiveComponent>
-
----
-
-## Features
-
-- **Camera Toggle**: Click to enable/disable camera input
-- **Device Selection**: Built-in dropdown for selecting different camera devices
-- **Video Preview**: Optional real-time video preview display
-- **Loading States**: Automatic loading indicators during connection setup
-- **Accessible**: Includes proper ARIA labels and keyboard navigation
-- **Responsive**: Adapts to different screen sizes and container widths
-- **Theme Support**: Integrates with the Voice UI Kit theming system
-- **Flexible**: Available in both connected and headless variants
 
 ## Integration
 

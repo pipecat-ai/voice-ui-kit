@@ -1,0 +1,163 @@
+---
+title: useTheme
+description: Hook for accessing and managing theme state
+---
+
+The `useTheme` hook provides access to the theme context, allowing you to read and update the current theme. It must be used within a `ThemeProvider` component.
+
+## Overview
+
+`useTheme` returns an object with the current theme, resolved theme, and a function to set the theme. The resolved theme resolves "system" to either "light" or "dark" based on the user's system preferences.
+
+## Usage
+
+### Basic Usage
+
+```tsx
+import { useTheme } from "@pipecat-ai/voice-ui-kit";
+
+function ThemeToggle() {
+  const { theme, resolvedTheme, setTheme } = useTheme();
+  
+  return (
+    <div>
+      <p>Current theme: {theme}</p>
+      <p>Resolved theme: {resolvedTheme}</p>
+      <button onClick={() => setTheme("light")}>Light</button>
+      <button onClick={() => setTheme("dark")}>Dark</button>
+      <button onClick={() => setTheme("system")}>System</button>
+    </div>
+  );
+}
+```
+
+### Theme Toggle Component
+
+```tsx
+import { useTheme } from "@pipecat-ai/voice-ui-kit";
+import { Button } from "@pipecat-ai/voice-ui-kit";
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  
+  return (
+    <Button
+      onClick={() => {
+        if (theme === "dark") {
+          setTheme("light");
+        } else if (theme === "light") {
+          setTheme("dark");
+        } else {
+          setTheme("dark");
+        }
+      }}
+    >
+      Toggle Theme
+    </Button>
+  );
+}
+```
+
+### Custom Theme
+
+```tsx
+import { useTheme } from "@pipecat-ai/voice-ui-kit";
+
+function CustomThemeSelector() {
+  const { theme, setTheme } = useTheme();
+  
+  return (
+    <select value={theme} onChange={(e) => setTheme(e.target.value)}>
+      <option value="system">System</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+      <option value="terminal">Terminal</option>
+    </select>
+  );
+}
+```
+
+## Return Value
+
+The hook returns an object with the following properties:
+
+<TypeTable
+  className="text-sm"
+  type={{
+    theme: {
+      description: "The current theme value. Can be 'system' or any custom theme string",
+      type: "Theme",
+      required: true,
+    },
+    resolvedTheme: {
+      description: "The resolved theme. If theme is 'system', this will be 'light' or 'dark' based on system preferences. Otherwise, it matches theme",
+      type: "Theme",
+      required: true,
+    },
+    setTheme: {
+      description: "Function to update the theme. Accepts 'system', 'light', 'dark', or any custom theme string",
+      type: "(theme: Theme) => void",
+      required: true,
+    },
+  }}
+/>
+
+## Theme Type
+
+The `Theme` type is defined as:
+
+```typescript
+type Theme = "system" | (string & {});
+```
+
+This allows:
+- `"system"` - Use system preference
+- `"light"` - Light theme
+- `"dark"` - Dark theme
+- Any custom string - Custom theme name
+
+## Resolved Theme
+
+When `theme` is set to `"system"`, the `resolvedTheme` will be:
+- `"light"` if the system prefers light mode
+- `"dark"` if the system prefers dark mode
+
+For all other theme values, `resolvedTheme` matches `theme`.
+
+## Integration
+
+The `useTheme` hook:
+- Must be used within a `ThemeProvider` component
+- Throws an error if used outside of a `ThemeProvider`
+- Automatically updates when the theme changes
+- Respects system theme preferences when theme is "system"
+
+## Example: Theme Toggle Button
+
+```tsx
+import { useTheme } from "@pipecat-ai/voice-ui-kit";
+import { Button } from "@pipecat-ai/voice-ui-kit";
+import { MoonIcon, SunIcon } from "lucide-react";
+
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
+  
+  return (
+    <Button
+      variant="ghost"
+      isIcon
+      onClick={() => {
+        setTheme(resolvedTheme === "dark" ? "light" : "dark");
+      }}
+    >
+      {resolvedTheme === "dark" ? <SunIcon /> : <MoonIcon />}
+    </Button>
+  );
+}
+```
+
+## See Also
+
+- [ThemeProvider](/docs/components/ThemeProvider) - Component that provides theme context
+- [Styling and Theming](/docs/styling) - Guide for styling and theming
+
