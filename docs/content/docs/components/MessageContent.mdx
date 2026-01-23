@@ -56,6 +56,12 @@ The MessageContent component displays message content with thinking indicator an
       required: false,
       default: "undefined",
     },
+    aggregationMetadata: {
+      description: "Metadata for custom aggregation types. Controls whether a type should render inline vs block and whether it is expected to be spoken (karaoke-style highlighting).",
+      type: "Record<string, { displayMode?: 'inline' | 'block'; isSpoken?: boolean }>",
+      required: false,
+      default: "undefined",
+    },
     classNames: {
       description: "Custom CSS classes for different parts of the component",
       type: "{ messageContent?: string; thinking?: string; time?: string; }",
@@ -168,6 +174,10 @@ import { MessageContent } from "@pipecat-ai/voice-ui-kit";
     }],
     createdAt: new Date().toISOString()
   }}
+  aggregationMetadata={{
+    // Custom types are arbitrary: configure them in your app
+    code: { displayMode: "block", isSpoken: false },
+  }}
   botOutputRenderers={{
     code: (content, { spoken, unspoken }) => (
       <div>
@@ -197,7 +207,7 @@ If no custom renderer is provided, the component defaults to showing spoken text
 
 The component:
 1. Renders all text parts from `message.parts` array
-2. Adds a space between consecutive text parts
+2. Groups parts by display mode: inline parts render together, block parts render on their own line
 3. Shows a `Thinking` component if the message has no parts or all parts are empty whitespace
 4. Displays a formatted timestamp using `toLocaleTimeString()`
 

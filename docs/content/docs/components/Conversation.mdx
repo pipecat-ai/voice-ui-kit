@@ -59,6 +59,12 @@ The Conversation component displays real-time conversation history between users
       required: false,
       default: "undefined",
     },
+    aggregationMetadata: {
+      description: "Metadata for custom aggregation types (controls block vs inline rendering, and whether the content is expected to be spoken for karaoke-style highlighting).",
+      type: "Record<string, { displayMode?: 'inline' | 'block'; isSpoken?: boolean }>",
+      required: false,
+      default: "undefined",
+    },
     noTextInput: {
       description: "Disable the text input field at the bottom of the conversation",
       type: "boolean",
