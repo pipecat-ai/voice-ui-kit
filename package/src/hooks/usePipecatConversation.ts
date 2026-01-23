@@ -86,6 +86,12 @@ export const usePipecatConversation = ({
       (msg) => msg.role === "assistant",
     );
 
+    const getMetadata = (part: ConversationMessagePart) => {
+      return part.aggregatedBy
+        ? aggregationMetadata?.[part.aggregatedBy]
+        : undefined;
+    };
+
     // Process messages: convert string parts to BotOutputText based on position state
     const processedMessages = messages.map((message, messageIndex) => {
       if (message.role === "assistant") {
@@ -98,96 +104,64 @@ export const usePipecatConversation = ({
           return message;
         }
 
-        const { currentPartIndex, currentCharIndex } = messageState;
         const parts = message.parts || [];
 
-        // Find the actual current part index, skipping parts that aren't meant to be spoken
-        let actualCurrentPartIndex = currentPartIndex;
-        for (let i = 0; i <= currentPartIndex && i < parts.length; i++) {
-          const part = parts[i];
-          if (typeof part.text === "string") {
-            const metadata = part.aggregatedBy
-              ? aggregationMetadata?.[part.aggregatedBy]
-              : undefined;
-            const isSpoken = metadata?.isSpoken !== false;
-            if (!isSpoken) {
-              // This part isn't meant to be spoken, adjust current index
-              if (i === actualCurrentPartIndex) {
-                actualCurrentPartIndex = Math.min(
-                  actualCurrentPartIndex + 1,
-                  parts.length - 1,
-                );
-              }
-            }
-          }
+        // Find the actual current part index (skip parts that aren't meant to be spoken)
+        let actualCurrentPartIndex = messageState.currentPartIndex;
+        while (actualCurrentPartIndex < parts.length) {
+          const part = parts[actualCurrentPartIndex];
+          if (typeof part?.text !== "string") break;
+          const isSpoken = getMetadata(part)?.isSpoken !== false;
+          if (isSpoken) break;
+          actualCurrentPartIndex++;
+        }
+        if (parts.length > 0 && actualCurrentPartIndex >= parts.length) {
+          actualCurrentPartIndex = parts.length - 1;
         }
 
         // Convert parts to BotOutputText format based on position state
         const processedParts: ConversationMessagePart[] = parts.map(
           (part, partIndex) => {
             // If part text is not a string, it's already processed (e.g., ReactNode)
-            if (typeof part.text !== "string") {
-              return part;
-            }
+            if (typeof part.text !== "string") return part;
 
-            const partText = part.text;
-            const metadata = part.aggregatedBy
-              ? aggregationMetadata?.[part.aggregatedBy]
-              : undefined;
-            const isSpoken = metadata?.isSpoken !== false;
-            // Set displayMode on the part (default to "inline" for sentence-level)
+            const metadata = getMetadata(part);
             const displayMode =
               part.displayMode ?? metadata?.displayMode ?? "inline";
+            const isSpoken = metadata?.isSpoken !== false;
 
-            // If part is not meant to be spoken, render as fully unspoken
+            const partText =
+              displayMode === "block" && !isSpoken
+                ? part.text.trim()
+                : part.text;
             if (!isSpoken) {
               return {
                 ...part,
                 displayMode,
-                text: {
-                  spoken: "",
-                  unspoken: partText,
-                },
+                text: { spoken: "", unspoken: partText },
               };
             }
 
-            // Determine if this is the current part being spoken
             const isCurrentPart =
               isLastAssistantMessage && partIndex === actualCurrentPartIndex;
 
-            if (isCurrentPart) {
-              // Current part: split at currentCharIndex
-              const spoken = partText.slice(0, currentCharIndex);
-              const unspoken = partText.slice(currentCharIndex);
-              return {
-                ...part,
-                displayMode,
-                text: {
-                  spoken,
-                  unspoken,
-                },
-              };
-            } else if (partIndex < actualCurrentPartIndex) {
-              // Previous parts: fully spoken
-              return {
-                ...part,
-                displayMode,
-                text: {
-                  spoken: partText,
-                  unspoken: "",
-                },
-              };
-            } else {
-              // Subsequent parts: fully unspoken
-              return {
-                ...part,
-                displayMode,
-                text: {
-                  spoken: "",
-                  unspoken: partText,
-                },
-              };
-            }
+            const currentCharIndex = messageState.currentCharIndex;
+            const spokenText = isCurrentPart
+              ? partText.slice(0, currentCharIndex)
+              : partIndex < actualCurrentPartIndex
+                ? partText
+                : "";
+            const unspokenText = isCurrentPart
+              ? partText.slice(currentCharIndex)
+              : partIndex < actualCurrentPartIndex
+                ? ""
+                : partText;
+
+            return {
+              ...part,
+              displayMode,
+              text: { spoken: spokenText, unspoken: unspokenText },
+            };
           },
         );
 
