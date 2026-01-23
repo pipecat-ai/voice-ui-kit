@@ -8,16 +8,17 @@ import { create } from "zustand";
 interface ConversationState {
   messages: ConversationMessage[];
   messageCallbacks: Map<string, (message: ConversationMessage) => void>;
-  // Store BotOutput text streams (BotOutput mode)
-  botOutputSpokenStreams: Map<string, string>; // messageId -> accumulated spoken text
-  botOutputUnspokenStreams: Map<string, string>; // messageId -> accumulated unspoken text
-  // Store BotOutput aggregation types per message
+  // Store BotOutput aggregation types per message (for metadata lookup)
   botOutputAggregationTypes: Map<string, string>; // messageId -> last aggregation type
-  // Track last unspoken aggregation type to determine if we should use position-based splitting
-  botOutputUnspokenAggregationTypes: Map<string, string>; // messageId -> last unspoken aggregation type
-  // Track spoken position in unspoken text (character index)
-  // Only used when unspoken is sentence-level and spoken is word/sentence-level
-  botOutputSpokenPositions: Map<string, number>; // messageId -> position in unspoken text
+  // Simple state per message for tracking spoken position
+  botOutputMessageState: Map<
+    string,
+    {
+      currentPartIndex: number; // Which part we're currently speaking
+      currentCharIndex: number; // Character position within that part
+      partFinalFlags: boolean[]; // Per-part: true if fully spoken or not meant to be spoken
+    }
+  >;
 
   // Actions
   registerMessageCallback: (
@@ -160,7 +161,8 @@ const normalizeForMatching = (text: string): string => {
   return text.toLowerCase().replace(/[^\w\s]/g, "");
 };
 
-// Helper function to find where spoken words appear in unspoken text
+// Helper function to find where spoken text appears in unspoken text within a single part
+// Simplified: only matches sequentially, returns current position on mismatch
 const findSpokenPositionInUnspoken = (
   spoken: string,
   unspoken: string,
@@ -170,16 +172,40 @@ const findSpokenPositionInUnspoken = (
     return startPosition;
   }
 
+  // If the spoken text starts with a space (from separator), skip any leading whitespace in unspoken
+  let actualStartPosition = startPosition;
+  let spokenTextForMatching = spoken;
+  if (spoken.startsWith(" ") && startPosition < unspoken.length) {
+    // Skip any leading whitespace (spaces, newlines, tabs) in unspoken text
+    while (
+      actualStartPosition < unspoken.length &&
+      /\s/.test(unspoken[actualStartPosition])
+    ) {
+      actualStartPosition++;
+    }
+    // Remove leading space from spoken for matching
+    spokenTextForMatching = spoken.trimStart();
+  } else if (startPosition === 0 && startPosition < unspoken.length) {
+    // If we're at the start of the part (position 0), skip any leading whitespace
+    // This handles cases where a part starts with newlines or other whitespace
+    while (
+      actualStartPosition < unspoken.length &&
+      /\s/.test(unspoken[actualStartPosition])
+    ) {
+      actualStartPosition++;
+    }
+  }
+
   // Normalize spoken text for matching (lowercase, remove punctuation)
-  const normalizedSpoken = normalizeForMatching(spoken);
+  const normalizedSpoken = normalizeForMatching(spokenTextForMatching);
   const spokenWords = normalizedSpoken.split(/\s+/).filter((w) => w.length > 0);
 
   if (spokenWords.length === 0) {
-    return startPosition;
+    return actualStartPosition;
   }
 
   // Find where we are in the unspoken words
-  const unspokenSubstring = unspoken.slice(startPosition);
+  const unspokenSubstring = unspoken.slice(actualStartPosition);
   const normalizedUnspokenSubstring = normalizeForMatching(unspokenSubstring);
   const unspokenSubstringWords = normalizedUnspokenSubstring
     .split(/\s+/)
@@ -187,7 +213,6 @@ const findSpokenPositionInUnspoken = (
 
   // Try to match spoken words sequentially against unspoken words
   // Handle contractions: if a spoken word doesn't match exactly, check if it's a prefix
-  // (e.g., "I" should match "I'm" -> "im" after normalization)
   let matchedWords = 0;
   for (
     let i = 0;
@@ -204,25 +229,23 @@ const findSpokenPositionInUnspoken = (
       // Prefix match (handles contractions like "I" matching "I'm")
       matchedWords++;
     } else {
-      // Sequential matching: if a word doesn't match, stop (don't reset)
-      break;
+      // Mismatch: return current position (don't advance)
+      return actualStartPosition;
     }
   }
 
+  // If no words matched, return current position (mismatch)
   if (matchedWords === 0) {
-    // No match found, return start position
-    return startPosition;
+    return actualStartPosition;
   }
 
-  // Find the character position after the matched words in the original unspoken text
-  // Walk through the unspoken text from startPosition and count words
-  // Only letters and numbers are word characters - everything else (including apostrophes) is punctuation
+  // Find the character position after the matched words
   const isWordChar = (char: string): boolean => {
     return /[a-zA-Z0-9]/.test(char);
   };
 
   let wordCount = 0;
-  let i = startPosition;
+  let i = actualStartPosition;
   let inWord = false;
 
   // Continue until we've counted all matched words AND passed the end of the last word
@@ -236,23 +259,20 @@ const findSpokenPositionInUnspoken = (
       wordCount++;
       // If we've matched all words, we need to continue to find the end of this word
       if (wordCount === matchedWords) {
-        // Continue until we find the end of this word (letters and numbers only)
+        // Continue until we find the end of this word
         i++;
         while (i < unspoken.length && isWordChar(unspoken[i])) {
           i++;
         }
-        // Now i is at the first non-letter/non-number character after the last matched word
-        // Continue including ALL characters (letters, numbers, apostrophes, punctuation, etc.)
-        // until we hit a space - this handles contractions like "I'm" where "I" matches "I'm"
+        // Continue including ALL characters until we hit a space
         while (i < unspoken.length) {
           const nextChar = unspoken[i];
           if (nextChar === " ") {
-            // Include space after the word/contraction, then stop
+            // Include space after the word, then stop
             i++;
             break;
           } else {
-            // Include any character (letters, numbers, apostrophes, punctuation, em dashes, etc.)
-            // This ensures contractions like "I'm" are fully included when matching "I"
+            // Include any character (punctuation, etc.)
             i++;
           }
         }
@@ -267,18 +287,20 @@ const findSpokenPositionInUnspoken = (
     i++;
   }
 
-  // If we reached the end of the string, return the end position
-  return unspoken.length;
+  // If we reached the end, return the end position
+  if (matchedWords > 0) {
+    return unspoken.length;
+  }
+
+  // No match found, return current position
+  return actualStartPosition;
 };
 
 export const useConversationStore = create<ConversationState>()((set) => ({
   messages: [],
   messageCallbacks: new Map(),
-  botOutputSpokenStreams: new Map(),
-  botOutputUnspokenStreams: new Map(),
   botOutputAggregationTypes: new Map(),
-  botOutputUnspokenAggregationTypes: new Map(),
-  botOutputSpokenPositions: new Map(),
+  botOutputMessageState: new Map(),
 
   registerMessageCallback: (id, callback) =>
     set((state) => {
@@ -297,11 +319,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
   clearMessages: () =>
     set({
       messages: [],
-      botOutputSpokenStreams: new Map(),
-      botOutputUnspokenStreams: new Map(),
       botOutputAggregationTypes: new Map(),
-      botOutputUnspokenAggregationTypes: new Map(),
-      botOutputSpokenPositions: new Map(),
+      botOutputMessageState: new Map(),
     }),
 
   addMessage: (messageData) => {
@@ -359,13 +378,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
 
       const lastMessage = messages[lastMessageIndex];
 
-      // Check if message is empty in both parts and text streams
-      const messageId = lastMessage.createdAt;
-      const hasTextInStreams =
-        state.botOutputSpokenStreams.get(messageId) ||
-        state.botOutputUnspokenStreams.get(messageId);
-
-      if (isMessageEmpty(lastMessage) && !hasTextInStreams) {
+      // Check if message is empty
+      if (isMessageEmpty(lastMessage)) {
         // Remove empty message only if it has no text in streams either
         messages.splice(lastMessageIndex, 1);
       } else {
@@ -407,14 +421,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       if (lastMessageIndex === -1) return state;
 
       const lastMessage = messages[lastMessageIndex];
-      const messageId = lastMessage.createdAt;
 
-      // Check if message has text in streams
-      const hasTextInStreams =
-        state.botOutputSpokenStreams.get(messageId) ||
-        state.botOutputUnspokenStreams.get(messageId);
-
-      if (isMessageEmpty(lastMessage) && !hasTextInStreams) {
+      if (isMessageEmpty(lastMessage)) {
         messages.splice(lastMessageIndex, 1);
         const processedMessages = mergeMessages(
           filterEmptyMessages(messages.sort(sortByCreatedAt)),
@@ -524,15 +532,10 @@ export const useConversationStore = create<ConversationState>()((set) => ({
     const now = new Date();
     set((state) => {
       const messages = [...state.messages];
-      const botOutputSpokenStreams = new Map(state.botOutputSpokenStreams);
-      const botOutputUnspokenStreams = new Map(state.botOutputUnspokenStreams);
       const botOutputAggregationTypes = new Map(
         state.botOutputAggregationTypes,
       );
-      const botOutputUnspokenAggregationTypes = new Map(
-        state.botOutputUnspokenAggregationTypes,
-      );
-      const botOutputSpokenPositions = new Map(state.botOutputSpokenPositions);
+      const botOutputMessageState = new Map(state.botOutputMessageState);
 
       const lastAssistantIndex = messages.findLastIndex(
         (msg) => msg.role === "assistant",
@@ -551,6 +554,12 @@ export const useConversationStore = create<ConversationState>()((set) => ({
           updatedAt: messageId,
         };
         messages.push(newMessage);
+        // Initialize message state
+        botOutputMessageState.set(messageId, {
+          currentPartIndex: 0,
+          currentCharIndex: 0,
+          partFinalFlags: [],
+        });
       } else {
         // Update existing assistant message
         const lastMessage = messages[lastAssistantIndex];
@@ -561,88 +570,245 @@ export const useConversationStore = create<ConversationState>()((set) => ({
           final: final ? true : lastMessage.final,
           updatedAt: now.toISOString(),
         };
-      }
 
-      // Store aggregation type if provided
-      if (aggregatedBy !== undefined) {
-        botOutputAggregationTypes.set(messageId, aggregatedBy);
-      }
-
-      // Update the appropriate text stream
-      if (spoken) {
-        const currentText = botOutputSpokenStreams.get(messageId) || "";
-        // Add space separator if needed
-        const separator =
-          currentText && !currentText.endsWith(" ") && !text.startsWith(" ")
-            ? " "
-            : "";
-        const newSpokenText = currentText + separator + text;
-        botOutputSpokenStreams.set(messageId, newSpokenText);
-
-        // Only use position-based splitting for sentence-level unspoken + word/sentence-level spoken
-        const unspokenAggregationType =
-          botOutputUnspokenAggregationTypes.get(messageId);
-        const isSentenceLevelUnspoken = unspokenAggregationType === "sentence";
-        const isWordOrSentenceSpoken =
-          aggregatedBy === "word" ||
-          aggregatedBy === "sentence" ||
-          !aggregatedBy;
-
-        if (isSentenceLevelUnspoken && isWordOrSentenceSpoken) {
-          // Update spoken position by matching against unspoken text
-          const unspokenText = botOutputUnspokenStreams.get(messageId) || "";
-          if (unspokenText) {
-            const currentPosition =
-              botOutputSpokenPositions.get(messageId) || 0;
-
-            // Match incrementally: find where the new portion appears starting from current position
-            const newSpokenPortion = separator + text;
-
-            // If we're at position 0, match the full accumulated text to establish initial position
-            // Otherwise, match only the new portion incrementally
-            const textToMatch =
-              currentPosition === 0 ? newSpokenText : newSpokenPortion;
-            const startPos = currentPosition === 0 ? 0 : currentPosition;
-
-            const newPosition = findSpokenPositionInUnspoken(
-              textToMatch,
-              unspokenText,
-              startPos,
-            );
-            botOutputSpokenPositions.set(messageId, newPosition);
-          }
+        // Ensure message state exists
+        if (!botOutputMessageState.has(messageId)) {
+          botOutputMessageState.set(messageId, {
+            currentPartIndex: 0,
+            currentCharIndex: 0,
+            partFinalFlags: [],
+          });
         }
-      } else {
-        const currentText = botOutputUnspokenStreams.get(messageId) || "";
-        // Add space separator if needed
-        const separator =
-          currentText && !currentText.endsWith(" ") && !text.startsWith(" ")
-            ? " "
-            : "";
-        const newUnspokenText = currentText + separator + text;
-        botOutputUnspokenStreams.set(messageId, newUnspokenText);
+      }
 
-        // Store the unspoken aggregation type
+      const messageState = botOutputMessageState.get(messageId)!;
+      const message =
+        messages[
+          lastAssistantIndex === -1 ? messages.length - 1 : lastAssistantIndex
+        ];
+      const parts = [...(message.parts || [])];
+
+      if (!spoken) {
+        // UNSPOKEN EVENT: Create/update message parts immediately
+        // Store aggregation type
         if (aggregatedBy !== undefined) {
-          botOutputUnspokenAggregationTypes.set(messageId, aggregatedBy);
+          botOutputAggregationTypes.set(messageId, aggregatedBy);
         }
 
-        // When a new sentence-level unspoken chunk arrives, reset the spoken position
-        if (aggregatedBy === "sentence") {
-          botOutputSpokenPositions.set(messageId, 0);
+        // Determine if this should be a new part or appended to last part
+        // Default types: "word" and "sentence" - sentence should be separate parts
+        // Custom types (anything else) need metadata to determine behavior
+        const isSentence = aggregatedBy === "sentence";
+        const isWord = aggregatedBy === "word";
+        const isDefaultType = isSentence || isWord || !aggregatedBy;
+        const lastPart = parts[parts.length - 1];
+        const shouldAppend =
+          lastPart &&
+          lastPart.aggregatedBy === aggregatedBy &&
+          !isSentence &&
+          typeof lastPart.text === "string";
+
+        if (shouldAppend) {
+          // Append to last part (for word-level chunks)
+          const lastPartText = lastPart.text as string;
+          const separator =
+            lastPartText && !lastPartText.endsWith(" ") && !text.startsWith(" ")
+              ? " "
+              : "";
+          parts[parts.length - 1] = {
+            ...lastPart,
+            text: lastPartText + separator + text,
+          };
+        } else {
+          // Create new part
+          // Set displayMode only for default types (word/sentence are inline)
+          // Custom types will get displayMode from metadata in the hook
+          const defaultDisplayMode = isDefaultType ? "inline" : undefined;
+          const newPart: ConversationMessagePart = {
+            text: text, // Store full text as string
+            final: false, // Will be evaluated in hook based on metadata
+            createdAt: now.toISOString(),
+            aggregatedBy,
+            displayMode: defaultDisplayMode,
+          };
+          parts.push(newPart);
+          // Extend partFinalFlags array
+          messageState.partFinalFlags.push(false);
+        }
+
+        // Update message with new parts
+        messages[
+          lastAssistantIndex === -1 ? messages.length - 1 : lastAssistantIndex
+        ] = {
+          ...message,
+          parts,
+        };
+      } else {
+        // SPOKEN EVENT: Only update position state
+        // Store aggregation type
+        if (aggregatedBy !== undefined) {
+          botOutputAggregationTypes.set(messageId, aggregatedBy);
+        }
+
+        // Find current part to match against
+        if (parts.length === 0) {
+          // No parts yet, can't update position
+          const processedMessages = mergeMessages(
+            messages.sort(sortByCreatedAt),
+          );
+          return {
+            messages: processedMessages,
+            botOutputAggregationTypes,
+            botOutputMessageState,
+          };
+        }
+
+        // Find the next part that should be spoken (skip parts that are fully spoken)
+        // Start from current part index and find next part that's not fully spoken
+        let partToMatch = messageState.currentPartIndex;
+        while (
+          partToMatch < parts.length &&
+          messageState.partFinalFlags[partToMatch]
+        ) {
+          partToMatch++;
+        }
+
+        if (partToMatch >= parts.length) {
+          // All remaining parts are final/not meant to be spoken, nothing to do
+          const processedMessages = mergeMessages(
+            messages.sort(sortByCreatedAt),
+          );
+          return {
+            messages: processedMessages,
+            botOutputAggregationTypes,
+            botOutputMessageState,
+          };
+        }
+
+        // Update current part index if we skipped ahead
+        if (partToMatch > messageState.currentPartIndex) {
+          messageState.currentPartIndex = partToMatch;
+          messageState.currentCharIndex = 0;
+        }
+
+        const currentPart = parts[messageState.currentPartIndex];
+        if (typeof currentPart.text !== "string") {
+          // Current part is not a string (shouldn't happen for BotOutput), skip
+          const processedMessages = mergeMessages(
+            messages.sort(sortByCreatedAt),
+          );
+          return {
+            messages: processedMessages,
+            botOutputAggregationTypes,
+            botOutputMessageState,
+          };
+        }
+
+        const partText = currentPart.text;
+        const currentCharIndex = messageState.currentCharIndex;
+
+        // Match spoken text against current part starting from current position
+        // Text may include leading space separator from ConversationProvider
+        const newPosition = findSpokenPositionInUnspoken(
+          text,
+          partText,
+          currentCharIndex,
+        );
+
+        // Only advance if we actually matched words (not just whitespace)
+        // Check if the new position is beyond just leading whitespace
+        let whitespaceEnd = currentCharIndex;
+        while (
+          whitespaceEnd < partText.length &&
+          /\s/.test(partText[whitespaceEnd])
+        ) {
+          whitespaceEnd++;
+        }
+
+        // If position advanced beyond whitespace, it's a real match
+        if (newPosition > whitespaceEnd) {
+          // Match found - update position
+          messageState.currentCharIndex = newPosition;
+
+          // Check if part is fully spoken
+          if (newPosition >= partText.length) {
+            messageState.partFinalFlags[messageState.currentPartIndex] = true;
+
+            // Move to next part if available
+            if (messageState.currentPartIndex < parts.length - 1) {
+              messageState.currentPartIndex++;
+              messageState.currentCharIndex = 0;
+            }
+          }
+        } else {
+          // No match - this could mean:
+          // 1. The part isn't meant to be spoken (custom aggregation with isSpoken: false)
+          // 2. The spoken text is for a later part (mismatch scenario)
+          // Try to find if the spoken text matches any later part
+          let foundMatch = false;
+          for (
+            let nextPartIdx = messageState.currentPartIndex + 1;
+            nextPartIdx < parts.length;
+            nextPartIdx++
+          ) {
+            const nextPart = parts[nextPartIdx];
+            if (typeof nextPart.text === "string") {
+              const nextPartMatch = findSpokenPositionInUnspoken(
+                text,
+                nextPart.text,
+                0,
+              );
+              // Only consider it a match if we actually matched words (not just whitespace)
+              // Check if the match position is beyond just leading whitespace
+              const nextPartText = nextPart.text;
+              let whitespaceEnd = 0;
+              while (
+                whitespaceEnd < nextPartText.length &&
+                /\s/.test(nextPartText[whitespaceEnd])
+              ) {
+                whitespaceEnd++;
+              }
+              // Only skip if we matched beyond just whitespace
+              if (nextPartMatch > whitespaceEnd) {
+                // Found a match in a later part - skip to it
+                // Mark all parts between current and next as final (they're not meant to be spoken or were skipped)
+                for (
+                  let i = messageState.currentPartIndex;
+                  i < nextPartIdx;
+                  i++
+                ) {
+                  messageState.partFinalFlags[i] = true;
+                }
+                messageState.currentPartIndex = nextPartIdx;
+                messageState.currentCharIndex = nextPartMatch;
+                foundMatch = true;
+                break;
+              }
+            }
+          }
+
+          // If no match found in later parts and we're at position 0, this part might not be meant to be spoken
+          // Mark it as final and move to next part to avoid getting stuck
+          if (
+            !foundMatch &&
+            currentCharIndex === 0 &&
+            messageState.currentPartIndex < parts.length - 1
+          ) {
+            messageState.partFinalFlags[messageState.currentPartIndex] = true;
+            messageState.currentPartIndex++;
+            messageState.currentCharIndex = 0;
+          }
+          // If we're not at position 0 and no match found, it's a temporary mismatch
+          // Keep current position unchanged and wait for matching text
         }
       }
 
-      // Don't filter out messages that have text in the text streams
       const processedMessages = mergeMessages(messages.sort(sortByCreatedAt));
 
       return {
         messages: processedMessages,
-        botOutputSpokenStreams,
-        botOutputUnspokenStreams,
         botOutputAggregationTypes,
-        botOutputUnspokenAggregationTypes,
-        botOutputSpokenPositions,
+        botOutputMessageState,
       };
     });
   },

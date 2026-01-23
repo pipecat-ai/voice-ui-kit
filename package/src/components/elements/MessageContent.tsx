@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { isMessageEmpty } from "@/stores/conversationStore";
 import {
+  AggregationMetadata,
   BotOutputText,
   ConversationMessage,
   ConversationMessagePart,
@@ -40,6 +41,11 @@ interface Props {
    * Key is the aggregation type (e.g., "code", "link"), value is a renderer function
    */
   botOutputRenderers?: Record<string, CustomBotOutputRenderer>;
+  /**
+   * Metadata for aggregation types to control rendering and speech progress behavior
+   * Key is the aggregation type (e.g., "code", "link"), value is metadata configuration
+   */
+  aggregationMetadata?: Record<string, AggregationMetadata>;
 }
 
 /**
@@ -48,6 +54,7 @@ interface Props {
  * @param unspoken - The unspoken text (remaining portion after spoken position)
  * @param aggregatedBy - The aggregation type
  * @param customRenderer - A custom renderer function
+ * @param metadata - Metadata for the aggregation type
  * @returns The rendered content
  */
 const renderBotOutput = (
@@ -55,6 +62,7 @@ const renderBotOutput = (
   unspoken: string,
   aggregatedBy?: string,
   customRenderer?: CustomBotOutputRenderer,
+  metadata?: AggregationMetadata,
 ): React.ReactNode => {
   // Use custom renderer if provided and aggregation type matches
   if (aggregatedBy && customRenderer) {
@@ -63,53 +71,143 @@ const renderBotOutput = (
   }
 
   // Default rendering - unspoken is already split at the correct position
+  const displayMode = metadata?.displayMode || "inline";
+  const Wrapper = displayMode === "block" ? "div" : "span";
+
   return (
-    <span>
+    <Wrapper>
       {spoken}
       {unspoken && <span className="text-muted-foreground">{unspoken}</span>}
-    </span>
+    </Wrapper>
   );
 };
 
 export const MessageContent = ({
   botOutputRenderers,
+  aggregationMetadata,
   classNames = {},
   message,
 }: Props) => {
   const parts = Array.isArray(message.parts) ? message.parts : [];
 
+  // Group parts by display mode: inline parts together, block parts separate
+  const groupedParts: Array<{
+    type: "inline" | "block";
+    parts: ConversationMessagePart[];
+  }> = [];
+
+  let currentInlineGroup: ConversationMessagePart[] = [];
+
+  for (const part of parts) {
+    const metadata = part.aggregatedBy
+      ? aggregationMetadata?.[part.aggregatedBy]
+      : undefined;
+    const displayMode = part.displayMode ?? metadata?.displayMode ?? "inline";
+
+    if (displayMode === "block") {
+      // Flush any accumulated inline parts
+      if (currentInlineGroup.length > 0) {
+        groupedParts.push({ type: "inline", parts: currentInlineGroup });
+        currentInlineGroup = [];
+      }
+      // Add block part separately
+      groupedParts.push({ type: "block", parts: [part] });
+    } else {
+      // Accumulate inline parts
+      currentInlineGroup.push(part);
+    }
+  }
+
+  // Flush remaining inline parts
+  if (currentInlineGroup.length > 0) {
+    groupedParts.push({ type: "inline", parts: currentInlineGroup });
+  }
+
   return (
     <div className={cn("flex flex-col gap-2", classNames.messageContent)}>
-      {parts.map((part: ConversationMessagePart, idx: number) => {
-        const isBotOutputTextValue = Boolean(
-          part.text &&
-            typeof part.text === "object" &&
-            "spoken" in part.text &&
-            "unspoken" in part.text,
-        );
+      {groupedParts.map((group, groupIdx) => {
+        if (group.type === "inline") {
+          // Render inline parts together in a single line
+          return (
+            <div key={groupIdx} className="inline-block">
+              {group.parts.map((part, partIdx) => {
+                const isBotOutputTextValue = Boolean(
+                  part.text &&
+                    typeof part.text === "object" &&
+                    "spoken" in part.text &&
+                    "unspoken" in part.text,
+                );
 
-        let content: React.ReactNode;
-        if (isBotOutputTextValue) {
-          const botText = part.text as BotOutputText;
-          const customRenderer = part.aggregatedBy
-            ? botOutputRenderers?.[part.aggregatedBy]
-            : undefined;
-          content = renderBotOutput(
-            botText.spoken,
-            botText.unspoken,
-            part.aggregatedBy,
-            customRenderer,
+                const metadata = part.aggregatedBy
+                  ? aggregationMetadata?.[part.aggregatedBy]
+                  : undefined;
+
+                let content: React.ReactNode;
+                if (isBotOutputTextValue) {
+                  const botText = part.text as BotOutputText;
+                  const customRenderer = part.aggregatedBy
+                    ? botOutputRenderers?.[part.aggregatedBy]
+                    : undefined;
+                  content = renderBotOutput(
+                    botText.spoken,
+                    botText.unspoken,
+                    part.aggregatedBy,
+                    customRenderer,
+                    metadata,
+                  );
+                } else {
+                  content = part.text as React.ReactNode;
+                }
+
+                const shouldAddSpace = partIdx > 0 && !isBotOutputTextValue;
+
+                return (
+                  <Fragment key={partIdx}>
+                    {shouldAddSpace && " "}
+                    {content}
+                  </Fragment>
+                );
+              })}
+            </div>
           );
         } else {
-          content = part.text as React.ReactNode;
-        }
+          // Render block parts separately (each on its own line)
+          return (
+            <Fragment key={groupIdx}>
+              {group.parts.map((part, partIdx) => {
+                const isBotOutputTextValue = Boolean(
+                  part.text &&
+                    typeof part.text === "object" &&
+                    "spoken" in part.text &&
+                    "unspoken" in part.text,
+                );
 
-        return (
-          <Fragment key={idx}>
-            {idx > 0 && " "}
-            {content}
-          </Fragment>
-        );
+                const metadata = part.aggregatedBy
+                  ? aggregationMetadata?.[part.aggregatedBy]
+                  : undefined;
+
+                let content: React.ReactNode;
+                if (isBotOutputTextValue) {
+                  const botText = part.text as BotOutputText;
+                  const customRenderer = part.aggregatedBy
+                    ? botOutputRenderers?.[part.aggregatedBy]
+                    : undefined;
+                  content = renderBotOutput(
+                    botText.spoken,
+                    botText.unspoken,
+                    part.aggregatedBy,
+                    customRenderer,
+                    metadata,
+                  );
+                } else {
+                  content = part.text as React.ReactNode;
+                }
+
+                return <Fragment key={partIdx}>{content}</Fragment>;
+              })}
+            </Fragment>
+          );
+        }
       })}
       {isMessageEmpty(message) ? (
         <Thinking className={classNames.thinking} />

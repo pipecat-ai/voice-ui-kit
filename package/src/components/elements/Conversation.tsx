@@ -59,6 +59,13 @@ export interface ConversationProps {
   botOutputRenderers?: React.ComponentProps<
     typeof MessageContainer
   >["botOutputRenderers"];
+  /**
+   * Metadata for aggregation types to control rendering and speech progress behavior
+   * Key is the aggregation type (e.g., "code", "link"), value is metadata configuration
+   */
+  aggregationMetadata?: React.ComponentProps<
+    typeof MessageContainer
+  >["aggregationMetadata"];
 }
 
 /**
@@ -98,6 +105,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
     noTextInput = false,
     systemLabel,
     botOutputRenderers,
+    aggregationMetadata,
   }) => {
     const transportState = usePipecatClientTransportState();
 
@@ -130,7 +138,9 @@ export const Conversation: React.FC<ConversationProps> = memo(
         ) <= Math.ceil(scrollRef.current.clientHeight);
     }, [noAutoscroll]);
 
-    const { messages } = usePipecatConversation();
+    const { messages } = usePipecatConversation({
+      aggregationMetadata,
+    });
     const { botOutputSupported } = useConversationContext();
 
     // Determine connection states based on transport state
@@ -199,6 +209,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
                     role: classNames.role,
                   }}
                   botOutputRenderers={botOutputRenderers}
+                  aggregationMetadata={aggregationMetadata}
                 />
               ))}
             </div>

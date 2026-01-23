@@ -1,4 +1,8 @@
-import { type ConversationMessage } from "@/types/conversation";
+import {
+  type ConversationMessage,
+  type ConversationMessagePart,
+} from "@/types/conversation";
+import type { AggregationMetadata } from "@/types/conversation";
 import { useConversationContext } from "@/components/ConversationProvider";
 import { useEffect, useId, useMemo } from "react";
 import {
@@ -17,6 +21,11 @@ interface Props {
    * This callback will be called with the latest message object.
    */
   onMessageAdded?: (message: ConversationMessage) => void;
+  /**
+   * Metadata for aggregation types to control rendering and speech progress behavior.
+   * Used to determine which aggregations should be excluded from position-based splitting.
+   */
+  aggregationMetadata?: Record<string, AggregationMetadata>;
 }
 
 /**
@@ -37,7 +46,10 @@ interface Props {
  *   injectMessage: (message: { role: "user" | "assistant" | "system"; parts: any[] }) => void;
  * }}
  */
-export const usePipecatConversation = ({ onMessageAdded }: Props = {}) => {
+export const usePipecatConversation = ({
+  onMessageAdded,
+  aggregationMetadata,
+}: Props = {}) => {
   const { injectMessage } = useConversationContext();
   const { registerMessageCallback, unregisterMessageCallback } =
     useConversationStore();
@@ -61,97 +73,137 @@ export const usePipecatConversation = ({ onMessageAdded }: Props = {}) => {
     unregisterMessageCallback,
   ]);
 
-  // Get the raw state from the store using separate selectors
+  // Get the raw state from the store
   const messages = useConversationStore((state) => state.messages);
-  const botOutputSpokenStreams = useConversationStore(
-    (state) => state.botOutputSpokenStreams,
-  );
-  const botOutputUnspokenStreams = useConversationStore(
-    (state) => state.botOutputUnspokenStreams,
-  );
-  const botOutputAggregationTypes = useConversationStore(
-    (state) => state.botOutputAggregationTypes,
-  );
-  const botOutputUnspokenAggregationTypes = useConversationStore(
-    (state) => state.botOutputUnspokenAggregationTypes,
-  );
-  const botOutputSpokenPositions = useConversationStore(
-    (state) => state.botOutputSpokenPositions,
+  const botOutputMessageState = useConversationStore(
+    (state) => state.botOutputMessageState,
   );
 
   // Memoize the filtered messages to prevent infinite loops
   const filteredMessages = useMemo(() => {
-    // First, create messages with the appropriate text streams
-    const messagesWithTextStreams = messages.map((message) => {
+    // Find the last assistant message index (only this one should have active speech progress)
+    const lastAssistantIndex = messages.findLastIndex(
+      (msg) => msg.role === "assistant",
+    );
+
+    // Process messages: convert string parts to BotOutputText based on position state
+    const processedMessages = messages.map((message, messageIndex) => {
       if (message.role === "assistant") {
-        const messageId = message.createdAt; // Use createdAt as unique ID
+        const isLastAssistantMessage = messageIndex === lastAssistantIndex;
+        const messageId = message.createdAt;
+        const messageState = botOutputMessageState.get(messageId);
 
-        // All assistant messages use BotOutput streams
-        const spokenText = botOutputSpokenStreams.get(messageId) || "";
-        const unspokenText = botOutputUnspokenStreams.get(messageId) || "";
-        const aggregatedBy = botOutputAggregationTypes.get(messageId);
-        const unspokenAggregationType =
-          botOutputUnspokenAggregationTypes.get(messageId);
-        const spokenPosition = botOutputSpokenPositions.get(messageId) || 0;
-
-        // Only use position-based splitting for sentence-level unspoken + word/sentence-level spoken
-        // For other aggregation types, custom renderers should be used
-        const isSentenceLevelUnspoken = unspokenAggregationType === "sentence";
-        const isWordOrSentenceSpoken =
-          aggregatedBy === "word" ||
-          aggregatedBy === "sentence" ||
-          !aggregatedBy;
-        const shouldUsePositionSplitting =
-          isSentenceLevelUnspoken && isWordOrSentenceSpoken && unspokenText;
-
-        let finalSpoken = "";
-        let finalUnspoken = "";
-
-        if (shouldUsePositionSplitting) {
-          // Split unspoken text at the spoken position to preserve punctuation
-          // The spoken part comes from the unspoken text (with punctuation), not from word-level events
-          const spokenPart = unspokenText.slice(0, spokenPosition);
-          const unspokenPart = unspokenText.slice(spokenPosition);
-          finalSpoken = spokenPart;
-          finalUnspoken = unspokenPart;
-        } else {
-          // For other cases, use the streams directly (custom renderers handle these)
-          finalSpoken = spokenText;
-          finalUnspoken = unspokenText;
+        if (!messageState) {
+          // No state yet, return message as-is
+          return message;
         }
+
+        const { currentPartIndex, currentCharIndex } = messageState;
+        const parts = message.parts || [];
+
+        // Find the actual current part index, skipping parts that aren't meant to be spoken
+        let actualCurrentPartIndex = currentPartIndex;
+        for (let i = 0; i <= currentPartIndex && i < parts.length; i++) {
+          const part = parts[i];
+          if (typeof part.text === "string") {
+            const metadata = part.aggregatedBy
+              ? aggregationMetadata?.[part.aggregatedBy]
+              : undefined;
+            const isSpoken = metadata?.isSpoken !== false;
+            if (!isSpoken) {
+              // This part isn't meant to be spoken, adjust current index
+              if (i === actualCurrentPartIndex) {
+                actualCurrentPartIndex = Math.min(
+                  actualCurrentPartIndex + 1,
+                  parts.length - 1,
+                );
+              }
+            }
+          }
+        }
+
+        // Convert parts to BotOutputText format based on position state
+        const processedParts: ConversationMessagePart[] = parts.map(
+          (part, partIndex) => {
+            // If part text is not a string, it's already processed (e.g., ReactNode)
+            if (typeof part.text !== "string") {
+              return part;
+            }
+
+            const partText = part.text;
+            const metadata = part.aggregatedBy
+              ? aggregationMetadata?.[part.aggregatedBy]
+              : undefined;
+            const isSpoken = metadata?.isSpoken !== false;
+            // Set displayMode on the part (default to "inline" for sentence-level)
+            const displayMode =
+              part.displayMode ?? metadata?.displayMode ?? "inline";
+
+            // If part is not meant to be spoken, render as fully unspoken
+            if (!isSpoken) {
+              return {
+                ...part,
+                displayMode,
+                text: {
+                  spoken: "",
+                  unspoken: partText,
+                },
+              };
+            }
+
+            // Determine if this is the current part being spoken
+            const isCurrentPart =
+              isLastAssistantMessage && partIndex === actualCurrentPartIndex;
+
+            if (isCurrentPart) {
+              // Current part: split at currentCharIndex
+              const spoken = partText.slice(0, currentCharIndex);
+              const unspoken = partText.slice(currentCharIndex);
+              return {
+                ...part,
+                displayMode,
+                text: {
+                  spoken,
+                  unspoken,
+                },
+              };
+            } else if (partIndex < actualCurrentPartIndex) {
+              // Previous parts: fully spoken
+              return {
+                ...part,
+                displayMode,
+                text: {
+                  spoken: partText,
+                  unspoken: "",
+                },
+              };
+            } else {
+              // Subsequent parts: fully unspoken
+              return {
+                ...part,
+                displayMode,
+                text: {
+                  spoken: "",
+                  unspoken: partText,
+                },
+              };
+            }
+          },
+        );
 
         return {
           ...message,
-          parts: [
-            {
-              text: {
-                spoken: finalSpoken,
-                unspoken: finalUnspoken,
-              },
-              final: message.final || false,
-              createdAt: message.createdAt,
-              aggregatedBy,
-            },
-          ],
+          parts: processedParts,
         };
       }
       return message;
     });
 
     // Then process the messages normally
-    const processedMessages = mergeMessages(
-      filterEmptyMessages(messagesWithTextStreams.sort(sortByCreatedAt)),
+    return mergeMessages(
+      filterEmptyMessages(processedMessages.sort(sortByCreatedAt)),
     );
-
-    return processedMessages;
-  }, [
-    messages,
-    botOutputSpokenStreams,
-    botOutputUnspokenStreams,
-    botOutputAggregationTypes,
-    botOutputUnspokenAggregationTypes,
-    botOutputSpokenPositions,
-  ]);
+  }, [messages, botOutputMessageState, aggregationMetadata]);
 
   return {
     messages: filteredMessages,

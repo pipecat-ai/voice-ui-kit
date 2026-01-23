@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ConversationMessage } from "@/types/conversation";
+import type { AggregationMetadata } from "@/types/conversation";
 import { MessageRole } from "./MessageRole";
 import { MessageContent } from "./MessageContent";
 
@@ -54,6 +55,10 @@ interface Props {
   botOutputRenderers?: React.ComponentProps<
     typeof MessageContent
   >["botOutputRenderers"];
+  /**
+   * Metadata for aggregation types to control rendering and speech progress behavior
+   */
+  aggregationMetadata?: Record<string, AggregationMetadata>;
 }
 
 export const MessageContainer = ({
@@ -63,6 +68,7 @@ export const MessageContainer = ({
   classNames = {},
   message,
   botOutputRenderers,
+  aggregationMetadata,
 }: Props) => {
   return (
     <div className={cn("flex flex-col gap-2", classNames.container)}>
@@ -81,6 +87,7 @@ export const MessageContainer = ({
         }}
         message={message}
         botOutputRenderers={botOutputRenderers}
+        aggregationMetadata={aggregationMetadata}
       />
     </div>
   );

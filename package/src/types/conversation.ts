@@ -8,6 +8,25 @@ export interface BotOutputText {
   unspoken: string;
 }
 
+/**
+ * Metadata for aggregation types to control rendering and speech progress behavior
+ */
+export interface AggregationMetadata {
+  /**
+   * Whether the content of this aggregation type is expected to be spoken.
+   * If false, it will be skipped from karaoke-style highlighting and position-based splitting.
+   * @default true
+   */
+  isSpoken?: boolean;
+  /**
+   * How the aggregation should be rendered.
+   * - 'inline': Rendered inline with surrounding text
+   * - 'block': Rendered as a block element (e.g., code blocks)
+   * @default 'inline'
+   */
+  displayMode?: "inline" | "block";
+}
+
 export interface ConversationMessagePart {
   /**
    * Text content for the message part.
@@ -22,6 +41,13 @@ export interface ConversationMessagePart {
    * Used to determine which custom renderer to use, if any
    */
   aggregatedBy?: string;
+  /**
+   * Display mode for BotOutput content.
+   * - "inline": Rendered inline with surrounding text (default for sentence-level)
+   * - "block": Rendered as a block element (e.g., code blocks)
+   * @default "inline"
+   */
+  displayMode?: "inline" | "block";
 }
 
 export interface ConversationMessage {
