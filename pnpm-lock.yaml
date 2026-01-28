@@ -416,8 +416,8 @@ importers:
         version: 5.0.8(@types/react@19.1.16)(react@19.2.1)
     devDependencies:
       '@daily-co/daily-js':
-        specifier: ^0.80.0
-        version: 0.80.0
+        specifier: ^0.86.0
+        version: 0.86.0
       '@eslint/js':
         specifier: ^9.36.0
         version: 9.36.0
@@ -425,17 +425,17 @@ importers:
         specifier: ^5.0.3
         version: 5.0.3(@types/node@22.18.8)(@types/react@19.1.16)(jiti@2.6.0)(lightningcss@1.30.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(tsx@4.20.5)(typescript@5.8.3)
       '@pipecat-ai/client-js':
-        specifier: ^1.4.0
-        version: 1.4.0
+        specifier: ^1.5.0
+        version: 1.5.0
       '@pipecat-ai/client-react':
         specifier: ^1.1.0
-        version: 1.1.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.4.0)(@types/react@19.1.16)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        version: 1.1.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.5.0)(@types/react@19.1.16)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@pipecat-ai/daily-transport':
-        specifier: ^1.4.0
-        version: 1.4.0(@pipecat-ai/client-js@1.4.0)
-      '@pipecat-ai/small-webrtc-transport':
         specifier: ^1.5.0
-        version: 1.5.0(@pipecat-ai/client-js@1.4.0)
+        version: 1.5.0(@pipecat-ai/client-js@1.5.0)
+      '@pipecat-ai/small-webrtc-transport':
+        specifier: ^1.8.1
+        version: 1.8.1(@pipecat-ai/client-js@1.5.0)
       '@tailwindcss/vite':
         specifier: ^4.1.13
         version: 4.1.13(vite@7.1.7(@types/node@22.18.8)(jiti@2.6.0)(lightningcss@1.30.1)(tsx@4.20.5))
@@ -638,12 +638,12 @@ packages:
       react: ^16.8.0 || ^17 || ^18 || ^19
       react-dom: ^16.8.0 || ^17 || ^18 || ^19
 
-  '@daily-co/daily-js@0.80.0':
-    resolution: {integrity: sha512-zG2NBbKbHfm56P0lg4ddC94vBtn5AQKcgvbYrO5+ohNWPSolMqlJiYxQC9uhOHfFYRhH4ELKQ6NHqGatX9VD7A==}
-    engines: {node: '>=10.0.0'}
-
   '@daily-co/daily-js@0.83.1':
     resolution: {integrity: sha512-KXA3zrSnNPZONwhip4TI6ayD3huumI1QBD/xPAjFArvHuFFB7t0QTOS2oxH1bXvdOBJ6XnY08vdlJslTVi2/2w==}
+    engines: {node: '>=10.0.0'}
+
+  '@daily-co/daily-js@0.84.0':
+    resolution: {integrity: sha512-/ynXrMDDkRXhLlHxiFNf9QU5yw4ZGPr56wNARgja/Tiid71UIniundTavCNF5cMb2I1vNoMh7oEJ/q8stg/V7g==}
     engines: {node: '>=10.0.0'}
 
   '@daily-co/daily-js@0.86.0':
@@ -1634,9 +1634,6 @@ packages:
     resolution: {integrity: sha512-Szki0cgFiXE5F9RLx2lUyEtJllnuCSQ4B8RLDwIjXkVit6qZjoDAxH+xhJs29MjKLDz0tbPLdKFa6QrQ/qoGGA==}
     engines: {node: '>= 20.0.0'}
 
-  '@pipecat-ai/client-js@1.4.0':
-    resolution: {integrity: sha512-HOWz4OWXbIetkywwrfVuEiEpU8FVFksmyP/rSWHSQGu/V2MJflAXfFt2tQmtu8RiQCA7C1qurfZGsxeccYmJXw==}
-
   '@pipecat-ai/client-js@1.5.0':
     resolution: {integrity: sha512-WE8n5P98XoOyEX+k6DkcxBFaeoP82rDl3BEm4Zxf8tw1Umw5zFsv73qR6ztU4D5WDbYiscA3J+hGfe+g8PSUIw==}
 
@@ -1647,15 +1644,20 @@ packages:
       react: '>=18'
       react-dom: '>=18'
 
-  '@pipecat-ai/daily-transport@1.4.0':
-    resolution: {integrity: sha512-zGfrpOAjyE7oSgcYhFp70Ut6flRgBdpzgAPbSsdLgHjWDD9zHPG4OkSrQg+/y5YabWX623ulD/321EKgKZamPg==}
+  '@pipecat-ai/daily-transport@1.5.0':
+    resolution: {integrity: sha512-dVe8XQjBxsQBWR3/567ClJYoEMIMN2+8gcdkbTGoK2EfQqnKIAxmIQo/o3hXzBrZe/PNzvoMOap7o7w2OnPQXQ==}
     peerDependencies:
-      '@pipecat-ai/client-js': ~1.4.0
+      '@pipecat-ai/client-js': ~1.5.0
 
   '@pipecat-ai/small-webrtc-transport@1.5.0':
     resolution: {integrity: sha512-kGebGYD60U9A7wKskw9pRw3XZUZ+tepumqc5ObaST8tzM1O+oroDOriPxEtMaOVEglAyOg+7gXYUBDexK2Rp3Q==}
     peerDependencies:
       '@pipecat-ai/client-js': ~1.4.0
+
+  '@pipecat-ai/small-webrtc-transport@1.8.1':
+    resolution: {integrity: sha512-gK9l+OeHZ5/K5a0I+bO1b8dYrGnvQaOzexvDKENHR7jzOMcJP/KmQU885uD6RzNklr/qSOfNCFcacAJgc/Ttrg==}
+    peerDependencies:
+      '@pipecat-ai/client-js': ~1.5.0
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -6460,7 +6462,7 @@ snapshots:
       react-dom: 19.2.1(react@19.2.1)
       react-is: 17.0.2
 
-  '@daily-co/daily-js@0.80.0':
+  '@daily-co/daily-js@0.83.1':
     dependencies:
       '@babel/runtime': 7.28.4
       '@sentry/browser': 8.55.0
@@ -6468,7 +6470,7 @@ snapshots:
       dequal: 2.0.3
       events: 3.3.0
 
-  '@daily-co/daily-js@0.83.1':
+  '@daily-co/daily-js@0.84.0':
     dependencies:
       '@babel/runtime': 7.28.4
       '@sentry/browser': 8.55.0
@@ -7249,15 +7251,6 @@ snapshots:
 
   '@orama/orama@3.1.11': {}
 
-  '@pipecat-ai/client-js@1.4.0':
-    dependencies:
-      '@types/events': 3.0.3
-      bowser: 2.12.1
-      clone-deep: 4.0.1
-      events: 3.3.0
-      typed-emitter: 2.1.0
-      uuid: 10.0.0
-
   '@pipecat-ai/client-js@1.5.0':
     dependencies:
       '@types/events': 3.0.3
@@ -7266,17 +7259,6 @@ snapshots:
       events: 3.3.0
       typed-emitter: 2.1.0
       uuid: 10.0.0
-
-  '@pipecat-ai/client-react@1.1.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.4.0)(@types/react@19.1.16)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
-    dependencies:
-      '@pipecat-ai/client-js': 1.4.0
-      jotai: 2.15.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@types/react@19.1.16)(react@19.2.1)
-      react: 19.2.1
-      react-dom: 19.2.1(react@19.2.1)
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@babel/template'
-      - '@types/react'
 
   '@pipecat-ai/client-react@1.1.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.5.0)(@types/react@19.1.16)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
@@ -7289,19 +7271,19 @@ snapshots:
       - '@babel/template'
       - '@types/react'
 
-  '@pipecat-ai/daily-transport@1.4.0(@pipecat-ai/client-js@1.4.0)':
+  '@pipecat-ai/daily-transport@1.5.0(@pipecat-ai/client-js@1.5.0)':
     dependencies:
-      '@daily-co/daily-js': 0.83.1
-      '@pipecat-ai/client-js': 1.4.0
+      '@daily-co/daily-js': 0.84.0
+      '@pipecat-ai/client-js': 1.5.0
 
-  '@pipecat-ai/small-webrtc-transport@1.5.0(@pipecat-ai/client-js@1.4.0)':
+  '@pipecat-ai/small-webrtc-transport@1.5.0(@pipecat-ai/client-js@1.5.0)':
     dependencies:
       '@daily-co/daily-js': 0.83.1
-      '@pipecat-ai/client-js': 1.4.0
+      '@pipecat-ai/client-js': 1.5.0
       dequal: 2.0.3
       lodash: 4.17.21
 
-  '@pipecat-ai/small-webrtc-transport@1.5.0(@pipecat-ai/client-js@1.5.0)':
+  '@pipecat-ai/small-webrtc-transport@1.8.1(@pipecat-ai/client-js@1.5.0)':
     dependencies:
       '@daily-co/daily-js': 0.83.1
       '@pipecat-ai/client-js': 1.5.0
