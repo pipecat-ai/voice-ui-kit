@@ -82,6 +82,43 @@ const renderBotOutput = (
   );
 };
 
+function isBotOutputText(
+  part: ConversationMessagePart,
+): part is ConversationMessagePart & { text: BotOutputText } {
+  const text = part.text;
+  return (
+    text !== null &&
+    typeof text === "object" &&
+    "spoken" in text &&
+    "unspoken" in text
+  );
+}
+
+const renderPartContent = (
+  part: ConversationMessagePart,
+  botOutputRenderers?: Record<string, CustomBotOutputRenderer>,
+  aggregationMetadata?: Record<string, AggregationMetadata>,
+): React.ReactNode => {
+  if (!part.text) return null;
+  if (isBotOutputText(part)) {
+    const text = part.text as BotOutputText;
+    const customRenderer = part.aggregatedBy
+      ? botOutputRenderers?.[part.aggregatedBy]
+      : undefined;
+    const metadata = part.aggregatedBy
+      ? aggregationMetadata?.[part.aggregatedBy]
+      : undefined;
+    return renderBotOutput(
+      text.spoken,
+      text.unspoken,
+      part.aggregatedBy,
+      customRenderer,
+      metadata,
+    );
+  }
+  return part.text as React.ReactNode;
+};
+
 export const MessageContent = ({
   botOutputRenderers,
   aggregationMetadata,
@@ -131,35 +168,12 @@ export const MessageContent = ({
           return (
             <div key={groupIdx} className="inline-block">
               {group.parts.map((part, partIdx) => {
-                const isBotOutputTextValue = Boolean(
-                  part.text &&
-                    typeof part.text === "object" &&
-                    "spoken" in part.text &&
-                    "unspoken" in part.text,
+                const content = renderPartContent(
+                  part,
+                  botOutputRenderers,
+                  aggregationMetadata,
                 );
-
-                const metadata = part.aggregatedBy
-                  ? aggregationMetadata?.[part.aggregatedBy]
-                  : undefined;
-
-                let content: React.ReactNode;
-                if (isBotOutputTextValue) {
-                  const botText = part.text as BotOutputText;
-                  const customRenderer = part.aggregatedBy
-                    ? botOutputRenderers?.[part.aggregatedBy]
-                    : undefined;
-                  content = renderBotOutput(
-                    botText.spoken,
-                    botText.unspoken,
-                    part.aggregatedBy,
-                    customRenderer,
-                    metadata,
-                  );
-                } else {
-                  content = part.text as React.ReactNode;
-                }
-
-                const shouldAddSpace = partIdx > 0 && !isBotOutputTextValue;
+                const shouldAddSpace = partIdx > 0 && !isBotOutputText(part);
 
                 return (
                   <Fragment key={partIdx}>
@@ -174,37 +188,15 @@ export const MessageContent = ({
           // Render block parts separately (each on its own line)
           return (
             <Fragment key={groupIdx}>
-              {group.parts.map((part, partIdx) => {
-                const isBotOutputTextValue = Boolean(
-                  part.text &&
-                    typeof part.text === "object" &&
-                    "spoken" in part.text &&
-                    "unspoken" in part.text,
-                );
-
-                const metadata = part.aggregatedBy
-                  ? aggregationMetadata?.[part.aggregatedBy]
-                  : undefined;
-
-                let content: React.ReactNode;
-                if (isBotOutputTextValue) {
-                  const botText = part.text as BotOutputText;
-                  const customRenderer = part.aggregatedBy
-                    ? botOutputRenderers?.[part.aggregatedBy]
-                    : undefined;
-                  content = renderBotOutput(
-                    botText.spoken,
-                    botText.unspoken,
-                    part.aggregatedBy,
-                    customRenderer,
-                    metadata,
-                  );
-                } else {
-                  content = part.text as React.ReactNode;
-                }
-
-                return <Fragment key={partIdx}>{content}</Fragment>;
-              })}
+              {group.parts.map((part, partIdx) => (
+                <Fragment key={partIdx}>
+                  {renderPartContent(
+                    part,
+                    botOutputRenderers,
+                    aggregationMetadata,
+                  )}
+                </Fragment>
+              ))}
             </Fragment>
           );
         }

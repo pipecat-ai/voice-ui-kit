@@ -1,8 +1,8 @@
-import {
-  type ConversationMessage,
-  type ConversationMessagePart,
+import type {
+  AggregationMetadata,
+  ConversationMessage,
+  ConversationMessagePart,
 } from "@/types/conversation";
-import type { AggregationMetadata } from "@/types/conversation";
 import { useConversationContext } from "@/components/ConversationProvider";
 import { useEffect, useId, useMemo } from "react";
 import {

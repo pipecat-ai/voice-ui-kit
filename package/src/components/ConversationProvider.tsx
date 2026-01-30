@@ -43,6 +43,10 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   );
   const userStoppedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const assistantStreamResetRef = useRef<number>(0);
+  const botOutputLastChunkRef = useRef<{ spoken: string; unspoken: string }>({
+    spoken: "",
+    unspoken: "",
+  });
 
   useRTVIClientEvent(RTVIEvent.Connected, () => {
     clearMessages();
@@ -78,12 +82,6 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     const rtviVersion = botData.version;
     const supportsBotOutput = isMinVersion(rtviVersion, [1, 1, 0]);
     setBotOutputSupported(supportsBotOutput);
-  });
-
-  // Track last chunk text per type for spacing detection in BotOutput mode
-  const botOutputLastChunkRef = useRef<{ spoken: string; unspoken: string }>({
-    spoken: "",
-    unspoken: "",
   });
 
   useRTVIClientEvent(RTVIEvent.BotOutput, (data: BotOutputData) => {
