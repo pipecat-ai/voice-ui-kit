@@ -471,8 +471,40 @@ export const useConversationStore = create<ConversationState>()((set) => ({
           parts,
         };
       } else {
-        // SPOKEN EVENT: advance cursor into existing text
-        applySpokenBotOutputProgress(messageState, parts, text);
+        // SPOKEN EVENT: advance cursor into existing text, or add as new part if
+        // there is none (bots that only send spoken: true, never unspoken).
+        const advanced =
+          parts.length > 0 &&
+          applySpokenBotOutputProgress(messageState, parts, text);
+
+        if (!advanced) {
+          // No unspoken content to advance: add this text as a part already fully spoken
+          const isDefaultType =
+            aggregatedBy === "sentence" ||
+            aggregatedBy === "word" ||
+            !aggregatedBy;
+          const defaultDisplayMode = isDefaultType ? "inline" : undefined;
+          const newPart: ConversationMessagePart = {
+            text,
+            final: false,
+            createdAt: now.toISOString(),
+            aggregatedBy,
+            displayMode: defaultDisplayMode,
+          };
+          parts.push(newPart);
+          messageState.partFinalFlags.push(true);
+          messageState.currentPartIndex = parts.length - 1;
+          messageState.currentCharIndex = text.length;
+
+          messages[
+            lastAssistantIndex === -1
+              ? messages.length - 1
+              : lastAssistantIndex
+          ] = {
+            ...message,
+            parts,
+          };
+        }
       }
 
       const processedMessages = mergeMessages(messages.sort(sortByCreatedAt));

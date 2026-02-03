@@ -108,19 +108,24 @@ const findSpokenPositionInUnspoken = (
   return unspoken.length;
 };
 
+/**
+ * Advances the cursor for spoken text. Returns true if the cursor was advanced
+ * (text was consumed), false if there was nothing to advance (e.g. no parts).
+ * Used to detect "spoken-only" bots that never send unspoken events.
+ */
 export function applySpokenBotOutputProgress(
   cursor: BotOutputMessageCursor,
   parts: ConversationMessagePart[],
   spokenText: string,
-): void {
-  if (parts.length === 0) return;
+): boolean {
+  if (parts.length === 0) return false;
 
   // Find the next part that should be spoken (skip parts already marked final/skipped)
   let partToMatch = cursor.currentPartIndex;
   while (partToMatch < parts.length && cursor.partFinalFlags[partToMatch]) {
     partToMatch++;
   }
-  if (partToMatch >= parts.length) return;
+  if (partToMatch >= parts.length) return false;
 
   if (partToMatch > cursor.currentPartIndex) {
     cursor.currentPartIndex = partToMatch;
@@ -128,7 +133,7 @@ export function applySpokenBotOutputProgress(
   }
 
   const currentPart = parts[cursor.currentPartIndex];
-  if (typeof currentPart.text !== "string") return;
+  if (typeof currentPart.text !== "string") return false;
 
   const partText = currentPart.text;
   const startChar = cursor.currentCharIndex;
@@ -150,7 +155,7 @@ export function applySpokenBotOutputProgress(
         cursor.currentCharIndex = 0;
       }
     }
-    return;
+    return true;
   }
 
   // Mismatch recovery: try to find the spoken text in a later part.
@@ -171,7 +176,7 @@ export function applySpokenBotOutputProgress(
       }
       cursor.currentPartIndex = nextPartIdx;
       cursor.currentCharIndex = match;
-      return;
+      return true;
     }
   }
 
@@ -180,5 +185,8 @@ export function applySpokenBotOutputProgress(
     cursor.partFinalFlags[cursor.currentPartIndex] = true;
     cursor.currentPartIndex++;
     cursor.currentCharIndex = 0;
+    return true;
   }
+
+  return false;
 }
