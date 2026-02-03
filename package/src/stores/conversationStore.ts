@@ -422,21 +422,21 @@ export const useConversationStore = create<ConversationState>()((set) => ({
 
       if (!spoken) {
         // UNSPOKEN EVENT: Create/update message parts immediately
-        // Determine if this should be a new part or appended to last part
-        // Default types: "word" and "sentence" - sentence should be separate parts
-        // Custom types (anything else) need metadata to determine behavior
-        const isSentence = aggregatedBy === "sentence";
+        // Only append when both current and last part are word-level; sentence-level
+        // and other types each get their own part so spoken events can match 1:1.
         const isDefaultType =
-          isSentence || aggregatedBy === "word" || !aggregatedBy;
+          aggregatedBy === "sentence" ||
+          aggregatedBy === "word" ||
+          !aggregatedBy;
         const lastPart = parts[parts.length - 1];
         const shouldAppend =
           lastPart &&
-          lastPart.aggregatedBy === aggregatedBy &&
-          !isSentence &&
+          aggregatedBy === "word" &&
+          lastPart.aggregatedBy === "word" &&
           typeof lastPart.text === "string";
 
         if (shouldAppend) {
-          // Append to last part (for word-level chunks)
+          // Append to last part (word-level only)
           const lastPartText = lastPart.text as string;
           const separator =
             lastPartText && !lastPartText.endsWith(" ") && !text.startsWith(" ")
@@ -447,9 +447,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
             text: lastPartText + separator + text,
           };
         } else {
-          // Create new part
-          // Set displayMode only for default types (word/sentence are inline)
-          // Custom types will get displayMode from metadata in the hook
+          // Create new part (sentence-level, custom types, or first word chunk)
+          // Default to inline; custom types get displayMode from metadata in the hook
           const defaultDisplayMode = isDefaultType ? "inline" : undefined;
           const newPart: ConversationMessagePart = {
             text: text, // Store full text as string

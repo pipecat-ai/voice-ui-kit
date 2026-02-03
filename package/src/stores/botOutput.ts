@@ -45,6 +45,16 @@ const findSpokenPositionInUnspoken = (
     actualStart = skipWhitespace(unspoken, 0);
   }
 
+  const remainder = unspoken.slice(actualStart);
+  // Sentence-level: if spoken exactly matches the remainder (normalized), consume the whole part
+  // so we never leave a word unspoken due to word-matching edge cases.
+  if (
+    normalizeForMatching(spokenForMatching).trim() ===
+    normalizeForMatching(remainder).trim()
+  ) {
+    return unspoken.length;
+  }
+
   const spokenWords = normalizeForMatching(spokenForMatching)
     .split(/\s+/)
     .filter(Boolean);
