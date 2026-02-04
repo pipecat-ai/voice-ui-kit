@@ -50,6 +50,18 @@ The MessageContent component displays message content with thinking indicator an
       type: "ConversationMessage",
       required: true,
     },
+    botOutputRenderers: {
+      description: "Custom renderers for BotOutput content based on aggregation type. Key is the aggregation type (e.g., 'code', 'link'), value is a renderer function that receives the content and metadata.",
+      type: "Record<string, (content: string, metadata: { spoken: string; unspoken: string }) => React.ReactNode>",
+      required: false,
+      default: "undefined",
+    },
+    aggregationMetadata: {
+      description: "Metadata for custom aggregation types. Controls whether a type should render inline vs block and whether it is expected to be spoken (karaoke-style highlighting).",
+      type: "Record<string, { displayMode?: 'inline' | 'block'; isSpoken?: boolean }>",
+      required: false,
+      default: "undefined",
+    },
     classNames: {
       description: "Custom CSS classes for different parts of the component",
       type: "{ messageContent?: string; thinking?: string; time?: string; }",
@@ -144,21 +156,72 @@ Apply custom classes to different parts of the content.
 `}
 </LiveComponent>
 
+#### BotOutput with Custom Renderers
+
+Use custom renderers for BotOutput content based on aggregation type. The component automatically detects `BotOutputText` objects and uses the appropriate renderer based on the `aggregatedBy` field.
+
+```tsx
+import { MessageContent } from "@pipecat-ai/voice-ui-kit";
+
+<MessageContent
+  message={{
+    role: "assistant",
+    parts: [{
+      text: { spoken: "Here's some code:", unspoken: "print('Hello')" },
+      final: false,
+      createdAt: new Date().toISOString(),
+      aggregatedBy: "code"
+    }],
+    createdAt: new Date().toISOString()
+  }}
+  aggregationMetadata={{
+    // Custom types are arbitrary: configure them in your app
+    code: { displayMode: "block", isSpoken: false },
+  }}
+  botOutputRenderers={{
+    code: (content, { spoken, unspoken }) => (
+      <div>
+        <span>{spoken}</span>
+        <pre className="bg-gray-100 p-2 rounded mt-1">{unspoken}</pre>
+      </div>
+    ),
+    link: (content, { spoken, unspoken }) => (
+      <a href={unspoken} className="text-blue-500 underline">
+        {spoken || unspoken}
+      </a>
+    )
+  }}
+/>
+```
+
+When a custom renderer is provided for the `aggregatedBy` type, it receives:
+- `content`: The full content string (spoken + unspoken)
+- `metadata.spoken`: The spoken portion of the text
+- `metadata.unspoken`: The unspoken portion of the text
+
+If no custom renderer is provided, the component defaults to showing spoken text normally and unspoken text in a muted color.
+
 ---
 
 ## Behavior
 
 The component:
 1. Renders all text parts from `message.parts` array
-2. Adds a space between consecutive text parts
+2. Groups parts by display mode: inline parts render together, block parts render on their own line
 3. Shows a `Thinking` component if the message has no parts or all parts are empty whitespace
 4. Displays a formatted timestamp using `toLocaleTimeString()`
 
 ## Message Parts
 
-Each message part should have a `text` property containing a string. The component:
+Each message part can have a `text` property containing either:
+- A string or ReactNode for regular text content
+- A `BotOutputText` object with `spoken` and `unspoken` properties for assistant messages with BotOutput mode
+
+The component:
 - Renders text parts sequentially
 - Adds spaces between consecutive text parts
+- Handles BotOutput text by showing spoken text normally and unspoken text in muted color
+- Supports custom renderers for BotOutput content based on `aggregatedBy` type
 - Handles empty or whitespace-only parts by showing thinking indicator
 
 ## Integration

@@ -9,8 +9,8 @@
     "examples/*"
   ],
   "dependencies": {
-    "@daily-co/daily-js": "^0.84.0",
-    "@pipecat-ai/client-js": "^1.4.0",
+    "@daily-co/daily-js": "^0.85.0",
+    "@pipecat-ai/client-js": "^1.5.0",
     "@pipecat-ai/client-react": "^1.1.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",

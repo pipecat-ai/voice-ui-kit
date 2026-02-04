@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ConversationMessage } from "@/types/conversation";
+import type { AggregationMetadata } from "@/types/conversation";
 import { MessageRole } from "./MessageRole";
 import { MessageContent } from "./MessageContent";
 
@@ -48,6 +49,16 @@ interface Props {
    * The message to display
    */
   message: ConversationMessage;
+  /**
+   * Custom renderers for BotOutput content based on aggregation type
+   */
+  botOutputRenderers?: React.ComponentProps<
+    typeof MessageContent
+  >["botOutputRenderers"];
+  /**
+   * Metadata for aggregation types to control rendering and speech progress behavior
+   */
+  aggregationMetadata?: Record<string, AggregationMetadata>;
 }
 
 export const MessageContainer = ({
@@ -56,6 +67,8 @@ export const MessageContainer = ({
   systemLabel,
   classNames = {},
   message,
+  botOutputRenderers,
+  aggregationMetadata,
 }: Props) => {
   return (
     <div className={cn("flex flex-col gap-2", classNames.container)}>
@@ -73,6 +86,8 @@ export const MessageContainer = ({
           time: classNames.time,
         }}
         message={message}
+        botOutputRenderers={botOutputRenderers}
+        aggregationMetadata={aggregationMetadata}
       />
     </div>
   );

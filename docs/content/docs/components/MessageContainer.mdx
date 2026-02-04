@@ -68,6 +68,18 @@ The MessageContainer component displays a single message with its role and conte
       required: false,
       default: '"system"',
     },
+    botOutputRenderers: {
+      description: "Custom renderers for BotOutput content based on aggregation type. Passed through to MessageContent component.",
+      type: "Record<string, (content: string, metadata: { spoken: string; unspoken: string }) => React.ReactNode>",
+      required: false,
+      default: "undefined",
+    },
+    aggregationMetadata: {
+      description: "Metadata for custom aggregation types (controls block vs inline rendering, and whether the content is expected to be spoken for karaoke-style highlighting). Passed through to MessageContent.",
+      type: "Record<string, { displayMode?: 'inline' | 'block'; isSpoken?: boolean }>",
+      required: false,
+      default: "undefined",
+    },
     classNames: {
       description: "Custom CSS classes for different parts of the component",
       type: "{ container?: string; messageContent?: string; role?: string; thinking?: string; time?: string; }",
@@ -171,8 +183,14 @@ Messages can contain multiple parts (text chunks).
 
 The component expects a `ConversationMessage` object with:
 - `role`: "user" | "assistant" | "system"
-- `parts`: Array of `ConversationMessagePart` objects, each with a `text` property
+- `parts`: Array of `ConversationMessagePart` objects, each with:
+  - `text`: A string, ReactNode, or `BotOutputText` object (with `spoken` and `unspoken` properties)
+  - `final`: Boolean indicating if the part is finalized
+  - `createdAt`: ISO timestamp string
+  - `aggregatedBy`: Optional aggregation type for BotOutput content
 - `createdAt`: ISO timestamp string
+
+If you use custom `aggregatedBy` values (anything other than the defaults `"word"` and `"sentence"`), pass `aggregationMetadata` so the UI knows whether those parts should render inline vs block and whether they should be included in karaoke-style speech progress.
 
 ## Integration
 

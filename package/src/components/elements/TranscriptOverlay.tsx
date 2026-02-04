@@ -1,11 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { type BotTTSTextData, RTVIEvent } from "@pipecat-ai/client-js";
+import { BotOutputData, BotReadyData, RTVIEvent } from "@pipecat-ai/client-js";
 import {
   usePipecatClientTransportState,
   useRTVIClientEvent,
 } from "@pipecat-ai/client-react";
+import { isMinVersion } from "@/utils/version";
 import { cva } from "class-variance-authority";
 import { useCallback, useState } from "react";
 
@@ -181,39 +182,35 @@ export const TranscriptOverlay = ({
 }: TranscriptOverlayProps) => {
   const [transcript, setTranscript] = useState<string[]>([]);
   const [turnEnd, setIsTurnEnd] = useState(false);
+  const [botOutputSupported, setBotOutputSupported] = useState(false);
   const transportState = usePipecatClientTransportState();
 
-  useRTVIClientEvent(
-    RTVIEvent.BotTtsText,
-    useCallback(
-      (event: BotTTSTextData) => {
-        if (participant === "local") {
-          return;
-        }
+  // Detect BotOutput support from BotReady event
+  useRTVIClientEvent(RTVIEvent.BotReady, (botData: BotReadyData) => {
+    const rtviVersion = botData.version;
+    const supportsBotOutput = isMinVersion(rtviVersion, [1, 1, 0]);
+    setBotOutputSupported(supportsBotOutput);
+  });
 
-        if (turnEnd) {
-          setTranscript([]);
-          setIsTurnEnd(false);
-        }
+  // Handle BotOutput events (when supported) - only word-level spoken chunks
+  useRTVIClientEvent(RTVIEvent.BotOutput, (data: BotOutputData) => {
+    if (participant === "local" || !botOutputSupported) {
+      return;
+    }
 
-        setTranscript((prev) => [...prev, event.text]);
-      },
-      [turnEnd, participant],
-    ),
-  );
+    // Only process spoken outputs
+    if (data.spoken === true && data.text) {
+      if (turnEnd) {
+        setTranscript([]);
+        setIsTurnEnd(false);
+      }
+
+      setTranscript((prev) => [...prev, data.text]);
+    }
+  });
 
   useRTVIClientEvent(
     RTVIEvent.BotStoppedSpeaking,
-    useCallback(() => {
-      if (participant === "local") {
-        return;
-      }
-      setIsTurnEnd(true);
-    }, [participant]),
-  );
-
-  useRTVIClientEvent(
-    RTVIEvent.BotTtsStopped,
     useCallback(() => {
       if (participant === "local") {
         return;

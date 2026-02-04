@@ -38,19 +38,21 @@ The SessionInfo component displays session-related information in a structured f
       default: "false",
     },
     noRTVIVersion: {
-      description: "Hide the RTVI version display",
+      description: "Hide both RTVI Client and RTVI Server version displays",
       type: "boolean",
       required: false,
       default: "false",
     },
     sessionId: {
-      description: "Override the session ID to display (instead of fetching from client)",
+      description:
+        "Override the session ID to display (instead of fetching from client)",
       type: "string",
       required: false,
       default: "undefined",
     },
     participantId: {
-      description: "Override the participant ID to display (instead of fetching from client)",
+      description:
+        "Override the participant ID to display (instead of fetching from client)",
       type: "string",
       required: false,
       default: "undefined",
@@ -84,6 +86,7 @@ Hide fields you don't need or override IDs with custom values.
 ## Transport Types
 
 The component automatically detects and displays:
+
 - **Daily**: Shows "Daily (v[version])" when using Daily transport, where [version] is the Daily.js version number
 - **Small WebRTC**: Shows "Small WebRTC" when using Small WebRTC transport
 - **Unknown**: Shows "Unknown" if transport type cannot be determined
@@ -92,13 +95,21 @@ The component automatically detects and displays:
 
 Session ID and Participant ID fields use the `CopyText` component, allowing users to easily copy these values to their clipboard.
 
+## Version Information
+
+The component displays two separate RTVI version fields:
+
+- **RTVI Client**: The version of the RTVI client SDK being used (from `client.version`)
+- **RTVI Server**: The version of the RTVI server (from `BotReady` event)
+
 ## Integration
 
 The `SessionInfo` component uses:
+
 - `usePipecatClient` hook to access the Pipecat client instance
+- `useRTVIClientEvent` to listen for `BotReady` and `Disconnected` events
 - `DataList` component to display the information
 - `CopyText` component for copyable IDs
 - `TextDashBlankslate` component for empty values
 
 It must be used within a `PipecatClientProvider` context to function properly.
-

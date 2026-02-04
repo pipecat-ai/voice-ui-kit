@@ -259,11 +259,16 @@ The `TranscriptOverlay` component uses several hooks from the Pipecat Client Rea
 This means it must be used within a `PipecatClientProvider` context to function properly.
 
 The component listens to these events:
-- `RTVIEvent.BotTtsText` - Receives text chunks as the bot speaks
+- `RTVIEvent.BotOutput` - Receives BotOutput events with spoken text (when RTVI 1.1.0+ is detected)
+- `RTVIEvent.BotTtsText` - Receives text chunks as the bot speaks (when BotOutput is not supported)
 - `RTVIEvent.BotStoppedSpeaking` - Triggers when the bot stops speaking
 - `RTVIEvent.BotTtsStopped` - Triggers when TTS stops
+- `RTVIEvent.BotReady` - Detects RTVI version to determine BotOutput support
 
 The component automatically:
+- Detects BotOutput support from RTVI version (requires 1.1.0+)
+- Processes BotOutput events for non-word-level TTS (supports sentence, code, link, etc. aggregation types)
+- Falls back to `BotTtsText` events for older RTVI versions
 - Accumulates transcript text as speech progresses
 - Clears the transcript when a new speech turn begins
 - Triggers fade-out animations when speech ends

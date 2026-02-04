@@ -39,7 +39,13 @@ export function ConversationList() {
     <ul>
       {messages.map((m, i) => (
         <li key={i}>
-          <strong>{m.role}:</strong> {typeof m.content === "string" ? m.content : "[component]"}
+          <strong>{m.role}:</strong>{" "}
+          {m.parts.map((part, idx) => {
+            if (part.text && typeof part.text === "object" && "spoken" in part.text) {
+              return <span key={idx}>{part.text.spoken + part.text.unspoken}</span>;
+            }
+            return <span key={idx}>{String(part.text)}</span>;
+          })}
         </li>
       ))}
     </ul>
@@ -54,6 +60,27 @@ const { messages } = usePipecatConversation({
   onMessageAdded: (message) => console.log("New message:", message),
 });
 ```
+
+### Custom aggregation metadata (inline vs block, spoken vs not spoken)
+
+Only `"word"` and `"sentence"` are considered default aggregation types. Any other `aggregatedBy` value is **custom and arbitrary**, and should be configured through `aggregationMetadata` (and optionally `botOutputRenderers` in your UI components).
+
+This metadata influences:
+- **Rendering**: whether an aggregation should be treated as inline text or a block (e.g. code blocks)
+- **Karaoke-style highlighting**: whether the aggregation is expected to be spoken (`isSpoken`)
+
+```tsx
+const { messages } = usePipecatConversation({
+  aggregationMetadata: {
+    code: { displayMode: "block", isSpoken: false },
+    credit_card: { displayMode: "inline", isSpoken: false },
+  },
+});
+```
+
+Notes:
+- `displayMode: "block"` parts are rendered on their own line by `MessageContent`.
+- For cleaner rendering, non-spoken block parts are trimmed of leading/trailing whitespace before display (the stored text is not modified).
 
 ### Full example
 
@@ -73,7 +100,13 @@ export function ConversationExample() {
     <div style={{ height: 300, overflow: "auto", fontFamily: "monospace", fontSize: 12 }}>
       {messages.map((m, i) => (
         <div key={i}>
-          <strong>[{m.role}]</strong> {typeof m.content === "string" ? m.content : "[component]"}
+          <strong>[{m.role}]</strong>{" "}
+          {m.parts.map((part, idx) => {
+            if (part.text && typeof part.text === "object" && "spoken" in part.text) {
+              return <span key={idx}>{part.text.spoken + part.text.unspoken}</span>;
+            }
+            return <span key={idx}>{String(part.text)}</span>;
+          })}
           <span style={{ opacity: 0.6, marginLeft: 8 }}>
             {new Date(m.createdAt).toLocaleTimeString()}
           </span>
@@ -98,7 +131,11 @@ export function InjectViaHook() {
   return (
     <button
       onClick={() =>
-        injectMessage({ role: "system", content: "Hello from the system" })
+        injectMessage({
+          role: "system",
+          parts: [{ text: "Hello from the system", final: true, createdAt: new Date().toISOString() }],
+          createdAt: new Date().toISOString()
+        })
       }
     >
       Inject message

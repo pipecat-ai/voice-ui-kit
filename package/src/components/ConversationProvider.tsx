@@ -3,9 +3,10 @@ import {
   type ConversationMessage,
   type ConversationMessagePart,
 } from "@/types/conversation";
-import { RTVIEvent } from "@pipecat-ai/client-js";
+import { BotOutputData, BotReadyData, RTVIEvent } from "@pipecat-ai/client-js";
 import { useRTVIClientEvent } from "@pipecat-ai/client-react";
-import { createContext, useContext, useRef } from "react";
+import { createContext, useContext, useRef, useState } from "react";
+import { isMinVersion } from "@/utils/version";
 
 interface ConversationContextValue {
   messages: ConversationMessage[];
@@ -13,6 +14,11 @@ interface ConversationContextValue {
     role: "user" | "assistant" | "system";
     parts: ConversationMessagePart[];
   }) => void;
+  /**
+   * Whether BotOutput events are supported (RTVI 1.1.0+)
+   * null = unknown (before BotReady), true = supported, false = not supported
+   */
+  botOutputSupported: boolean | null;
 }
 
 const ConversationContext = createContext<ConversationContextValue | null>(
@@ -28,33 +34,28 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     removeEmptyLastMessage,
     injectMessage,
     upsertUserTranscript,
-    updateAssistantText,
-    startAssistantLlmStream,
+    updateAssistantBotOutput,
   } = useConversationStore();
 
+  // null = unknown (before BotReady), true = supported, false = not supported
+  const [botOutputSupported, setBotOutputSupported] = useState<boolean | null>(
+    null,
+  );
   const userStoppedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const assistantStreamResetRef = useRef<number>(0);
+  const botOutputLastChunkRef = useRef<{ spoken: string; unspoken: string }>({
+    spoken: "",
+    unspoken: "",
+  });
 
   useRTVIClientEvent(RTVIEvent.Connected, () => {
     clearMessages();
+    setBotOutputSupported(null);
+    botOutputLastChunkRef.current = { spoken: "", unspoken: "" };
   });
 
-  useRTVIClientEvent(RTVIEvent.BotLlmStarted, () => {
-    startAssistantLlmStream();
-    // Nudge a reset counter so any consumer logic can infer fresh turn if needed
-    assistantStreamResetRef.current += 1;
-  });
-
-  useRTVIClientEvent(RTVIEvent.BotLlmText, (data) => {
-    updateAssistantText(data.text, false, "llm");
-  });
-
-  useRTVIClientEvent(RTVIEvent.BotLlmStopped, () => {
-    finalizeLastMessage("assistant");
-  });
-
-  useRTVIClientEvent(RTVIEvent.BotTtsStarted, () => {
-    // Start a new assistant message for TTS if there isn't one already in progress
+  // Helper to ensure assistant message exists
+  const ensureAssistantMessage = () => {
     const store = useConversationStore.getState();
     const lastAssistantIndex = store.messages.findLastIndex(
       (msg: ConversationMessage) => msg.role === "assistant",
@@ -70,15 +71,53 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
         final: false,
         parts: [],
       });
+      assistantStreamResetRef.current += 1;
+      return true;
     }
+    return false;
+  };
+
+  // Detect BotOutput support from BotReady event
+  useRTVIClientEvent(RTVIEvent.BotReady, (botData: BotReadyData) => {
+    const rtviVersion = botData.version;
+    const supportsBotOutput = isMinVersion(rtviVersion, [1, 1, 0]);
+    setBotOutputSupported(supportsBotOutput);
   });
 
-  useRTVIClientEvent(RTVIEvent.BotTtsText, (data) => {
-    updateAssistantText(data.text, false, "tts");
+  useRTVIClientEvent(RTVIEvent.BotOutput, (data: BotOutputData) => {
+    ensureAssistantMessage();
+
+    // Handle spacing for BotOutput chunks
+    let textToAdd = data.text;
+    const lastChunk = data.spoken
+      ? botOutputLastChunkRef.current.spoken
+      : botOutputLastChunkRef.current.unspoken;
+
+    // Add space separator if needed between BotOutput chunks
+    if (lastChunk) {
+      textToAdd = " " + textToAdd;
+    }
+
+    // Update the appropriate last chunk tracker
+    if (data.spoken) {
+      botOutputLastChunkRef.current.spoken = textToAdd;
+    } else {
+      botOutputLastChunkRef.current.unspoken = textToAdd;
+    }
+
+    // Update both spoken and unspoken text streams
+    const isFinal = data.aggregated_by === "sentence";
+    updateAssistantBotOutput(
+      textToAdd,
+      isFinal,
+      data.spoken,
+      data.aggregated_by,
+    );
   });
 
-  useRTVIClientEvent(RTVIEvent.BotTtsStopped, () => {
-    // Finalize the TTS text stream
+  useRTVIClientEvent(RTVIEvent.BotStoppedSpeaking, () => {
+    // Finalize the assistant message when bot stops speaking
+    // This works for both BotOutput and fallback scenarios
     const store = useConversationStore.getState();
     const lastAssistant = store.messages.findLast(
       (m: ConversationMessage) => m.role === "assistant",
@@ -123,6 +162,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   const contextValue: ConversationContextValue = {
     messages,
     injectMessage,
+    botOutputSupported,
   };
 
   return (
