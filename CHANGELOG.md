@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]
 
+[0.7.0]
+
+- Added: Conversation messages are now built from BotOutput events when the RTVI server supports them
+- Added: `botOutputRenderers` prop on `MessageContent`, `MessageContainer`, `Conversation`, and `ConversationPanel` to customize rendering of BotOutput content by aggregation type
+- Added: `AggregationMetadata` type and `aggregationMetadata` prop to control rendering and speech progress per aggregation type (`isSpoken`, `displayMode`: inline/block)
+- Added: `SessionInfo` displays RTVI Server version (from BotReady); `noRTVIVersion` prop to hide the RTVI version section
+- Added: `TranscriptOverlay` uses BotOutput events for remote participant when supported (word-level); works with servers that send sentence-level or non-word-level TTS
+- Changed: `Conversation` shows a warning when the server does not support botOutput events; `ConversationProvider` exposes `botOutputSupported` in context
+- Changed: Conversation building no longer uses raw TTS/LLM events; uses BotOutput stream when available
+- Changed: `ConversationMessage` type no longer includes `mode`; part structure clarified for transcription and BotOutput
+
 [0.6.0]
 
 - Added: `UserAudioControl` dropdown can list both microphones and speakers with grouped sections
