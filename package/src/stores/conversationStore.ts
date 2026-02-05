@@ -496,9 +496,7 @@ export const useConversationStore = create<ConversationState>()((set) => ({
           messageState.currentCharIndex = text.length;
 
           messages[
-            lastAssistantIndex === -1
-              ? messages.length - 1
-              : lastAssistantIndex
+            lastAssistantIndex === -1 ? messages.length - 1 : lastAssistantIndex
           ] = {
             ...message,
             parts,

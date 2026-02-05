@@ -42,15 +42,34 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     null,
   );
   const userStoppedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const botStoppedSpeakingTimeoutRef =
+    useRef<ReturnType<typeof setTimeout>>(undefined);
   const assistantStreamResetRef = useRef<number>(0);
   const botOutputLastChunkRef = useRef<{ spoken: string; unspoken: string }>({
     spoken: "",
     unspoken: "",
   });
 
+  /** Delay (ms) before finalizing the assistant message after bot stops speaking. */
+  const BOT_STOPPED_FINALIZE_DELAY_MS = 2500;
+
+  const finalizeLastAssistantMessageIfPending = () => {
+    clearTimeout(botStoppedSpeakingTimeoutRef.current);
+    botStoppedSpeakingTimeoutRef.current = undefined;
+    const store = useConversationStore.getState();
+    const lastAssistant = store.messages.findLast(
+      (m: ConversationMessage) => m.role === "assistant",
+    );
+    if (lastAssistant && !lastAssistant.final) {
+      finalizeLastMessage("assistant");
+    }
+  };
+
   useRTVIClientEvent(RTVIEvent.Connected, () => {
     clearMessages();
     setBotOutputSupported(null);
+    clearTimeout(botStoppedSpeakingTimeoutRef.current);
+    botStoppedSpeakingTimeoutRef.current = undefined;
     botOutputLastChunkRef.current = { spoken: "", unspoken: "" };
   });
 
@@ -116,20 +135,28 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   });
 
   useRTVIClientEvent(RTVIEvent.BotStoppedSpeaking, () => {
-    // Finalize the assistant message when bot stops speaking
-    // This works for both BotOutput and fallback scenarios
+    // Don't finalize immediately; start a timer. Bot may start speaking again (pause).
+    clearTimeout(botStoppedSpeakingTimeoutRef.current);
     const store = useConversationStore.getState();
     const lastAssistant = store.messages.findLast(
       (m: ConversationMessage) => m.role === "assistant",
     );
-
-    if (lastAssistant && !lastAssistant.final) {
+    if (!lastAssistant || lastAssistant.final) return;
+    botStoppedSpeakingTimeoutRef.current = setTimeout(() => {
+      botStoppedSpeakingTimeoutRef.current = undefined;
       finalizeLastMessage("assistant");
-    }
+    }, BOT_STOPPED_FINALIZE_DELAY_MS);
+  });
+
+  useRTVIClientEvent(RTVIEvent.BotStartedSpeaking, () => {
+    // Bot is speaking again; reset the finalize timer (bot was just pausing).
+    clearTimeout(botStoppedSpeakingTimeoutRef.current);
+    botStoppedSpeakingTimeoutRef.current = undefined;
   });
 
   useRTVIClientEvent(RTVIEvent.UserStartedSpeaking, () => {
-    // Clear any pending cleanup timers
+    // User started a new turn; bot's turn is done. Fast-forward: finalize immediately.
+    finalizeLastAssistantMessageIfPending();
     clearTimeout(userStoppedTimeout.current);
   });
 
