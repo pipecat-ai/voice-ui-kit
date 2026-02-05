@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]
 
+[0.7.1]
+
+- Fixed: The last sentence of a previous assistant message no longer resets to unspoken when the bot starts a new turn.
+
 [0.7.0]
 
 - Added: Conversation messages are now built from BotOutput events when the RTVI server supports them
