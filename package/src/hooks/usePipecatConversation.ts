@@ -81,11 +81,6 @@ export const usePipecatConversation = ({
 
   // Memoize the filtered messages to prevent infinite loops
   const filteredMessages = useMemo(() => {
-    // Find the last assistant message index (only this one should have active speech progress)
-    const lastAssistantIndex = messages.findLastIndex(
-      (msg) => msg.role === "assistant",
-    );
-
     const getMetadata = (part: ConversationMessagePart) => {
       return part.aggregatedBy
         ? aggregationMetadata?.[part.aggregatedBy]
@@ -93,9 +88,8 @@ export const usePipecatConversation = ({
     };
 
     // Process messages: convert string parts to BotOutputText based on position state
-    const processedMessages = messages.map((message, messageIndex) => {
+    const processedMessages = messages.map((message) => {
       if (message.role === "assistant") {
-        const isLastAssistantMessage = messageIndex === lastAssistantIndex;
         const messageId = message.createdAt;
         const messageState = botOutputMessageState.get(messageId);
 
@@ -142,16 +136,16 @@ export const usePipecatConversation = ({
               };
             }
 
-            const isCurrentPart =
-              isLastAssistantMessage && partIndex === actualCurrentPartIndex;
-
+            // Use cursor split for the part at actualCurrentPartIndex for every message,
+            // so previous (e.g. interrupted) messages keep partially spoken state.
+            const isPartAtCursor = partIndex === actualCurrentPartIndex;
             const currentCharIndex = messageState.currentCharIndex;
-            const spokenText = isCurrentPart
+            const spokenText = isPartAtCursor
               ? partText.slice(0, currentCharIndex)
               : partIndex < actualCurrentPartIndex
                 ? partText
                 : "";
-            const unspokenText = isCurrentPart
+            const unspokenText = isPartAtCursor
               ? partText.slice(currentCharIndex)
               : partIndex < actualCurrentPartIndex
                 ? ""
