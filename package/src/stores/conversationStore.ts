@@ -43,7 +43,7 @@ interface ConversationState {
     text: string,
     final: boolean,
     spoken: boolean, // true if text has been spoken, false if unspoken
-    aggregatedBy?: string, // aggregation type (e.g., "code", "link", "sentence", "word")
+    aggregatedBy?: string, // aggregation type (e.g., "code", "link", "sentence", "word", "token")
   ) => void;
 }
 
@@ -422,26 +422,33 @@ export const useConversationStore = create<ConversationState>()((set) => ({
 
       if (!spoken) {
         // UNSPOKEN EVENT: Create/update message parts immediately
-        // Only append when both current and last part are word-level; sentence-level
-        // and other types each get their own part so spoken events can match 1:1.
+        // Only append when both current and last part are word-level or token-level;
+        // sentence-level and other types each get their own part so spoken events can match 1:1.
         const isDefaultType =
           aggregatedBy === "sentence" ||
           aggregatedBy === "word" ||
+          aggregatedBy === "token" ||
           !aggregatedBy;
         const lastPart = parts[parts.length - 1];
         const shouldAppend =
           lastPart &&
-          aggregatedBy === "word" &&
-          lastPart.aggregatedBy === "word" &&
+          (aggregatedBy === "word" || aggregatedBy === "token") &&
+          lastPart.aggregatedBy === aggregatedBy &&
           typeof lastPart.text === "string";
 
         if (shouldAppend) {
-          // Append to last part (word-level only)
+          // Append to last part (word-level or token-level)
           const lastPartText = lastPart.text as string;
+          // Token-level text already includes inter-frame spacing from the LLM;
+          // word-level needs a separator inserted between words.
           const separator =
-            lastPartText && !lastPartText.endsWith(" ") && !text.startsWith(" ")
-              ? " "
-              : "";
+            aggregatedBy === "token"
+              ? ""
+              : lastPartText &&
+                  !lastPartText.endsWith(" ") &&
+                  !text.startsWith(" ")
+                ? " "
+                : "";
           parts[parts.length - 1] = {
             ...lastPart,
             text: lastPartText + separator + text,
@@ -481,6 +488,7 @@ export const useConversationStore = create<ConversationState>()((set) => ({
           const isDefaultType =
             aggregatedBy === "sentence" ||
             aggregatedBy === "word" ||
+            aggregatedBy === "token" ||
             !aggregatedBy;
           const defaultDisplayMode = isDefaultType ? "inline" : undefined;
           const newPart: ConversationMessagePart = {

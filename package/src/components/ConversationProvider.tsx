@@ -112,8 +112,10 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
       ? botOutputLastChunkRef.current.spoken
       : botOutputLastChunkRef.current.unspoken;
 
-    // Add space separator if needed between BotOutput chunks
-    if (lastChunk) {
+    // Add space separator if needed between BotOutput chunks.
+    // Token-level aggregation already includes inter-frame spacing from the LLM,
+    // so we must not inject an extra space for "token" aggregated_by.
+    if (lastChunk && data.aggregated_by !== "token") {
       textToAdd = " " + textToAdd;
     }
 
