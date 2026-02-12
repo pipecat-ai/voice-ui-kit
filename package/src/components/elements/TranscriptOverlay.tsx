@@ -205,7 +205,12 @@ export const TranscriptOverlay = ({
         setIsTurnEnd(false);
       }
 
-      setTranscript((prev) => [...prev, data.text]);
+      // Trim whitespace for display: token-level text may include leading
+      // spaces from the LLM, and the renderer already adds spacing between items.
+      const displayText = data.text.trim();
+      if (displayText) {
+        setTranscript((prev) => [...prev, displayText]);
+      }
     }
   });
 
