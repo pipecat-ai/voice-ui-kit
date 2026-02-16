@@ -27,5 +27,11 @@
     "build": "pnpm --filter=@pipecat-ai/voice-ui-kit build",
     "dev": "pnpm --filter=@pipecat-ai/voice-ui-kit dev",
     "dev:docs": "pnpm --filter=@pipecat-ai/voice-ui-kit-docs dev"
+  },
+  "pnpm": {
+    "overrides": {
+      "tar": ">=7.5.7",
+      "glob@>=10": ">=10.5.0"
+    }
   }
 }
