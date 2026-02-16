@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]
 
+- Added: LLM function call display in the conversation view (`LLMFunctionCallStarted`, `LLMFunctionCallInProgress`, `LLMFunctionCallStopped` events)
+- Added: `FunctionCallContent` component for rendering function calls with collapsible details (arguments, result)
+- Added: `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent` UI primitives (wrapping `@radix-ui/react-collapsible`)
+- Added: `noFunctionCalls` prop on `ConversationPanel` and `Conversation` to disable rendering of function call messages
+- Added: `functionCallLabel` prop on `Conversation`, `MessageContainer`, and `MessageRole` to customize the function call label
+- Added: `FunctionCallData` type and `functionCall` field on `ConversationMessage`
+- Added: `addFunctionCall`, `updateFunctionCall`, `updateLastStartedFunctionCall` actions on the conversation store
+- Changed: `ConversationMessage.role` now includes `"function_call"` as a valid value
+- Changed: Bumped peer dependency `@pipecat-ai/client-js` to `>=1.6.0`, `@pipecat-ai/daily-transport` to `>=1.6.0`, `@pipecat-ai/small-webrtc-transport` to `>=1.9.0`
+
 [0.7.1]
 
 - Fixed: The last sentence of a previous assistant message no longer resets to unspoken when the bot starts a new turn.
