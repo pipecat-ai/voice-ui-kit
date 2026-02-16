@@ -4,6 +4,7 @@ export * from "./blankslates";
 export * from "./button";
 export * from "./buttongroup";
 export * from "./card";
+export * from "./collapsible";
 export * from "./container";
 export * from "./divider";
 export * from "./dropdown-menu";

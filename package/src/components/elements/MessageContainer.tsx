@@ -3,6 +3,7 @@ import { ConversationMessage } from "@/types/conversation";
 import type { AggregationMetadata } from "@/types/conversation";
 import { MessageRole } from "./MessageRole";
 import { MessageContent } from "./MessageContent";
+import { FunctionCallContent } from "./FunctionCallContent";
 
 interface Props {
   /**
@@ -20,6 +21,11 @@ interface Props {
    * @default "system"
    */
   systemLabel?: string;
+  /**
+   * Custom label for function call entries
+   * @default "function call"
+   */
+  functionCallLabel?: string;
   /**
    * Custom CSS classes for the component
    */
@@ -65,17 +71,35 @@ export const MessageContainer = ({
   assistantLabel,
   clientLabel,
   systemLabel,
+  functionCallLabel,
   classNames = {},
   message,
   botOutputRenderers,
   aggregationMetadata,
 }: Props) => {
+  if (message.role === "function_call" && message.functionCall) {
+    return (
+      <div className={cn("flex flex-col gap-2", classNames.container)}>
+        <FunctionCallContent
+          functionCall={message.functionCall}
+          functionCallLabel={functionCallLabel}
+        />
+        <div
+          className={cn("self-end text-xs text-gray-500 mb-1", classNames.time)}
+        >
+          {new Date(message.createdAt).toLocaleTimeString()}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("flex flex-col gap-2", classNames.container)}>
       <MessageRole
         assistantLabel={assistantLabel}
         clientLabel={clientLabel}
         systemLabel={systemLabel}
+        functionCallLabel={functionCallLabel}
         className={classNames.role}
         role={message.role}
       />
