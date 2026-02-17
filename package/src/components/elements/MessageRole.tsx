@@ -18,13 +18,18 @@ interface Props {
    */
   systemLabel?: string;
   /**
+   * Custom label for function call messages
+   * @default "function call"
+   */
+  functionCallLabel?: string;
+  /**
    * Custom CSS classes for the role label
    */
   className?: string;
   /**
    * The role of the message
    */
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant" | "system" | "function_call";
 }
 
 /**
@@ -41,6 +46,7 @@ export const MessageRole = ({
   assistantLabel = "assistant",
   clientLabel = "user",
   systemLabel = "system",
+  functionCallLabel = "function call",
   className,
   role,
 }: Props) => {
@@ -53,8 +59,9 @@ export const MessageRole = ({
       user: clientLabel,
       assistant: assistantLabel,
       system: systemLabel,
+      function_call: functionCallLabel,
     }),
-    [assistantLabel, clientLabel, systemLabel],
+    [assistantLabel, clientLabel, systemLabel, functionCallLabel],
   );
 
   return (
@@ -64,7 +71,7 @@ export const MessageRole = ({
         {
           "text-client": role === "user",
           "text-agent": role === "assistant",
-          "text-subtle": role === "system",
+          "text-subtle": role === "system" || role === "function_call",
         },
         className,
       )}

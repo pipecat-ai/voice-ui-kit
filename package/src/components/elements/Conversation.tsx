@@ -1,7 +1,7 @@
 import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
 import { usePipecatClientTransportState } from "@pipecat-ai/client-react";
-import { memo, useCallback, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { MessageContainer } from "./MessageContainer";
 import { TextInput } from "./TextInput";
 import { useConversationContext } from "@/components/ConversationProvider";
@@ -48,10 +48,21 @@ export interface ConversationProps {
    */
   systemLabel?: string;
   /**
+   * Custom label for function call entries
+   * @default "function call"
+   */
+  functionCallLabel?: string;
+  /**
    * Disable the text input field at the bottom of the conversation
    * @default false
    */
   noTextInput?: boolean;
+  /**
+   * Disable rendering of function call messages in the conversation.
+   * Function call data is still captured in the store.
+   * @default false
+   */
+  noFunctionCalls?: boolean;
   /**
    * Custom renderers for BotOutput content based on aggregation type
    * Key is the aggregation type (e.g., "code", "link"), value is a renderer function
@@ -103,7 +114,9 @@ export const Conversation: React.FC<ConversationProps> = memo(
     clientLabel,
     noAutoscroll = false,
     noTextInput = false,
+    noFunctionCalls = false,
     systemLabel,
+    functionCallLabel,
     botOutputRenderers,
     aggregationMetadata,
   }) => {
@@ -138,10 +151,18 @@ export const Conversation: React.FC<ConversationProps> = memo(
         ) <= Math.ceil(scrollRef.current.clientHeight);
     }, [noAutoscroll]);
 
-    const { messages } = usePipecatConversation({
+    const { messages: allMessages } = usePipecatConversation({
       aggregationMetadata,
     });
     const { botOutputSupported } = useConversationContext();
+
+    const messages = useMemo(
+      () =>
+        noFunctionCalls
+          ? allMessages.filter((m) => m.role !== "function_call")
+          : allMessages,
+      [allMessages, noFunctionCalls],
+    );
 
     // Determine connection states based on transport state
     const isConnecting =
@@ -201,6 +222,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
                   assistantLabel={assistantLabel}
                   clientLabel={clientLabel}
                   systemLabel={systemLabel}
+                  functionCallLabel={functionCallLabel}
                   classNames={{
                     container: classNames.message,
                     messageContent: classNames.messageContent,

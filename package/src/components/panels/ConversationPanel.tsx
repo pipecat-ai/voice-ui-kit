@@ -26,6 +26,12 @@ interface ConversationPanelProps {
    * @default false
    */
   noTextInput?: boolean;
+  /**
+   * Disable rendering of function call messages in the conversation.
+   * Function call data is still captured in the store.
+   * @default false
+   */
+  noFunctionCalls?: boolean;
 }
 
 export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
@@ -34,6 +40,7 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
     noConversation = false,
     noMetrics = false,
     noTextInput = false,
+    noFunctionCalls = false,
   }) => {
     const defaultValue = noConversation ? "metrics" : "conversation";
 
@@ -66,6 +73,9 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
                   {...conversationElementProps}
                   noTextInput={
                     conversationElementProps?.noTextInput ?? noTextInput
+                  }
+                  noFunctionCalls={
+                    conversationElementProps?.noFunctionCalls ?? noFunctionCalls
                   }
                   botOutputRenderers={
                     conversationElementProps?.botOutputRenderers

@@ -5,6 +5,7 @@
         "ConnectButton",
         "Conversation",
         "DeviceDropDown",
+        "FunctionCallContent",
         "DeviceSelect",
         "MessageContainer",
         "MessageContent",

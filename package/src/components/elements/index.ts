@@ -6,6 +6,7 @@ export * from "./CopyText";
 export * from "./DataList";
 export * from "./DeviceDropDown";
 export * from "./DeviceSelect";
+export * from "./FunctionCallContent";
 export * from "./HighlightOverlay";
 export * from "./MessageContainer";
 export * from "./MessageContent";

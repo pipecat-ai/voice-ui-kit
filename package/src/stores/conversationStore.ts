@@ -2,6 +2,7 @@ import {
   type BotOutputText,
   type ConversationMessage,
   type ConversationMessagePart,
+  type FunctionCallData,
 } from "@/types/conversation";
 import {
   applySpokenBotOutputProgress,
@@ -45,6 +46,37 @@ interface ConversationState {
     spoken: boolean, // true if text has been spoken, false if unspoken
     aggregatedBy?: string, // aggregation type (e.g., "code", "link", "sentence", "word")
   ) => void;
+  addFunctionCall: (data: {
+    function_name?: string;
+    tool_call_id?: string;
+    args?: Record<string, unknown>;
+  }) => void;
+  updateFunctionCall: (
+    tool_call_id: string,
+    updates: Partial<
+      Pick<
+        FunctionCallData,
+        | "status"
+        | "result"
+        | "cancelled"
+        | "args"
+        | "function_name"
+        | "tool_call_id"
+      >
+    >,
+  ) => void;
+  /**
+   * Update the most recent function call message that has status "started"
+   * and no tool_call_id yet. Used when transitioning from Started → InProgress.
+   */
+  updateLastStartedFunctionCall: (
+    updates: Partial<
+      Pick<
+        FunctionCallData,
+        "status" | "tool_call_id" | "args" | "function_name"
+      >
+    >,
+  ) => boolean;
 }
 
 export const sortByCreatedAt = (
@@ -55,6 +87,7 @@ export const sortByCreatedAt = (
 };
 
 export const isMessageEmpty = (message: ConversationMessage): boolean => {
+  if (message.role === "function_call") return false;
   const parts = message.parts || [];
   if (parts.length === 0) return true;
   return parts.every((p) => {
@@ -114,6 +147,7 @@ export const mergeMessages = (
       lastMerged &&
       lastMerged.role === currentMessage.role &&
       currentMessage.role !== "system" &&
+      currentMessage.role !== "function_call" &&
       timeDiff < 30000;
 
     if (shouldMerge) {
@@ -511,5 +545,88 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         botOutputMessageState,
       };
     });
+  },
+
+  addFunctionCall: (data) => {
+    const now = new Date();
+    const message: ConversationMessage = {
+      role: "function_call",
+      final: false,
+      parts: [],
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+      functionCall: {
+        function_name: data.function_name,
+        tool_call_id: data.tool_call_id,
+        args: data.args,
+        status: "started",
+      },
+    };
+
+    set((state) => {
+      const updatedMessages = [...state.messages, message];
+      const processedMessages = normalizeMessagesForUI(updatedMessages);
+      callAllMessageCallbacks(state.messageCallbacks, message);
+      return { messages: processedMessages };
+    });
+  },
+
+  updateFunctionCall: (tool_call_id, updates) => {
+    set((state) => {
+      const messages = [...state.messages];
+      const index = messages.findLastIndex(
+        (msg) =>
+          msg.role === "function_call" &&
+          msg.functionCall?.tool_call_id === tool_call_id,
+      );
+      if (index === -1) return state;
+
+      const existing = messages[index];
+      const updated: ConversationMessage = {
+        ...existing,
+        updatedAt: new Date().toISOString(),
+        final: updates.status === "completed" ? true : existing.final,
+        functionCall: {
+          ...existing.functionCall!,
+          ...updates,
+        },
+      };
+      messages[index] = updated;
+
+      const processedMessages = normalizeMessagesForUI(messages);
+      callAllMessageCallbacks(state.messageCallbacks, updated);
+      return { messages: processedMessages };
+    });
+  },
+
+  updateLastStartedFunctionCall: (updates) => {
+    let found = false;
+    set((state) => {
+      const messages = [...state.messages];
+      const index = messages.findLastIndex(
+        (msg) =>
+          msg.role === "function_call" &&
+          msg.functionCall?.status === "started" &&
+          !msg.functionCall?.tool_call_id,
+      );
+      if (index === -1) return state;
+
+      found = true;
+      const existing = messages[index];
+      const updated: ConversationMessage = {
+        ...existing,
+        updatedAt: new Date().toISOString(),
+        functionCall: {
+          ...existing.functionCall!,
+          ...updates,
+        },
+      };
+      messages[index] = updated;
+
+      const processedMessages = normalizeMessagesForUI(messages);
+      callAllMessageCallbacks(state.messageCallbacks, updated);
+      return { messages: processedMessages };
+    });
+    return found;
   },
 }));
