@@ -119,6 +119,24 @@ const findSpokenPositionInUnspoken = (
 };
 
 /**
+ * Returns true if the cursor has not yet reached the end of all text parts,
+ * meaning there is still unspoken content waiting to be spoken.
+ */
+export function hasUnspokenContent(
+  cursor: BotOutputMessageCursor,
+  parts: ConversationMessagePart[],
+): boolean {
+  if (parts.length === 0) return false;
+
+  for (let i = 0; i < parts.length; i++) {
+    if (typeof parts[i]?.text !== "string") continue;
+    if (!cursor.partFinalFlags[i]) return true;
+  }
+
+  return false;
+}
+
+/**
  * Advances the cursor for spoken text. Returns true if the cursor was advanced
  * (text was consumed), false if there was nothing to advance (e.g. no parts).
  * Used to detect "spoken-only" bots that never send unspoken events.
