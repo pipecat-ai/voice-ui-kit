@@ -30,7 +30,13 @@ The Conversation component displays real-time conversation history between users
       default: "{}",
     },
     noAutoscroll: {
-      description: "Disable automatic scrolling to bottom when new messages arrive",
+      description: "Disable automatic scrolling when new messages arrive",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    reverseOrder: {
+      description: "Display messages in reverse order (newest first). When enabled, new messages appear at the top and auto-scroll targets the top.",
       type: "boolean",
       required: false,
       default: "false",
@@ -88,9 +94,9 @@ The component displays different UI based on connection state:
 ## Scrolling Behavior
 
 The component implements smart scrolling:
-- Automatically scrolls to bottom when new messages arrive
-- Only scrolls if the user is already at the bottom (doesn't interrupt reading)
-- Tracks scroll position to determine if user is at bottom
+- Automatically scrolls to the target edge when new messages arrive (bottom in normal mode, top in reverse mode)
+- Only scrolls if the user is already at the target edge (doesn't interrupt reading)
+- Tracks scroll position to determine if user is at the edge
 - Respects `noAutoscroll` prop to disable automatic scrolling entirely
 
 ## Integration
