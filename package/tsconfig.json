@@ -24,5 +24,5 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "docs/**/*", "**/*.test.*"]
+  "exclude": ["node_modules", "docs/**/*"]
 }
