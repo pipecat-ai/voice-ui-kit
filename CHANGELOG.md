@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]
 
+- Security: Upgraded `next` to 15.5.12, `vite` to ^7.1.11, `tar` to >=7.5.7, and `glob` to >=10.5.0 to address known vulnerabilities (DoS, SSRF, path traversal, command injection).
+
 [0.7.1]
 
 - Fixed: The last sentence of a previous assistant message no longer resets to unspoken when the bot starts a new turn.
