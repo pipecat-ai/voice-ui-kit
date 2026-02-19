@@ -17,7 +17,11 @@
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
     "@tailwindcss/postcss": "^4.1.13",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "postcss": "^8.5.6",
     "postcss-prefix-selector": "^2.1.1",
     "postcss-prefixwrap": "^1.57.0",
@@ -26,7 +30,11 @@
   "scripts": {
     "build": "pnpm --filter=@pipecat-ai/voice-ui-kit build",
     "dev": "pnpm --filter=@pipecat-ai/voice-ui-kit dev",
-    "dev:docs": "pnpm --filter=@pipecat-ai/voice-ui-kit-docs dev"
+    "dev:docs": "pnpm --filter=@pipecat-ai/voice-ui-kit-docs dev",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "package/src/**/*.{ts,tsx}": "eslint"
   },
   "pnpm": {
     "overrides": {

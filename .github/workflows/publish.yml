@@ -1,21 +1,16 @@
-name: Bump and Publish
+name: Publish RC
 
 on:
   workflow_dispatch:
     inputs:
-      version_type:
-        description: 'Version type to bump'
+      preid:
+        description: 'Prerelease identifier'
         required: true
-        default: 'patch'
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-          - rc
+        default: 'rc'
+        type: string
 
 jobs:
-  bump-and-publish:
+  publish-rc:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -43,48 +38,21 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@github.com'
 
-      - name: Bump version
-        id: bump_version
+      - name: Bump prerelease version
         working-directory: package
-        run: |
-          if [ "${{ github.event.inputs.version_type }}" = "rc" ]; then
-            pnpm version prerelease --preid=rc
-          else
-            pnpm version ${{ github.event.inputs.version_type }}
-          fi
-      
-      - name: Get version
-        id: package_version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
-        with:
-          path: package
+        run: pnpm version prerelease --preid=${{ github.event.inputs.preid }}
 
       - name: Build package
+        working-directory: package
         run: pnpm build
-        working-directory: package
 
-      - name: Publish to NPM
+      - name: Publish to NPM (dev tag)
         working-directory: package
-        run: |
-          if [ "${{ github.event.inputs.version_type }}" = "rc" ]; then
-            pnpm publish --tag dev
-          else
-            pnpm publish --tag latest
-          fi
+        run: pnpm publish --tag dev --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Push changes
+      - name: Push version bump
         run: |
           git push
           git push --tags
-
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.package_version.outputs.current-version }}
-          release_name: Release v${{ steps.package_version.outputs.current-version }}
-          draft: false
-          prerelease: ${{ github.event.inputs.version_type == 'rc' }}
