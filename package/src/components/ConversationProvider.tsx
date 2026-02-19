@@ -1,3 +1,4 @@
+import { hasUnspokenContent } from "@/stores/botOutput";
 import { useConversationStore } from "@/stores/conversationStore";
 import {
   type ConversationMessage,
@@ -30,6 +31,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     messages,
     clearMessages,
     addMessage,
+    updateLastMessage,
     finalizeLastMessage,
     removeEmptyLastMessage,
     injectMessage,
@@ -85,6 +87,23 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
         : undefined;
 
     if (!lastAssistant || lastAssistant.final) {
+      // If the message was finalized but still has unspoken content, it was
+      // finalized prematurely (e.g. BotStoppedSpeaking timer fired during a
+      // TTS pause mid-response). Un-finalize it instead of creating a new
+      // message bubble — but only when no user message followed (which would
+      // indicate an interruption and a genuinely new bot turn).
+      if (
+        lastAssistant?.final &&
+        lastAssistantIndex === store.messages.length - 1
+      ) {
+        const messageId = lastAssistant.createdAt;
+        const cursor = store.botOutputMessageState.get(messageId);
+        if (cursor && hasUnspokenContent(cursor, lastAssistant.parts || [])) {
+          updateLastMessage("assistant", { final: false });
+          return false;
+        }
+      }
+
       addMessage({
         role: "assistant",
         final: false,
@@ -104,6 +123,12 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   });
 
   useRTVIClientEvent(RTVIEvent.BotOutput, (data: BotOutputData) => {
+    // A BotOutput event means the response is still active; cancel any
+    // pending finalize timer from BotStoppedSpeaking to avoid premature
+    // finalization mid-response.
+    clearTimeout(botStoppedSpeakingTimeoutRef.current);
+    botStoppedSpeakingTimeoutRef.current = undefined;
+
     ensureAssistantMessage();
 
     // Handle spacing for BotOutput chunks
