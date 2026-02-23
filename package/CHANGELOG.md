@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.2](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.7.1...v0.7.2) (2026-02-23)
+
+
+### Bug Fixes
+
+* long bot messages when bot sends stopped speaking mid-turn ([0277a2c](https://github.com/pipecat-ai/voice-ui-kit/commit/0277a2cac7821e0b8958fb7e42cce467cb443d38))
+
+## Changelog
+
 All notable changes to **Voice UI Kit** will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
