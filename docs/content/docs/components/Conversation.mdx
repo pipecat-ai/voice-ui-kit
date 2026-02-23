@@ -59,6 +59,24 @@ The Conversation component displays real-time conversation history between users
       required: false,
       default: '"system"',
     },
+    functionCallLabel: {
+      description: "Custom label for function call entries",
+      type: "string",
+      required: false,
+      default: '"function call"',
+    },
+    functionCallRenderer: {
+      description: "Custom renderer for function call messages. Receives the full FunctionCallData and returns a ReactNode. Unhandled functions can fall back to the default FunctionCallContent component.",
+      type: "(functionCall: FunctionCallData) => React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    noFunctionCalls: {
+      description: "Disable rendering of function call messages in the conversation. Function call data is still captured in the store.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
     botOutputRenderers: {
       description: "Custom renderers for BotOutput content based on aggregation type. Passed through to MessageContainer component.",
       type: "Record<string, (content: string, metadata: { spoken: string; unspoken: string }) => React.ReactNode>",
@@ -99,12 +117,36 @@ The component implements smart scrolling:
 - Tracks scroll position to determine if user is at the edge
 - Respects `noAutoscroll` prop to disable automatic scrolling entirely
 
+## Function Calls
+
+When the LLM invokes a function (tool use), function call entries appear as separate items in the conversation timeline. Each entry shows the function name and a status indicator, with arguments and results collapsed by default using a collapsible UI.
+
+Function call display requires `@pipecat-ai/client-js` >= 1.6.0 and corresponding transport versions (`@pipecat-ai/daily-transport` >= 1.6.0 or `@pipecat-ai/small-webrtc-transport` >= 1.9.0).
+
+To disable function call rendering while still capturing the data in the store, set `noFunctionCalls={true}`.
+
+To customize how function calls are rendered, use the `functionCallRenderer` prop:
+
+```tsx
+<Conversation
+  functionCallRenderer={(fc) => {
+    switch (fc.function_name) {
+      case "get_weather":
+        return <WeatherCard functionCall={fc} />;
+      default:
+        return <FunctionCallContent functionCall={fc} />;
+    }
+  }}
+/>
+```
+
 ## Integration
 
 The `Conversation` component uses:
 - `usePipecatConversation` hook to get messages from the conversation store
 - `usePipecatClientTransportState` to determine connection state
 - `MessageContainer` and `MessageContent` components to render individual messages
+- `FunctionCallContent` component to render function call entries
 - `TextInput` component for user input
 
 It must be used within:

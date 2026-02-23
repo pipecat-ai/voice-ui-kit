@@ -4,7 +4,7 @@ description: Component for displaying message role labels
 component: MessageRole
 ---
 
-The MessageRole component displays the role label for a conversation message (user, assistant, or system). It uses color-coded styling to distinguish between different roles and supports custom labels.
+The MessageRole component displays the role label for a conversation message (user, assistant, system, or function_call). It uses color-coded styling to distinguish between different roles and supports custom labels.
 
 <LiveComponent language="tsx">
 {`
@@ -39,7 +39,7 @@ The MessageRole component displays a role label with color-coded styling.
   type={{
     role: {
       description: "The role of the message",
-      type: '"user" | "assistant" | "system"',
+      type: '"user" | "assistant" | "system" | "function_call"',
       required: true,
     },
     assistantLabel: {
@@ -59,6 +59,12 @@ The MessageRole component displays a role label with color-coded styling.
       type: "string",
       required: false,
       default: '"system"',
+    },
+    functionCallLabel: {
+      description: "Custom label for function call messages",
+      type: "string",
+      required: false,
+      default: '"function call"',
     },
     className: {
       description: "Custom CSS classes to apply to the role label",
@@ -128,6 +134,7 @@ The component applies different text colors based on role:
 - **user**: `text-client` (typically blue)
 - **assistant**: `text-agent` (typically green)
 - **system**: `text-subtle` (muted color)
+- **function_call**: `text-subtle` (muted color)
 
 ## Integration
 

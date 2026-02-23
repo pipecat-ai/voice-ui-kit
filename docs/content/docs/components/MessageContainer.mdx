@@ -68,6 +68,18 @@ The MessageContainer component displays a single message with its role and conte
       required: false,
       default: '"system"',
     },
+    functionCallLabel: {
+      description: "Custom label for function call entries",
+      type: "string",
+      required: false,
+      default: '"function call"',
+    },
+    functionCallRenderer: {
+      description: "Custom renderer for function call messages. When provided, replaces the default function call rendering. Passed through to FunctionCallContent.",
+      type: "(functionCall: FunctionCallData) => React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
     botOutputRenderers: {
       description: "Custom renderers for BotOutput content based on aggregation type. Passed through to MessageContent component.",
       type: "Record<string, (content: string, metadata: { spoken: string; unspoken: string }) => React.ReactNode>",
@@ -182,21 +194,27 @@ Messages can contain multiple parts (text chunks).
 ## Message Structure
 
 The component expects a `ConversationMessage` object with:
-- `role`: "user" | "assistant" | "system"
+- `role`: "user" | "assistant" | "system" | "function_call"
 - `parts`: Array of `ConversationMessagePart` objects, each with:
   - `text`: A string, ReactNode, or `BotOutputText` object (with `spoken` and `unspoken` properties)
   - `final`: Boolean indicating if the part is finalized
   - `createdAt`: ISO timestamp string
   - `aggregatedBy`: Optional aggregation type for BotOutput content
 - `createdAt`: ISO timestamp string
+- `functionCall`: Optional `FunctionCallData` object (present when `role` is `"function_call"`)
 
 If you use custom `aggregatedBy` values (anything other than the defaults `"word"` and `"sentence"`), pass `aggregationMetadata` so the UI knows whether those parts should render inline vs block and whether they should be included in karaoke-style speech progress.
+
+## Function Call Messages
+
+When a message has `role: "function_call"` and a `functionCall` data object, the MessageContainer renders a `FunctionCallContent` component instead of the standard `MessageRole` + `MessageContent`. The function call is displayed with a collapsible UI showing the function name, arguments, and result.
 
 ## Integration
 
 The MessageContainer component uses:
 - `MessageRole` component to display the role label
 - `MessageContent` component to display the message content
+- `FunctionCallContent` component to display function call entries
 
 It's typically used within the `Conversation` component to render individual messages from the conversation history.
 

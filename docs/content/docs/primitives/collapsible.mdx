@@ -1,0 +1,45 @@
+---
+title: Collapsible
+description: Expandable/collapsible content sections.
+---
+
+A wrapper around `@radix-ui/react-collapsible` that provides expand/collapse functionality. Used internally by the `FunctionCallContent` component.
+
+<LiveComponent language="tsx">
+{`
+  import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@pipecat-ai/voice-ui-kit";
+
+  <Collapsible>
+    <CollapsibleTrigger className="text-sm font-medium cursor-pointer">
+      Click to expand
+    </CollapsibleTrigger>
+    <CollapsibleContent className="mt-2 text-sm text-muted-foreground">
+      This content is collapsed by default and expands when the trigger is clicked.
+    </CollapsibleContent>
+  </Collapsible>
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    Collapsible: {
+      description: "Collapsible root component (wraps Radix Collapsible Root)",
+      type: "React.ComponentProps<typeof CollapsiblePrimitive.Root>",
+      required: false,
+      default: "{}",
+    },
+    CollapsibleTrigger: {
+      description: "Element that toggles the collapsible content",
+      type: "React.ComponentProps<typeof CollapsiblePrimitive.Trigger>",
+      required: false,
+      default: "{}",
+    },
+    CollapsibleContent: {
+      description: "The collapsible content area",
+      type: "React.ComponentProps<typeof CollapsiblePrimitive.Content>",
+      required: false,
+      default: "{}",
+    },
+  }}
+/>

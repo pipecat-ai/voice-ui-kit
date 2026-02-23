@@ -1,0 +1,127 @@
+---
+title: Function Call Content
+description: Component for displaying LLM function calls with collapsible details
+component: FunctionCallContent
+---
+
+The FunctionCallContent component renders LLM function call entries in the conversation. It displays the function name and status, with arguments and results collapsed by default using a collapsible UI.
+
+Function calls appear as separate entries in the conversation timeline when the LLM invokes a tool. The component handles three lifecycle states: started, in progress, and completed.
+
+<LiveComponent language="tsx">
+{`
+  import { FunctionCallContent } from "@pipecat-ai/voice-ui-kit";
+
+  <FunctionCallContent
+    functionCall={{
+      function_name: "get_weather",
+      tool_call_id: "call_123",
+      args: { location: "San Francisco", unit: "celsius" },
+      result: { temperature: 18, condition: "Partly cloudy" },
+      status: "completed",
+    }}
+  />
+`}
+</LiveComponent>
+
+---
+
+<TypeTable
+  className="text-sm"
+  type={{
+    functionCall: {
+      description: "The function call data to display",
+      type: "FunctionCallData",
+      required: true,
+    },
+    functionCallLabel: {
+      description: "Label for function call entries",
+      type: "string",
+      required: false,
+      default: '"function call"',
+    },
+    functionCallRenderer: {
+      description: "Custom renderer for function call messages. When provided, replaces the default rendering entirely. Receives the full FunctionCallData object.",
+      type: "(functionCall: FunctionCallData) => React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for the component",
+      type: "{ container?: string }",
+      required: false,
+      default: "{}",
+    },
+  }}
+/>
+
+---
+
+## Status Indicators
+
+The component shows different icons based on the function call status:
+- **started / in_progress**: Spinning loader icon
+- **completed**: Green check icon
+- **completed + cancelled**: Red X icon
+
+## Collapsible Details
+
+When the function call has arguments or a result, clicking the entry expands the details. Details are collapsed by default. If there are no arguments or result data, the trigger is not interactive.
+
+## FunctionCallData Type
+
+The `FunctionCallData` interface contains:
+- `function_name`: Optional name of the function being called
+- `tool_call_id`: Optional unique identifier for the tool call
+- `args`: Optional arguments passed to the function
+- `result`: Optional result (populated when complete)
+- `cancelled`: Optional boolean indicating the call was cancelled
+- `status`: `"started"` | `"in_progress"` | `"completed"`
+
+## Custom Rendering
+
+You can provide a `functionCallRenderer` prop to completely replace the default rendering. The renderer receives the full `FunctionCallData` object, allowing you to render differently based on function name, status, args, and result.
+
+<LiveComponent language="tsx">
+{`
+  import { FunctionCallContent } from "@pipecat-ai/voice-ui-kit";
+
+  <FunctionCallContent
+    functionCall={{
+      function_name: "get_weather",
+      tool_call_id: "call_456",
+      args: { location: "San Francisco" },
+      result: { temperature: 18, condition: "Sunny" },
+      status: "completed",
+    }}
+    functionCallRenderer={(fc) => (
+      <div className="p-2 rounded bg-blue-50 text-sm">
+        {fc.status === "completed"
+          ? \`Weather in \${fc.args?.location}: \${fc.result?.temperature}° — \${fc.result?.condition}\`
+          : "Fetching weather..."}
+      </div>
+    )}
+  />
+`}
+</LiveComponent>
+
+When using a custom renderer with the `Conversation` component, you can switch on `function_name` and fall back to the default `FunctionCallContent` for unhandled functions:
+
+```tsx
+<Conversation
+  functionCallRenderer={(fc) => {
+    switch (fc.function_name) {
+      case "get_weather":
+        return <WeatherCard functionCall={fc} />;
+      default:
+        return <FunctionCallContent functionCall={fc} />;
+    }
+  }}
+/>
+```
+
+## Integration
+
+The FunctionCallContent component is rendered by `MessageContainer` when a message has `role: "function_call"`. It is not typically used directly — instead, function call events from the SDK are automatically captured by the `ConversationProvider` and displayed in the `Conversation` component.
+
+To disable function call display, set `noFunctionCalls={true}` on the `Conversation` or `ConversationPanel` component.
