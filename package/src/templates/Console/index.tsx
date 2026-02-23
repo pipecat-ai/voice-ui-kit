@@ -23,6 +23,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { SpinLoader } from "@/components/ui/loader";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -36,7 +41,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
 import { type ConversationMessage } from "@/types/conversation";
-import { type PipecatClientOptions, RTVIEvent } from "@pipecat-ai/client-js";
+import {
+  type APIRequest,
+  type PipecatClientOptions,
+  RTVIEvent,
+} from "@pipecat-ai/client-js";
 import {
   usePipecatClientCamControl,
   useRTVIClientEvent,
@@ -165,6 +174,51 @@ export interface ConsoleTemplateProps
   title?: string;
 }
 
+/**
+ * Extract a URL string from SmallWebRTC-style connection options.
+ */
+const extractUrlFromOptions = (opts: unknown): string | undefined => {
+  if (!opts || typeof opts !== "object") return undefined;
+  const o = opts as Record<string, unknown>;
+  if (o.webrtcRequestParams && typeof o.webrtcRequestParams === "object") {
+    const params = o.webrtcRequestParams as Record<string, unknown>;
+    if (params.endpoint) return String(params.endpoint);
+  }
+  if (typeof o.webrtcUrl === "string") return o.webrtcUrl;
+  if (typeof o.connectionUrl === "string") return o.connectionUrl;
+  return undefined;
+};
+
+/**
+ * Resolve a URL string to an absolute URL, using window.location.origin
+ * as the base for relative paths (e.g. "/start").
+ */
+const resolveUrl = (url: string): string => {
+  if (typeof window === "undefined") return url;
+  try {
+    return new URL(url, window.location.origin).toString();
+  } catch {
+    return url;
+  }
+};
+
+/**
+ * Resolve the connection URL that will be used when clicking Connect.
+ * Checks startBotParams, connectParams, and transportOptions in priority order.
+ */
+const getConnectionUrl = (
+  startBotParams?: APIRequest,
+  connectParams?: unknown,
+  transportOptions?: unknown,
+): string | undefined => {
+  if (startBotParams?.endpoint)
+    return resolveUrl(String(startBotParams.endpoint));
+  const url =
+    extractUrlFromOptions(connectParams) ??
+    extractUrlFromOptions(transportOptions);
+  return url ? resolveUrl(url) : undefined;
+};
+
 const defaultClientOptions: Partial<PipecatClientOptions> = {
   enableCam: false,
   enableMic: true,
@@ -237,6 +291,9 @@ const ConsoleUI = ({
   noBotVideo = false,
 
   // Transport and client options
+  startBotParams,
+  connectParams,
+  transportOptions,
   transportType = "smallwebrtc",
 
   // UI configuration
@@ -290,6 +347,11 @@ const ConsoleUI = ({
   const noConversationPanel = noConversation && noMetrics;
   const noDevices = noUserAudio && noUserVideo && noScreenControl;
   const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
+  const connectionUrl = getConnectionUrl(
+    startBotParams,
+    connectParams,
+    transportOptions,
+  );
 
   useRTVIClientEvent(RTVIEvent.ParticipantConnected, (p) => {
     if (p.local) setParticipantId(p.id || "");
@@ -348,10 +410,21 @@ const ConsoleUI = ({
                 )}
               </Button>
             </div>
-            <ConnectButton
-              onConnect={handleConnect}
-              onDisconnect={handleDisconnect}
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <ConnectButton
+                    onConnect={handleConnect}
+                    onDisconnect={handleDisconnect}
+                  />
+                </span>
+              </TooltipTrigger>
+              {connectionUrl && (
+                <TooltipContent align="end" side="bottom">
+                  {connectionUrl}
+                </TooltipContent>
+              )}
+            </Tooltip>
           </div>
         </div>
         {error && (
