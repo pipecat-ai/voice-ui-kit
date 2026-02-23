@@ -34,7 +34,7 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "package/src/**/*.{ts,tsx}": "eslint"
+    "package/src/**/*.{ts,tsx}": "eslint --config package/eslint.config.js"
   },
   "pnpm": {
     "overrides": {
