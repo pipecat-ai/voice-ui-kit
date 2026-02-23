@@ -28,10 +28,16 @@ export interface ConversationProps {
     thinking?: string;
   };
   /**
-   * Disable automatic scrolling to bottom when new messages arrive
+   * Disable automatic scrolling when new messages arrive
    * @default false
    */
   noAutoscroll?: boolean;
+  /**
+   * Display messages in reverse order (newest first)
+   * When enabled, new messages appear at the top and auto-scroll targets the top
+   * @default false
+   */
+  reverseOrder?: boolean;
   /**
    * Custom label for assistant messages
    * @default "assistant"
@@ -103,6 +109,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
     clientLabel,
     noAutoscroll = false,
     noTextInput = false,
+    reverseOrder = false,
     systemLabel,
     botOutputRenderers,
     aggregationMetadata,
@@ -110,33 +117,39 @@ export const Conversation: React.FC<ConversationProps> = memo(
     const transportState = usePipecatClientTransportState();
 
     const scrollRef = useRef<HTMLDivElement>(null);
-    const isScrolledToBottom = useRef(true);
+    const isScrolledToEdge = useRef(true);
 
     /**
-     * Scrolls to the bottom of the conversation if the user is already at the bottom
-     * This prevents interrupting users who are reading previous messages
+     * Scrolls to the edge of the conversation if the user is already there.
+     * In normal mode, scrolls to the bottom. In reverse mode, scrolls to the top.
+     * This prevents interrupting users who are reading previous messages.
      */
-    const maybeScrollToBottom = useCallback(() => {
+    const maybeScrollToEdge = useCallback(() => {
       if (!scrollRef.current) return;
-      if (isScrolledToBottom.current) {
+      if (isScrolledToEdge.current) {
         scrollRef.current.scrollTo({
-          top: scrollRef.current.scrollHeight,
+          top: reverseOrder ? 0 : scrollRef.current.scrollHeight,
           behavior: "smooth",
         });
       }
-    }, []);
+    }, [reverseOrder]);
 
     /**
-     * Updates the scroll state to track whether the user is at the bottom
-     * This is used to determine whether to auto-scroll when new messages arrive
+     * Updates the scroll state to track whether the user is at the target edge.
+     * In normal mode, tracks the bottom. In reverse mode, tracks the top.
+     * This is used to determine whether to auto-scroll when new messages arrive.
      */
     const updateScrollState = useCallback(() => {
       if (!scrollRef.current || noAutoscroll) return;
-      isScrolledToBottom.current =
-        Math.ceil(
-          scrollRef.current.scrollHeight - scrollRef.current.scrollTop,
-        ) <= Math.ceil(scrollRef.current.clientHeight);
-    }, [noAutoscroll]);
+      if (reverseOrder) {
+        isScrolledToEdge.current = scrollRef.current.scrollTop <= 1;
+      } else {
+        isScrolledToEdge.current =
+          Math.ceil(
+            scrollRef.current.scrollHeight - scrollRef.current.scrollTop,
+          ) <= Math.ceil(scrollRef.current.clientHeight);
+      }
+    }, [noAutoscroll, reverseOrder]);
 
     const { messages } = usePipecatConversation({
       aggregationMetadata,
@@ -153,8 +166,8 @@ export const Conversation: React.FC<ConversationProps> = memo(
     useEffect(() => {
       if (noAutoscroll) return;
       // Scroll to bottom when messages change
-      maybeScrollToBottom();
-    }, [messages, maybeScrollToBottom, noAutoscroll]);
+      maybeScrollToEdge();
+    }, [messages, maybeScrollToEdge, noAutoscroll]);
 
     // Set up scroll event listener to track user scroll position
     useEffect(() => {
@@ -194,24 +207,26 @@ export const Conversation: React.FC<ConversationProps> = memo(
             )}
           >
             <div className={cn(classNames.message)}>
-              {messages.map((message, index) => (
-                <MessageContainer
-                  key={index}
-                  message={message}
-                  assistantLabel={assistantLabel}
-                  clientLabel={clientLabel}
-                  systemLabel={systemLabel}
-                  classNames={{
-                    container: classNames.message,
-                    messageContent: classNames.messageContent,
-                    thinking: classNames.thinking,
-                    time: classNames.time,
-                    role: classNames.role,
-                  }}
-                  botOutputRenderers={botOutputRenderers}
-                  aggregationMetadata={aggregationMetadata}
-                />
-              ))}
+              {(reverseOrder ? [...messages].reverse() : messages).map(
+                (message, index) => (
+                  <MessageContainer
+                    key={index}
+                    message={message}
+                    assistantLabel={assistantLabel}
+                    clientLabel={clientLabel}
+                    systemLabel={systemLabel}
+                    classNames={{
+                      container: classNames.message,
+                      messageContent: classNames.messageContent,
+                      thinking: classNames.thinking,
+                      time: classNames.time,
+                      role: classNames.role,
+                    }}
+                    botOutputRenderers={botOutputRenderers}
+                    aggregationMetadata={aggregationMetadata}
+                  />
+                ),
+              )}
             </div>
           </div>
           {textInput}
