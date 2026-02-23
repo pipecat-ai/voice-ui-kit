@@ -1,11 +1,7 @@
 "use client";
 
-import { PipecatClient } from "@pipecat-ai/client-js";
-import { PipecatClientProvider } from "@pipecat-ai/client-react";
-import { SmallWebRTCTransport } from "@pipecat-ai/small-webrtc-transport";
 import * as VoiceUIKit from "@pipecat-ai/voice-ui-kit";
 import * as VoiceUIKitWebGL from "@pipecat-ai/voice-ui-kit/webgl";
-const { ConversationProvider } = VoiceUIKit;
 import { CodeBlock, Pre as CodePre } from "fumadocs-ui/components/codeblock";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
@@ -101,23 +97,9 @@ export function LiveComponent({
   const [mounted, setMounted] = useState(false);
   const [intent, setIntent] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
-  const [client, setClient] = useState<PipecatClient | null>(null);
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (!withPipecat || client || !intent) {
-      return;
-    }
-    const pcClient = new PipecatClient({
-      transport: new SmallWebRTCTransport(),
-    });
-
-    pcClient.initDevices();
-    setClient(pcClient);
-  }, [withPipecat, client, intent]);
 
   const rawSource = useMemo(() => {
     if (typeof code === "string") return code;
@@ -217,20 +199,16 @@ export function LiveComponent({
       );
     } else {
       previewComp = (
-        <PipecatClientProvider client={client!}>
-          <ConversationProvider>{previewComp}</ConversationProvider>
-        </PipecatClientProvider>
+        <VoiceUIKit.PipecatAppBase
+          transportType="smallwebrtc"
+          initDevicesOnMount
+          noThemeProvider
+          noAudioOutput
+        >
+          {previewComp}
+        </VoiceUIKit.PipecatAppBase>
       );
     }
-  }
-
-  // If withConfirm is true and confirmed is true, and withPipecat is also true, wrap with PipecatClientProvider
-  if (withConfirm && confirmed && withPipecat && client) {
-    previewComp = (
-      <PipecatClientProvider client={client}>
-        <ConversationProvider>{previewComp}</ConversationProvider>
-      </PipecatClientProvider>
-    );
   }
 
   return (
