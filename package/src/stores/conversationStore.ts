@@ -2,6 +2,7 @@ import {
   type BotOutputText,
   type ConversationMessage,
   type ConversationMessagePart,
+  type FunctionCallData,
 } from "@/types/conversation";
 import {
   applySpokenBotOutputProgress,
@@ -45,6 +46,53 @@ interface ConversationState {
     spoken: boolean, // true if text has been spoken, false if unspoken
     aggregatedBy?: string, // aggregation type (e.g., "code", "link", "sentence", "word")
   ) => void;
+  addFunctionCall: (data: {
+    function_name?: string;
+    tool_call_id?: string;
+    args?: Record<string, unknown>;
+  }) => void;
+  updateFunctionCall: (
+    tool_call_id: string,
+    updates: Partial<
+      Pick<
+        FunctionCallData,
+        | "status"
+        | "result"
+        | "cancelled"
+        | "args"
+        | "function_name"
+        | "tool_call_id"
+      >
+    >,
+  ) => boolean;
+  /**
+   * Update the most recent function call message that has status "started"
+   * and no tool_call_id yet. Used when transitioning from Started → InProgress.
+   */
+  updateLastStartedFunctionCall: (
+    updates: Partial<
+      Pick<
+        FunctionCallData,
+        "status" | "tool_call_id" | "args" | "function_name"
+      >
+    >,
+  ) => boolean;
+
+  // High-level function call lifecycle handlers
+  // These encapsulate the orchestration logic (fallback chains, out-of-order
+  // detection) that was previously in ConversationProvider.
+  handleFunctionCallStarted: (data: { function_name?: string }) => void;
+  handleFunctionCallInProgress: (data: {
+    function_name?: string;
+    tool_call_id: string;
+    args?: Record<string, unknown>;
+  }) => void;
+  handleFunctionCallStopped: (data: {
+    function_name?: string;
+    tool_call_id: string;
+    result?: unknown;
+    cancelled?: boolean;
+  }) => void;
 }
 
 export const sortByCreatedAt = (
@@ -55,6 +103,7 @@ export const sortByCreatedAt = (
 };
 
 export const isMessageEmpty = (message: ConversationMessage): boolean => {
+  if (message.role === "function_call") return false;
   const parts = message.parts || [];
   if (parts.length === 0) return true;
   return parts.every((p) => {
@@ -114,6 +163,7 @@ export const mergeMessages = (
       lastMerged &&
       lastMerged.role === currentMessage.role &&
       currentMessage.role !== "system" &&
+      currentMessage.role !== "function_call" &&
       timeDiff < 30000;
 
     if (shouldMerge) {
@@ -131,10 +181,56 @@ export const mergeMessages = (
   return mergedMessages;
 };
 
+const statusPriority: Record<string, number> = {
+  started: 0,
+  in_progress: 1,
+  completed: 2,
+};
+
+/**
+ * Deduplicate function call messages that share the same tool_call_id,
+ * keeping the entry with the most advanced status.
+ */
+const deduplicateFunctionCalls = (
+  messages: ConversationMessage[],
+): ConversationMessage[] => {
+  const bestByToolCallId = new Map<string, number>();
+  const toRemove = new Set<number>();
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    const tcid = msg.functionCall?.tool_call_id;
+    if (msg.role !== "function_call" || !tcid) continue;
+
+    const existingIdx = bestByToolCallId.get(tcid);
+    if (existingIdx !== undefined) {
+      const existingPriority =
+        statusPriority[messages[existingIdx].functionCall!.status] ?? 0;
+      const currentPriority = statusPriority[msg.functionCall!.status] ?? 0;
+
+      if (currentPriority >= existingPriority) {
+        toRemove.add(existingIdx);
+        bestByToolCallId.set(tcid, i);
+      } else {
+        toRemove.add(i);
+      }
+    } else {
+      bestByToolCallId.set(tcid, i);
+    }
+  }
+
+  if (toRemove.size === 0) return messages;
+  return messages.filter((_, i) => !toRemove.has(i));
+};
+
 const normalizeMessagesForUI = (
   messages: ConversationMessage[],
 ): ConversationMessage[] => {
-  return mergeMessages(filterEmptyMessages(messages.sort(sortByCreatedAt)));
+  return mergeMessages(
+    deduplicateFunctionCalls(
+      filterEmptyMessages(messages.sort(sortByCreatedAt)),
+    ),
+  );
 };
 
 // Helper function to call all registered callbacks
@@ -151,7 +247,7 @@ const callAllMessageCallbacks = (
   });
 };
 
-export const useConversationStore = create<ConversationState>()((set) => ({
+export const useConversationStore = create<ConversationState>()((set, get) => ({
   messages: [],
   messageCallbacks: new Map(),
   botOutputMessageState: new Map(),
@@ -511,5 +607,185 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         botOutputMessageState,
       };
     });
+  },
+
+  addFunctionCall: (data) => {
+    set((state) => {
+      // If a tool_call_id is provided, check for an existing entry to avoid duplicates
+      if (data.tool_call_id) {
+        const existingIndex = state.messages.findLastIndex(
+          (msg) =>
+            msg.role === "function_call" &&
+            msg.functionCall?.tool_call_id === data.tool_call_id,
+        );
+        if (existingIndex !== -1) return state;
+      }
+
+      const now = new Date();
+      const message: ConversationMessage = {
+        role: "function_call",
+        final: false,
+        parts: [],
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+        functionCall: {
+          function_name: data.function_name,
+          tool_call_id: data.tool_call_id,
+          args: data.args,
+          status: "started",
+        },
+      };
+
+      const updatedMessages = [...state.messages, message];
+      const processedMessages = normalizeMessagesForUI(updatedMessages);
+      callAllMessageCallbacks(state.messageCallbacks, message);
+      return { messages: processedMessages };
+    });
+  },
+
+  updateFunctionCall: (tool_call_id, updates) => {
+    let found = false;
+    set((state) => {
+      const messages = [...state.messages];
+      const index = messages.findLastIndex(
+        (msg) =>
+          msg.role === "function_call" &&
+          msg.functionCall?.tool_call_id === tool_call_id,
+      );
+      if (index === -1) return state;
+
+      found = true;
+      const existing = messages[index];
+      const updated: ConversationMessage = {
+        ...existing,
+        updatedAt: new Date().toISOString(),
+        final: updates.status === "completed" ? true : existing.final,
+        functionCall: {
+          ...existing.functionCall!,
+          ...updates,
+        },
+      };
+      messages[index] = updated;
+
+      const processedMessages = normalizeMessagesForUI(messages);
+      callAllMessageCallbacks(state.messageCallbacks, updated);
+      return { messages: processedMessages };
+    });
+    return found;
+  },
+
+  updateLastStartedFunctionCall: (updates) => {
+    let found = false;
+    set((state) => {
+      const messages = [...state.messages];
+      const index = messages.findLastIndex(
+        (msg) =>
+          msg.role === "function_call" &&
+          msg.functionCall?.status === "started" &&
+          !msg.functionCall?.tool_call_id,
+      );
+      if (index === -1) return state;
+
+      found = true;
+      const existing = messages[index];
+      const updated: ConversationMessage = {
+        ...existing,
+        updatedAt: new Date().toISOString(),
+        functionCall: {
+          ...existing.functionCall!,
+          ...updates,
+        },
+      };
+      messages[index] = updated;
+
+      const processedMessages = normalizeMessagesForUI(messages);
+      callAllMessageCallbacks(state.messageCallbacks, updated);
+      return { messages: processedMessages };
+    });
+    return found;
+  },
+
+  handleFunctionCallStarted: (data) => {
+    const state = get();
+    const lastFc = state.messages.findLast(
+      (m: ConversationMessage) => m.role === "function_call",
+    );
+
+    // Check if InProgress already created an entry (events arrived out of order).
+    // If the most recent function_call is beyond "started" and was created
+    // within the last 2 seconds, skip creating a duplicate.
+    if (
+      lastFc?.functionCall &&
+      lastFc.functionCall.status !== "started" &&
+      Date.now() - new Date(lastFc.createdAt).getTime() < 2000
+    ) {
+      if (
+        data.function_name &&
+        !lastFc.functionCall.function_name &&
+        lastFc.functionCall.tool_call_id
+      ) {
+        get().updateFunctionCall(lastFc.functionCall.tool_call_id, {
+          function_name: data.function_name,
+        });
+      }
+      return;
+    }
+
+    get().addFunctionCall({ function_name: data.function_name });
+  },
+
+  handleFunctionCallInProgress: (data) => {
+    // Tier 1: Try to update the last "started" entry (from LLMFunctionCallStarted)
+    const updated = get().updateLastStartedFunctionCall({
+      function_name: data.function_name,
+      tool_call_id: data.tool_call_id,
+      args: data.args,
+      status: "in_progress",
+    });
+
+    if (!updated) {
+      // Tier 2: Try updating an existing entry by tool_call_id
+      const found = get().updateFunctionCall(data.tool_call_id, {
+        function_name: data.function_name,
+        args: data.args,
+        status: "in_progress",
+      });
+
+      if (!found) {
+        // Tier 3: No existing entry at all; create a new one as in_progress
+        get().addFunctionCall({
+          function_name: data.function_name,
+          tool_call_id: data.tool_call_id,
+          args: data.args,
+        });
+        get().updateFunctionCall(data.tool_call_id, { status: "in_progress" });
+      }
+    }
+  },
+
+  handleFunctionCallStopped: (data) => {
+    // Tier 1: Try updating by tool_call_id
+    const found = get().updateFunctionCall(data.tool_call_id, {
+      function_name: data.function_name,
+      status: "completed",
+      result: data.result,
+      cancelled: data.cancelled,
+    });
+
+    if (!found) {
+      // Tier 2: No match by tool_call_id (e.g. InProgress was skipped).
+      // Assign the tool_call_id to the last started entry, then complete it.
+      const matched = get().updateLastStartedFunctionCall({
+        function_name: data.function_name,
+        tool_call_id: data.tool_call_id,
+      });
+      if (matched) {
+        get().updateFunctionCall(data.tool_call_id, {
+          status: "completed",
+          result: data.result,
+          cancelled: data.cancelled,
+        });
+      }
+    }
   },
 }));

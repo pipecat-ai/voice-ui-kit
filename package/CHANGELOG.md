@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Unreleased]
 
 - Security: Upgraded `next` to 15.5.12, `vite` to ^7.1.11, `tar` to >=7.5.7, and `glob` to >=10.5.0 to address known vulnerabilities (DoS, SSRF, path traversal, command injection).
+- Added: LLM function call display in the conversation view (`LLMFunctionCallStarted`, `LLMFunctionCallInProgress`, `LLMFunctionCallStopped` events)
+- Added: `FunctionCallContent` component for rendering function calls with collapsible details (arguments, result)
+- Added: `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent` UI primitives (wrapping `@radix-ui/react-collapsible`)
+- Added: `noFunctionCalls` prop on `ConversationPanel` and `Conversation` to disable rendering of function call messages
+- Added: `functionCallLabel` prop on `Conversation`, `MessageContainer`, and `MessageRole` to customize the function call label
+- Added: `functionCallRenderer` prop on `Conversation`, `MessageContainer`, and `FunctionCallContent` for custom function call rendering. Accepts a `FunctionCallRenderer` callback that receives the full `FunctionCallData` and returns a `ReactNode`.
+- Added: `FunctionCallData` type and `functionCall` field on `ConversationMessage`
+- Added: `addFunctionCall`, `updateFunctionCall`, `updateLastStartedFunctionCall` actions on the conversation store
+- Changed: `ConversationMessage.role` now includes `"function_call"` as a valid value
+- Changed: Bumped peer dependency `@pipecat-ai/client-js` to `>=1.6.0`, `@pipecat-ai/daily-transport` to `>=1.6.0`, `@pipecat-ai/small-webrtc-transport` to `>=1.9.0`
 
 [0.7.1]
 

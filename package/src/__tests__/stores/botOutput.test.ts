@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   applySpokenBotOutputProgress,
-  hasUnspokenContent,
   type BotOutputMessageCursor,
+  hasUnspokenContent,
 } from "@/stores/botOutput";
 import type { ConversationMessagePart } from "@/types/conversation";
 

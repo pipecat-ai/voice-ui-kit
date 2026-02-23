@@ -156,9 +156,10 @@ export interface ConsoleTemplateProps
    * This allows parent components to manually add messages to the conversation.
    */
   onInjectMessage?: (
-    injectMessage: (
-      message: Pick<ConversationMessage, "role" | "parts">,
-    ) => void,
+    injectMessage: (message: {
+      role: "user" | "assistant" | "system";
+      parts: ConversationMessage["parts"];
+    }) => void,
   ) => void;
 
   /**

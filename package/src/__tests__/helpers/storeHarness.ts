@@ -1,8 +1,8 @@
 import { useConversationStore } from "@/stores/conversationStore";
 import type { ConversationMessage } from "@/types/conversation";
 import {
-  hasUnspokenContent,
   type BotOutputMessageCursor,
+  hasUnspokenContent,
 } from "@/stores/botOutput";
 
 /**
