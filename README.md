@@ -164,3 +164,7 @@ Examples:
 - [Custom UI with components](./examples/02-components/)
 - [Tailwind](./examples/03-tailwind/)
 - [Vite](./examples/04-vite/)
+
+## Contributing
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) enforced by Husky + commitlint, and [Release Please](https://github.com/googleapis/release-please) for automated releases. See [AGENTS.md](./AGENTS.md) for the full development workflow, commit guidelines, and release process.
