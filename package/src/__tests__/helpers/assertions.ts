@@ -48,10 +48,14 @@ export function getUserText(message: ConversationMessage): string {
 export function expectMessages(
   messages: ConversationMessage[],
   expected: Array<{
-    role: "user" | "assistant" | "system";
+    role: "user" | "assistant" | "system" | "function_call";
     final?: boolean;
     textContains?: string;
     partCount?: number;
+    functionName?: string;
+    functionStatus?: "started" | "in_progress" | "completed";
+    toolCallId?: string;
+    cancelled?: boolean;
   }>,
 ) {
   expect(messages).toHaveLength(expected.length);
@@ -70,6 +74,18 @@ export function expectMessages(
           ? getRawPartTexts(msg).join("")
           : getUserText(msg);
       expect(text).toContain(exp.textContains);
+    }
+    if (exp.functionName !== undefined) {
+      expect(msg.functionCall?.function_name).toBe(exp.functionName);
+    }
+    if (exp.functionStatus !== undefined) {
+      expect(msg.functionCall?.status).toBe(exp.functionStatus);
+    }
+    if (exp.toolCallId !== undefined) {
+      expect(msg.functionCall?.tool_call_id).toBe(exp.toolCallId);
+    }
+    if (exp.cancelled !== undefined) {
+      expect(msg.functionCall?.cancelled).toBe(exp.cancelled);
     }
   });
 }
