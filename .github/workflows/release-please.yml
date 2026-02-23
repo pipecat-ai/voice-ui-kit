@@ -13,7 +13,7 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
+      release_created: ${{ steps.release.outputs['package--release_created'] }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
