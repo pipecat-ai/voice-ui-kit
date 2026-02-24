@@ -63,7 +63,7 @@ const { messages } = usePipecatConversation({
 
 ### Custom aggregation metadata (inline vs block, spoken vs not spoken)
 
-Only `"word"` and `"sentence"` are considered default aggregation types. Any other `aggregatedBy` value is **custom and arbitrary**, and should be configured through `aggregationMetadata` (and optionally `botOutputRenderers` in your UI components).
+Only `"word"`, `"sentence"`, and `"token"` are considered default aggregation types. Any other `aggregatedBy` value is **custom and arbitrary**, and should be configured through `aggregationMetadata` (and optionally `botOutputRenderers` in your UI components).
 
 This metadata influences:
 - **Rendering**: whether an aggregation should be treated as inline text or a block (e.g. code blocks)

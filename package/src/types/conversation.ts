@@ -65,7 +65,7 @@ export interface ConversationMessagePart {
   final: boolean;
   createdAt: string;
   /**
-   * Aggregation type for BotOutput content (e.g., "code", "link", "sentence", "word")
+   * Aggregation type for BotOutput content (e.g., "code", "link", "sentence", "word", "token")
    * Used to determine which custom renderer to use, if any
    */
   aggregatedBy?: string;

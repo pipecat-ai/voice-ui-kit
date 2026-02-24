@@ -174,7 +174,7 @@ describe("conversationStore", () => {
       });
 
       getState().updateAssistantBotOutput("Hello", false, false, "word");
-      getState().updateAssistantBotOutput(" world", false, false, "word");
+      getState().updateAssistantBotOutput("world", false, false, "word");
 
       const parts = getState().messages[0].parts;
       expect(parts).toHaveLength(1);
@@ -247,7 +247,7 @@ describe("conversationStore", () => {
 
       // First send unspoken
       getState().updateAssistantBotOutput("Hello", false, false, "word");
-      getState().updateAssistantBotOutput(" world", false, false, "word");
+      getState().updateAssistantBotOutput("world", false, false, "word");
 
       // Then spoken
       getState().updateAssistantBotOutput("Hello", false, true, "word");

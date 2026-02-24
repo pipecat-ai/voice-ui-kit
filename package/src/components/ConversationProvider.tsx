@@ -57,10 +57,6 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   const botStoppedSpeakingTimeoutRef =
     useRef<ReturnType<typeof setTimeout>>(undefined);
   const assistantStreamResetRef = useRef<number>(0);
-  const botOutputLastChunkRef = useRef<{ spoken: string; unspoken: string }>({
-    spoken: "",
-    unspoken: "",
-  });
 
   /** Delay (ms) before finalizing the assistant message after bot stops speaking. */
   const BOT_STOPPED_FINALIZE_DELAY_MS = 2500;
@@ -82,7 +78,6 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     setBotOutputSupported(null);
     clearTimeout(botStoppedSpeakingTimeoutRef.current);
     botStoppedSpeakingTimeoutRef.current = undefined;
-    botOutputLastChunkRef.current = { spoken: "", unspoken: "" };
   });
 
   // Helper to ensure assistant message exists
@@ -140,30 +135,9 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     botStoppedSpeakingTimeoutRef.current = undefined;
 
     ensureAssistantMessage();
-
-    // Handle spacing for BotOutput chunks
-    let textToAdd = data.text;
-    const lastChunk = data.spoken
-      ? botOutputLastChunkRef.current.spoken
-      : botOutputLastChunkRef.current.unspoken;
-
-    // Add space separator if needed between BotOutput chunks
-    if (lastChunk) {
-      textToAdd = " " + textToAdd;
-    }
-
-    // Update the appropriate last chunk tracker
-    if (data.spoken) {
-      botOutputLastChunkRef.current.spoken = textToAdd;
-    } else {
-      botOutputLastChunkRef.current.unspoken = textToAdd;
-    }
-
-    // Update both spoken and unspoken text streams
-    const isFinal = data.aggregated_by === "sentence";
     updateAssistantBotOutput(
-      textToAdd,
-      isFinal,
+      data.text,
+      data.aggregated_by === "sentence",
       data.spoken,
       data.aggregated_by,
     );

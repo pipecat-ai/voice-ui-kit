@@ -267,7 +267,7 @@ The component listens to these events:
 
 The component automatically:
 - Detects BotOutput support from RTVI version (requires 1.1.0+)
-- Processes BotOutput events for non-word-level TTS (supports sentence, code, link, etc. aggregation types)
+- Processes BotOutput events for non-word-level TTS (supports sentence, token, code, link, etc. aggregation types)
 - Falls back to `BotTtsText` events for older RTVI versions
 - Accumulates transcript text as speech progresses
 - Clears the transcript when a new speech turn begins

@@ -9,18 +9,12 @@ import {
  * Store-level test harness that replicates the ConversationProvider's
  * event-to-store-action logic without requiring React.
  *
- * The key behavior replicated here is the space-prepending logic from
- * ConversationProvider (lines 106-135): each BotOutput chunk gets a
- * leading space if there was a previous chunk of the same type (spoken
- * or unspoken). This is critical because the store receives already-spaced text.
+ * ConversationProvider passes raw BotOutput text directly to the store;
+ * all spacing logic (word-level separators, etc.) lives in the store itself.
  */
 export function createStoreHarness() {
-  // Tracks last chunk per type, mirroring botOutputLastChunkRef in ConversationProvider
-  let lastChunk = { spoken: "", unspoken: "" };
-
   function reset() {
     useConversationStore.getState().clearMessages();
-    lastChunk = { spoken: "", unspoken: "" };
   }
 
   /**
@@ -55,35 +49,22 @@ export function createStoreHarness() {
       }
 
       store.addMessage({ role: "assistant", final: false, parts: [] });
-      lastChunk = { spoken: "", unspoken: "" };
       return true;
     }
     return false;
   }
 
   /**
-   * Emit a BotOutput event, replicating ConversationProvider spacing logic.
+   * Emit a BotOutput event, mirroring ConversationProvider which passes
+   * raw text directly to the store.
    */
   function emitBotOutput(text: string, spoken: boolean, aggregatedBy?: string) {
     ensureAssistantMessage();
 
-    let textToAdd = text;
-    const prevChunk = spoken ? lastChunk.spoken : lastChunk.unspoken;
-
-    if (prevChunk) {
-      textToAdd = " " + textToAdd;
-    }
-
-    if (spoken) {
-      lastChunk.spoken = textToAdd;
-    } else {
-      lastChunk.unspoken = textToAdd;
-    }
-
     const isFinal = aggregatedBy === "sentence";
     useConversationStore
       .getState()
-      .updateAssistantBotOutput(textToAdd, isFinal, spoken, aggregatedBy);
+      .updateAssistantBotOutput(text, isFinal, spoken, aggregatedBy);
   }
 
   /**
@@ -146,13 +127,6 @@ export function createStoreHarness() {
     return getBotOutputState().get(lastAssistant.createdAt);
   }
 
-  /**
-   * Reset the chunk trackers, as happens when a new assistant message is created.
-   */
-  function resetChunkTrackers() {
-    lastChunk = { spoken: "", unspoken: "" };
-  }
-
   function handleFunctionCallStarted(data: { function_name?: string }) {
     useConversationStore.getState().handleFunctionCallStarted(data);
   }
@@ -186,7 +160,6 @@ export function createStoreHarness() {
     getMessages,
     getBotOutputState,
     getLastAssistantCursor,
-    resetChunkTrackers,
     handleFunctionCallStarted,
     handleFunctionCallInProgress,
     handleFunctionCallStopped,

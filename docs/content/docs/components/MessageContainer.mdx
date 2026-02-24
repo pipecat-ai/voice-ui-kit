@@ -203,7 +203,7 @@ The component expects a `ConversationMessage` object with:
 - `createdAt`: ISO timestamp string
 - `functionCall`: Optional `FunctionCallData` object (present when `role` is `"function_call"`)
 
-If you use custom `aggregatedBy` values (anything other than the defaults `"word"` and `"sentence"`), pass `aggregationMetadata` so the UI knows whether those parts should render inline vs block and whether they should be included in karaoke-style speech progress.
+If you use custom `aggregatedBy` values (anything other than the defaults `"word"`, `"sentence"`, and `"token"`), pass `aggregationMetadata` so the UI knows whether those parts should render inline vs block and whether they should be included in karaoke-style speech progress.
 
 ## Function Call Messages
 

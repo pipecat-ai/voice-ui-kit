@@ -44,7 +44,7 @@ interface ConversationState {
     text: string,
     final: boolean,
     spoken: boolean, // true if text has been spoken, false if unspoken
-    aggregatedBy?: string, // aggregation type (e.g., "code", "link", "sentence", "word")
+    aggregatedBy?: string, // aggregation type (e.g., "code", "link", "sentence", "word", "token")
   ) => void;
   addFunctionCall: (data: {
     function_name?: string;
@@ -246,6 +246,22 @@ const callAllMessageCallbacks = (
     }
   });
 };
+
+/**
+ * Built-in aggregation types that are treated as inline, spoken content.
+ * Custom types (e.g., "code", "link") are not in this set and require
+ * explicit `aggregationMetadata` for display configuration.
+ */
+const isBuiltInAggregationType = (type?: string): boolean =>
+  type === "sentence" || type === "word" || type === "token" || !type;
+
+/**
+ * Incremental aggregation types that accumulate into a single message part.
+ * Sentence-level and custom types each get their own part so spoken progress
+ * events can match 1:1.
+ */
+const isIncrementalType = (type?: string): boolean =>
+  type === "word" || type === "token";
 
 export const useConversationStore = create<ConversationState>()((set, get) => ({
   messages: [],
@@ -517,37 +533,35 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
       const parts = [...(message.parts || [])];
 
       if (!spoken) {
-        // UNSPOKEN EVENT: Create/update message parts immediately
-        // Only append when both current and last part are word-level; sentence-level
-        // and other types each get their own part so spoken events can match 1:1.
-        const isDefaultType =
-          aggregatedBy === "sentence" ||
-          aggregatedBy === "word" ||
-          !aggregatedBy;
+        // UNSPOKEN EVENT: Create/update message parts immediately.
+        // Incremental types (word, token) append to the current part;
+        // sentence-level and custom types each get their own part so
+        // spoken progress events can match 1:1.
         const lastPart = parts[parts.length - 1];
         const shouldAppend =
           lastPart &&
-          aggregatedBy === "word" &&
-          lastPart.aggregatedBy === "word" &&
+          isIncrementalType(aggregatedBy) &&
+          lastPart.aggregatedBy === aggregatedBy &&
           typeof lastPart.text === "string";
 
         if (shouldAppend) {
-          // Append to last part (word-level only)
-          const lastPartText = lastPart.text as string;
-          const separator =
-            lastPartText && !lastPartText.endsWith(" ") && !text.startsWith(" ")
-              ? " "
-              : "";
+          // Append to current part.
+          // Word-level chunks need a space separator; token-level text
+          // already includes inter-frame spacing from the LLM.
+          const separator = aggregatedBy === "word" ? " " : "";
           parts[parts.length - 1] = {
             ...lastPart,
-            text: lastPartText + separator + text,
+            text: (lastPart.text as string) + separator + text,
           };
         } else {
-          // Create new part (sentence-level, custom types, or first word chunk)
-          // Default to inline; custom types get displayMode from metadata in the hook
-          const defaultDisplayMode = isDefaultType ? "inline" : undefined;
+          // Create new part (sentence-level, custom types, or first incremental chunk).
+          // Built-in types default to inline; custom types get displayMode
+          // from aggregationMetadata in the hook.
+          const defaultDisplayMode = isBuiltInAggregationType(aggregatedBy)
+            ? "inline"
+            : undefined;
           const newPart: ConversationMessagePart = {
-            text: text, // Store full text as string
+            text,
             final: false, // Will be evaluated in hook based on metadata
             createdAt: now.toISOString(),
             aggregatedBy,
@@ -573,12 +587,10 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
           applySpokenBotOutputProgress(messageState, parts, text);
 
         if (!advanced) {
-          // No unspoken content to advance: add this text as a part already fully spoken
-          const isDefaultType =
-            aggregatedBy === "sentence" ||
-            aggregatedBy === "word" ||
-            !aggregatedBy;
-          const defaultDisplayMode = isDefaultType ? "inline" : undefined;
+          // No unspoken content to advance: add this text as a part already fully spoken.
+          const defaultDisplayMode = isBuiltInAggregationType(aggregatedBy)
+            ? "inline"
+            : undefined;
           const newPart: ConversationMessagePart = {
             text,
             final: false,
