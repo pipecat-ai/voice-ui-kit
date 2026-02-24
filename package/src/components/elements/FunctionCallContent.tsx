@@ -45,7 +45,7 @@ const StatusIcon: React.FC<{
 
 export const FunctionCallContent: React.FC<FunctionCallContentProps> = ({
   functionCall,
-  functionCallLabel = "function call",
+  functionCallLabel = "Function call",
   functionCallRenderer,
   classNames = {},
 }) => {
@@ -85,10 +85,12 @@ export const FunctionCallContent: React.FC<FunctionCallContentProps> = ({
               status={functionCall.status}
               cancelled={functionCall.cancelled}
             />
-            <span className="font-semibold">
-              {functionCall.function_name ?? "unknown"}
-            </span>
-            <span className="text-muted-foreground">({functionCallLabel})</span>
+            <span className="font-semibold">{functionCallLabel}</span>
+            {functionCall.function_name && (
+              <span className="text-muted-foreground">
+                ({functionCall.function_name})
+              </span>
+            )}
           </button>
         </CollapsibleTrigger>
 
