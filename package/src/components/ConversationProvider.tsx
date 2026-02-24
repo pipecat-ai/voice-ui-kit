@@ -4,7 +4,14 @@ import {
   type ConversationMessage,
   type ConversationMessagePart,
 } from "@/types/conversation";
-import { BotOutputData, BotReadyData, RTVIEvent } from "@pipecat-ai/client-js";
+import {
+  BotOutputData,
+  BotReadyData,
+  type LLMFunctionCallInProgressData,
+  type LLMFunctionCallStartedData,
+  type LLMFunctionCallStoppedData,
+  RTVIEvent,
+} from "@pipecat-ai/client-js";
 import { useRTVIClientEvent } from "@pipecat-ai/client-react";
 import { createContext, useContext, useRef, useState } from "react";
 import { isMinVersion } from "@/utils/version";
@@ -37,6 +44,9 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     injectMessage,
     upsertUserTranscript,
     updateAssistantBotOutput,
+    handleFunctionCallStarted,
+    handleFunctionCallInProgress,
+    handleFunctionCallStopped,
   } = useConversationStore();
 
   // null = unknown (before BotReady), true = supported, false = not supported
@@ -210,6 +220,37 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
       }
     }, 3000);
   });
+
+  // LLM Function Call lifecycle events
+  useRTVIClientEvent(
+    RTVIEvent.LLMFunctionCallStarted,
+    (data: LLMFunctionCallStartedData) => {
+      handleFunctionCallStarted({ function_name: data.function_name });
+    },
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.LLMFunctionCallInProgress,
+    (data: LLMFunctionCallInProgressData) => {
+      handleFunctionCallInProgress({
+        function_name: data.function_name,
+        tool_call_id: data.tool_call_id,
+        args: data.arguments,
+      });
+    },
+  );
+
+  useRTVIClientEvent(
+    RTVIEvent.LLMFunctionCallStopped,
+    (data: LLMFunctionCallStoppedData) => {
+      handleFunctionCallStopped({
+        function_name: data.function_name,
+        tool_call_id: data.tool_call_id,
+        result: data.result,
+        cancelled: data.cancelled,
+      });
+    },
+  );
 
   const contextValue: ConversationContextValue = {
     messages,

@@ -1,6 +1,15 @@
 import { type ReactNode } from "react";
 
 /**
+ * Custom renderer for function call messages in the conversation.
+ * Receives the full FunctionCallData so developers can render differently
+ * based on function name, status, args, and result.
+ */
+export type FunctionCallRenderer = (
+  functionCall: FunctionCallData,
+) => ReactNode;
+
+/**
  * BotOutput text structure for messages in BotOutput mode
  */
 export interface BotOutputText {
@@ -27,6 +36,25 @@ export interface AggregationMetadata {
   displayMode?: "inline" | "block";
 }
 
+/**
+ * Data associated with an LLM function call message.
+ * Present only when role === "function_call".
+ */
+export interface FunctionCallData {
+  /** The name of the function being called */
+  function_name?: string;
+  /** Unique identifier for this tool call */
+  tool_call_id?: string;
+  /** Arguments passed to the function */
+  args?: Record<string, unknown>;
+  /** Result of the function call (populated when complete) */
+  result?: unknown;
+  /** Whether the function call was cancelled */
+  cancelled?: boolean;
+  /** Current status of the function call */
+  status: "started" | "in_progress" | "completed";
+}
+
 export interface ConversationMessagePart {
   /**
    * Text content for the message part.
@@ -51,9 +79,11 @@ export interface ConversationMessagePart {
 }
 
 export interface ConversationMessage {
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant" | "system" | "function_call";
   final?: boolean;
   parts: ConversationMessagePart[];
   createdAt: string;
   updatedAt?: string;
+  /** Function call data, present only when role is "function_call" */
+  functionCall?: FunctionCallData;
 }

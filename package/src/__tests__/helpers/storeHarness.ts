@@ -1,8 +1,8 @@
 import { useConversationStore } from "@/stores/conversationStore";
 import type { ConversationMessage } from "@/types/conversation";
 import {
-  hasUnspokenContent,
   type BotOutputMessageCursor,
+  hasUnspokenContent,
 } from "@/stores/botOutput";
 
 /**
@@ -153,6 +153,27 @@ export function createStoreHarness() {
     lastChunk = { spoken: "", unspoken: "" };
   }
 
+  function handleFunctionCallStarted(data: { function_name?: string }) {
+    useConversationStore.getState().handleFunctionCallStarted(data);
+  }
+
+  function handleFunctionCallInProgress(data: {
+    function_name?: string;
+    tool_call_id: string;
+    args?: Record<string, unknown>;
+  }) {
+    useConversationStore.getState().handleFunctionCallInProgress(data);
+  }
+
+  function handleFunctionCallStopped(data: {
+    function_name?: string;
+    tool_call_id: string;
+    result?: unknown;
+    cancelled?: boolean;
+  }) {
+    useConversationStore.getState().handleFunctionCallStopped(data);
+  }
+
   return {
     reset,
     ensureAssistantMessage,
@@ -166,6 +187,9 @@ export function createStoreHarness() {
     getBotOutputState,
     getLastAssistantCursor,
     resetChunkTrackers,
+    handleFunctionCallStarted,
+    handleFunctionCallInProgress,
+    handleFunctionCallStopped,
   };
 }
 

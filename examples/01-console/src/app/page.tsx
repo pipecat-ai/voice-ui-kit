@@ -7,12 +7,14 @@ import {
 } from "@pipecat-ai/voice-ui-kit";
 
 export default function Home() {
+  const botHost = process.env.NEXT_PUBLIC_BOT_HOST ?? "";
+
   return (
     <ThemeProvider>
       <FullScreenContainer>
           <ConsoleTemplate
               startBotParams={{
-                  endpoint: "/start",
+                  endpoint: `${botHost}/start`,
                   requestData: {
                       createDailyRoom: false,
                       enableDefaultIceServers: true,

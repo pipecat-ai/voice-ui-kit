@@ -13,7 +13,21 @@ export type ScenarioStep =
   | { type: "userStartedSpeaking" }
   | { type: "userStoppedSpeaking" }
   | { type: "userTranscript"; text: string; final: boolean }
-  | { type: "wait"; ms: number };
+  | { type: "wait"; ms: number }
+  | { type: "functionCallStarted"; function_name?: string }
+  | {
+      type: "functionCallInProgress";
+      function_name?: string;
+      tool_call_id: string;
+      args?: Record<string, unknown>;
+    }
+  | {
+      type: "functionCallStopped";
+      function_name?: string;
+      tool_call_id: string;
+      result?: unknown;
+      cancelled?: boolean;
+    };
 
 export interface ConversationScenario {
   steps: ScenarioStep[];
@@ -39,6 +53,25 @@ interface BotPartOptions {
   isSpoken?: boolean;
 }
 
+interface FunctionCallOptions {
+  /** Tool call ID. If not provided, auto-generated as `call_<index>`. */
+  toolCallId?: string;
+  /** Arguments to pass. */
+  args?: Record<string, unknown>;
+  /** Result of the function call. Default: undefined. */
+  result?: unknown;
+  /** Whether the call was cancelled. Default: false. */
+  cancelled?: boolean;
+  /**
+   * Which lifecycle events to emit.
+   * - "full": Started → InProgress → Stopped (default)
+   * - "startedOnly": only Started
+   * - "skipStarted": InProgress → Stopped (out-of-order)
+   * - "skipInProgress": Started → Stopped
+   */
+  lifecycle?: "full" | "startedOnly" | "skipStarted" | "skipInProgress";
+}
+
 // ---------------------------------------------------------------------------
 // Internal turn representation
 // ---------------------------------------------------------------------------
@@ -47,7 +80,8 @@ type Turn =
   | { kind: "bot"; text: string; options: BotTurnOptions }
   | { kind: "botPart"; text: string; options: BotPartOptions }
   | { kind: "user"; text: string }
-  | { kind: "interruptAfter"; spokenUpTo: string };
+  | { kind: "interruptAfter"; spokenUpTo: string }
+  | { kind: "functionCall"; name: string; options: FunctionCallOptions };
 
 // ---------------------------------------------------------------------------
 // Builder
@@ -55,6 +89,7 @@ type Turn =
 
 class ConversationBuilder {
   private turns: Turn[] = [];
+  private functionCallCounter = 0;
 
   /**
    * Add a bot turn. Text will be split into events per the aggregation mode.
@@ -83,6 +118,16 @@ class ConversationBuilder {
    */
   interruptAfter(spokenUpTo: string): this {
     this.turns.push({ kind: "interruptAfter", spokenUpTo });
+    return this;
+  }
+
+  /**
+   * Add a function call within the conversation.
+   * By default emits Started → InProgress → Stopped (full lifecycle).
+   * Use the `lifecycle` option to test edge cases (out-of-order, skipped events).
+   */
+  functionCall(name: string, options: FunctionCallOptions = {}): this {
+    this.turns.push({ kind: "functionCall", name, options });
     return this;
   }
 
@@ -258,6 +303,36 @@ class ConversationBuilder {
         }
 
         steps.push({ type: "userStoppedSpeaking" });
+      } else if (turn.kind === "functionCall") {
+        const toolCallId =
+          turn.options.toolCallId ?? `call_${++this.functionCallCounter}`;
+        const lifecycle = turn.options.lifecycle ?? "full";
+
+        if (lifecycle !== "skipStarted") {
+          steps.push({
+            type: "functionCallStarted",
+            function_name: turn.name,
+          });
+        }
+
+        if (lifecycle !== "startedOnly" && lifecycle !== "skipInProgress") {
+          steps.push({
+            type: "functionCallInProgress",
+            function_name: turn.name,
+            tool_call_id: toolCallId,
+            args: turn.options.args,
+          });
+        }
+
+        if (lifecycle !== "startedOnly") {
+          steps.push({
+            type: "functionCallStopped",
+            function_name: turn.name,
+            tool_call_id: toolCallId,
+            result: turn.options.result,
+            cancelled: turn.options.cancelled,
+          });
+        }
       }
       // botPart and interruptAfter are handled inline with the preceding bot turn
     }
@@ -372,6 +447,29 @@ export function playScenario(
         }, 3000);
         break;
       }
+
+      case "functionCallStarted":
+        harness.handleFunctionCallStarted({
+          function_name: step.function_name,
+        });
+        break;
+
+      case "functionCallInProgress":
+        harness.handleFunctionCallInProgress({
+          function_name: step.function_name,
+          tool_call_id: step.tool_call_id,
+          args: step.args,
+        });
+        break;
+
+      case "functionCallStopped":
+        harness.handleFunctionCallStopped({
+          function_name: step.function_name,
+          tool_call_id: step.tool_call_id,
+          result: step.result,
+          cancelled: step.cancelled,
+        });
+        break;
 
       case "wait":
         vi.advanceTimersByTime(step.ms);
