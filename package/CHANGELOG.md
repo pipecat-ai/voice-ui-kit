@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.7.2...v0.8.0) (2026-02-25)
+
+
+### Features
+
+* add function calls to conversation panel ([8b89cc8](https://github.com/pipecat-ai/voice-ui-kit/commit/8b89cc8423b629029e26b5c9ff8945f39365d44f))
+* add reverseOrder prop to Conversation ([f14b09f](https://github.com/pipecat-ai/voice-ui-kit/commit/f14b09fd1f2e801f57423ed43766bc55a169eeef))
+* **console:** add tooltip to Connect button showing connection endpoint ([56dbe30](https://github.com/pipecat-ai/voice-ui-kit/commit/56dbe30ac1584b594c186e341fc2ea3f45043924))
+
+
+### Bug Fixes
+
+* show friendly label for unnamed function calls ([be2ad19](https://github.com/pipecat-ai/voice-ui-kit/commit/be2ad192a9a232e48506e0426e7f914096494fb8))
+
+
+### Performance Improvements
+
+* **visualizers:** optimize VoiceVisualizer rendering performance ([0c47a8d](https://github.com/pipecat-ai/voice-ui-kit/commit/0c47a8d538fe391ea59456eb425886b86b984a43))
+* **visualizers:** optimize VoiceVisualizer rendering performance ([ccd871a](https://github.com/pipecat-ai/voice-ui-kit/commit/ccd871a568affc734ba06d8d05582bab66c4e41f))
+
 ## [0.7.2](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.7.1...v0.7.2) (2026-02-23)
 
 
