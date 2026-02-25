@@ -45,6 +45,8 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const resolvedBarColorRef = useRef<string>("black");
     const resolvedPeakLineColorRef = useRef<string>("black");
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const frequencyDataRef = useRef<Uint8Array | null>(null);
 
     useEffect(() => {
       function resolveColor(color: string) {
@@ -74,55 +76,60 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
       participantType,
     );
 
+    // Effect 1: Audio pipeline — only recreated when track changes
     useEffect(() => {
-      if (!canvasRef.current) return;
-
-      const canvasWidth = barCount * barWidth + (barCount - 1) * barGap;
-      const canvasHeight = barMaxHeight;
-
-      const canvas = canvasRef.current;
-
-      const scaleFactor = 2;
-
-      // Make canvas fill the width and height of its container
-      const resizeCanvas = () => {
-        canvas.width = canvasWidth * scaleFactor;
-        canvas.height = canvasHeight * scaleFactor;
-
-        canvas.style.width = `${canvasWidth}px`;
-        canvas.style.height = `${canvasHeight}px`;
-
-        canvasCtx.lineCap = barLineCap;
-        canvasCtx.scale(scaleFactor, scaleFactor);
-      };
-
-      const canvasCtx = canvas.getContext("2d")!;
-      resizeCanvas();
-
-      if (!track) return;
+      if (!track) {
+        analyserRef.current = null;
+        frequencyDataRef.current = null;
+        return;
+      }
 
       const audioContext = new AudioContext();
       const source = audioContext.createMediaStreamSource(
         new MediaStream([track]),
       );
       const analyser = audioContext.createAnalyser();
-
       analyser.fftSize = 1024;
-
       source.connect(analyser);
 
-      const frequencyData = new Uint8Array(analyser.frequencyBinCount);
+      analyserRef.current = analyser;
+      frequencyDataRef.current = new Uint8Array(analyser.frequencyBinCount);
 
+      return () => {
+        analyserRef.current = null;
+        frequencyDataRef.current = null;
+        audioContext.close();
+      };
+    }, [track]);
+
+    // Effect 2: Canvas setup + animation loop
+    useEffect(() => {
+      if (!canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const canvasWidth = barCount * barWidth + (barCount - 1) * barGap;
+      const canvasHeight = barMaxHeight;
+      const scaleFactor = 2;
+
+      canvas.width = canvasWidth * scaleFactor;
+      canvas.height = canvasHeight * scaleFactor;
+      canvas.style.width = `${canvasWidth}px`;
+      canvas.style.height = `${canvasHeight}px`;
+
+      const canvasCtx = canvas.getContext("2d")!;
       canvasCtx.lineCap = barLineCap;
+      canvasCtx.scale(scaleFactor, scaleFactor);
 
-      // Create frequency bands based on barCount
+      // Create frequency bands with precomputed bin indices
+      const sampleRate = analyserRef.current?.context.sampleRate ?? 48000;
+      const frequencyBinCount = analyserRef.current?.frequencyBinCount ?? 512;
+      const nyquist = sampleRate / 2;
+
       const bands = Array.from({ length: barCount }, (_, i) => {
-        // Use improved logarithmic scale for better frequency distribution
-        const minFreq = barCount > 20 ? 200 : 80; // Adjust min frequency based on bar count
-        const maxFreq = 10000; // Cover most important audio frequencies
+        const minFreq = barCount > 20 ? 200 : 80;
+        const maxFreq = 10000;
 
-        // Use Mel scale inspired approach for more perceptually uniform distribution
-        // This helps with a large number of bars by placing fewer in the very low range
+        // Mel scale inspired approach for perceptually uniform distribution
         // https://en.wikipedia.org/wiki/Mel_scale
         const melMin = 2595 * Math.log10(1 + minFreq / 700);
         const melMax = 2595 * Math.log10(1 + maxFreq / 700);
@@ -132,15 +139,22 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
         const startFreq = 700 * (Math.pow(10, melValue / 2595) - 1);
         const endFreq = 700 * (Math.pow(10, (melValue + melStep) / 2595) - 1);
 
+        const startBin = Math.round(
+          (startFreq / nyquist) * (frequencyBinCount - 1),
+        );
+        const endBin = Math.round(
+          (endFreq / nyquist) * (frequencyBinCount - 1),
+        );
+
         const band: {
-          startFreq: number;
-          endFreq: number;
+          startBin: number;
+          endBin: number;
           smoothValue: number;
           peakValue?: number;
           peakOpacity?: number;
         } = {
-          startFreq,
-          endFreq,
+          startBin,
+          endBin,
           smoothValue: 0,
         };
 
@@ -152,45 +166,93 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
         return band;
       });
 
-      const getFrequencyBinIndex = (frequency: number) => {
-        const nyquist = audioContext.sampleRate / 2;
-        return Math.round(
-          (frequency / nyquist) * (analyser.frequencyBinCount - 1),
-        );
-      };
+      // Precompute layout constants
+      const totalBarsWidth =
+        bands.length * barWidth + (bands.length - 1) * barGap;
+      const startX = (canvasWidth - totalBarsWidth) / 2;
+      const adjustedCircleRadius = barWidth / 2;
+
+      function drawInactiveCircle(
+        circleRadius: number,
+        color: string,
+        x: number,
+        y: number,
+      ) {
+        switch (barLineCap) {
+          case "square":
+            canvasCtx.fillStyle = color;
+            canvasCtx.fillRect(
+              x + barWidth / 2 - circleRadius,
+              y - circleRadius,
+              circleRadius * 2,
+              circleRadius * 2,
+            );
+            break;
+          case "round":
+          default:
+            canvasCtx.beginPath();
+            canvasCtx.arc(x + barWidth / 2, y, circleRadius, 0, 2 * Math.PI);
+            canvasCtx.fillStyle = color;
+            canvasCtx.fill();
+            canvasCtx.closePath();
+            break;
+        }
+      }
+
+      function drawInactiveCircles(circleRadius: number, color: string) {
+        let y;
+        switch (barOrigin) {
+          case "top":
+            y = circleRadius;
+            break;
+          case "bottom":
+            y = canvasHeight - circleRadius;
+            break;
+          case "center":
+          default:
+            y = canvasHeight / 2;
+            break;
+        }
+
+        bands.forEach((_, i) => {
+          const x = startX + i * (barWidth + barGap);
+          drawInactiveCircle(circleRadius, color, x, y);
+        });
+      }
+
+      let rafId: number;
 
       function drawSpectrum() {
-        analyser.getByteFrequencyData(frequencyData);
-        canvasCtx.clearRect(
-          0,
-          0,
-          canvas.width / scaleFactor,
-          canvas.height / scaleFactor,
-        );
+        const analyser = analyserRef.current;
+        const frequencyData = frequencyDataRef.current;
+
+        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
         canvasCtx.fillStyle = backgroundColor;
-        canvasCtx.fillRect(
-          0,
-          0,
-          canvas.width / scaleFactor,
-          canvas.height / scaleFactor,
-        );
+        canvasCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+        if (!analyser || !frequencyData) {
+          drawInactiveCircles(
+            adjustedCircleRadius,
+            resolvedBarColorRef.current,
+          );
+          // Don't schedule another frame — effect re-runs when track changes
+          return;
+        }
+
+        analyser.getByteFrequencyData(frequencyData);
 
         let isActive = false;
-
-        const totalBarsWidth =
-          bands.length * barWidth + (bands.length - 1) * barGap;
-        const startX = (canvas.width / scaleFactor - totalBarsWidth) / 2;
-
-        const adjustedCircleRadius = barWidth / 2;
 
         const resolvedBarColor = resolvedBarColorRef.current;
 
         bands.forEach((band, i) => {
-          const startIndex = getFrequencyBinIndex(band.startFreq);
-          const endIndex = getFrequencyBinIndex(band.endFreq);
-          const bandData = frequencyData.slice(startIndex, endIndex);
-          const bandValue =
-            bandData.reduce((acc, val) => acc + val, 0) / bandData.length;
+          // Index-based sum avoids per-frame array allocation
+          let sum = 0;
+          const count = band.endBin - band.startBin;
+          for (let j = band.startBin; j < band.endBin; j++) {
+            sum += frequencyData[j];
+          }
+          const bandValue = count > 0 ? sum / count : 0;
 
           const smoothingFactor = 0.2;
           const fadeEpsilon = 0.5;
@@ -242,7 +304,6 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
           );
 
           let yTop, yBottom;
-          const canvasHeight = canvas.height / scaleFactor;
 
           switch (barOrigin) {
             case "top":
@@ -355,70 +416,13 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
           drawInactiveCircles(adjustedCircleRadius, resolvedBarColor);
         }
 
-        requestAnimationFrame(drawSpectrum);
+        rafId = requestAnimationFrame(drawSpectrum);
       }
 
-      function drawInactiveCircle(
-        circleRadius: number,
-        color: string,
-        x: number,
-        y: number,
-      ) {
-        switch (barLineCap) {
-          case "square":
-            canvasCtx.fillStyle = color;
-            canvasCtx.fillRect(
-              x + barWidth / 2 - circleRadius,
-              y - circleRadius,
-              circleRadius * 2,
-              circleRadius * 2,
-            );
-            break;
-          case "round":
-          default:
-            canvasCtx.beginPath();
-            canvasCtx.arc(x + barWidth / 2, y, circleRadius, 0, 2 * Math.PI);
-            canvasCtx.fillStyle = color;
-            canvasCtx.fill();
-            canvasCtx.closePath();
-            break;
-        }
-      }
-
-      function drawInactiveCircles(circleRadius: number, color: string) {
-        const totalBarsWidth =
-          bands.length * barWidth + (bands.length - 1) * barGap;
-        const startX = (canvas.width / scaleFactor - totalBarsWidth) / 2;
-        const canvasHeight = canvas.height / scaleFactor;
-
-        let y;
-        switch (barOrigin) {
-          case "top":
-            y = circleRadius;
-            break;
-          case "bottom":
-            y = canvasHeight - circleRadius;
-            break;
-          case "center":
-          default:
-            y = canvasHeight / 2;
-            break;
-        }
-
-        bands.forEach((_, i) => {
-          const x = startX + i * (barWidth + barGap);
-          drawInactiveCircle(circleRadius, color, x, y);
-        });
-      }
-
-      drawSpectrum();
-
-      // Handle resizing
-      window.addEventListener("resize", resizeCanvas);
+      rafId = requestAnimationFrame(drawSpectrum);
 
       return () => {
-        audioContext.close();
-        window.removeEventListener("resize", resizeCanvas);
+        cancelAnimationFrame(rafId);
       };
     }, [
       backgroundColor,
@@ -429,7 +433,6 @@ export const VoiceVisualizer: React.FC<Props> = React.memo(
       barOrigin,
       barWidth,
       track,
-      barColor,
       noPeaks,
       peakLineSpeed,
       peakLineThickness,
