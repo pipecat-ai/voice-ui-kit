@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { usePipecatClient } from "@pipecat-ai/client-react";
 import { SendIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useConversationContext } from "../ConversationProvider";
+import { useConversationContext } from "@pipecat-ai/client-react";
 
 export interface TextInputComponentProps {
   debounceTime?: number;

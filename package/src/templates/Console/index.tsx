@@ -38,7 +38,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
 import {
   type ConversationMessage,
@@ -51,6 +50,7 @@ import {
 } from "@pipecat-ai/client-js";
 import {
   usePipecatClientCamControl,
+  usePipecatConversation,
   useRTVIClientEvent,
 } from "@pipecat-ai/client-react";
 import {

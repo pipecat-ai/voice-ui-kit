@@ -1,5 +1,5 @@
 import { FullScreenContainer } from "@/components/ui";
-import type { ConversationMessage } from "@/types/conversation";
+import type { ConversationMessage } from "@pipecat-ai/client-react";
 import type { StoryDefault } from "@ladle/react";
 import { useCallback, useRef, useState } from "react";
 import { ConsoleTemplate } from "./index";

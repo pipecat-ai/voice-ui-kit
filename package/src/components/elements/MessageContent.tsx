@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
-import { isMessageEmpty } from "@/stores/conversationStore";
-import {
+import type {
   AggregationMetadata,
   BotOutputText,
   ConversationMessage,
   ConversationMessagePart,
   TextRenderMode,
 } from "@/types/conversation";
+import { isMessageEmpty } from "@pipecat-ai/client-react";
 import { Fragment } from "react";
 import Thinking from "./Thinking";
 
