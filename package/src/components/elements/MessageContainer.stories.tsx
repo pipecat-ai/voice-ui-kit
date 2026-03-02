@@ -1,6 +1,6 @@
 import { MessageContainer } from "./MessageContainer";
 import type { Story, StoryDefault } from "@ladle/react";
-import { ConversationMessage } from "@/types/conversation";
+import type { ConversationMessage } from "@pipecat-ai/client-react";
 
 export default {
   title: "Components",

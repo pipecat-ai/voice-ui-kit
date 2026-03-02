@@ -23,4 +23,11 @@ export type {
   PipecatBaseChildProps,
   PipecatBaseProps,
 } from "@/components/PipecatAppBase";
-export * from "@/types/conversation";
+export type {
+  AggregationMetadata,
+  BotOutputText,
+  ConversationMessage,
+  ConversationMessagePart,
+  FunctionCallData,
+  FunctionCallRenderer,
+} from "@pipecat-ai/client-react";

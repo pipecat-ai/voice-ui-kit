@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type {
   FunctionCallData,
   FunctionCallRenderer,
-} from "@/types/conversation";
+} from "@pipecat-ai/client-react";
 import {
   Collapsible,
   CollapsibleContent,

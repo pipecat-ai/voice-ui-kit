@@ -1,5 +1,5 @@
 import type { Story, StoryDefault } from "@ladle/react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { TranscriptOverlayComponent } from "./TranscriptOverlay";
 
 export default {
@@ -149,13 +149,16 @@ export const SimulatedSpeech: Story<{
   const [turnEnd, setTurnEnd] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  const samplePhrases = [
-    "Hello, how can I help you today?",
-    "I can assist you with various tasks and answer your questions.",
-    "What would you like to know about our services?",
-    "I'm here to provide information and support whenever you need it.",
-    "Feel free to ask me anything you'd like to know.",
-  ];
+  const samplePhrases = useMemo(
+    () => [
+      "Hello, how can I help you today?",
+      "I can assist you with various tasks and answer your questions.",
+      "What would you like to know about our services?",
+      "I'm here to provide information and support whenever you need it.",
+      "Feel free to ask me anything you'd like to know.",
+    ],
+    [],
+  );
 
   const startNewSpeech = useCallback(() => {
     const phrase =
