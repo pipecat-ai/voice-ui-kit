@@ -13,7 +13,7 @@ import {
   RTVIEvent,
 } from "@pipecat-ai/client-js";
 import { useRTVIClientEvent } from "@pipecat-ai/client-react";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useMemo, useRef, useState } from "react";
 import { isMinVersion } from "@/utils/version";
 
 interface ConversationContextValue {
@@ -34,20 +34,8 @@ const ConversationContext = createContext<ConversationContextValue | null>(
 );
 
 export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
-  const {
-    messages,
-    clearMessages,
-    addMessage,
-    updateLastMessage,
-    finalizeLastMessage,
-    removeEmptyLastMessage,
-    injectMessage,
-    upsertUserTranscript,
-    updateAssistantBotOutput,
-    handleFunctionCallStarted,
-    handleFunctionCallInProgress,
-    handleFunctionCallStopped,
-  } = useConversationStore();
+  const messages = useConversationStore((state) => state.messages);
+  const injectMessage = useConversationStore((state) => state.injectMessage);
 
   // null = unknown (before BotReady), true = supported, false = not supported
   const [botOutputSupported, setBotOutputSupported] = useState<boolean | null>(
@@ -73,12 +61,12 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
       (m: ConversationMessage) => m.role === "assistant",
     );
     if (lastAssistant && !lastAssistant.final) {
-      finalizeLastMessage("assistant");
+      store.finalizeLastMessage("assistant");
     }
   };
 
   useRTVIClientEvent(RTVIEvent.Connected, () => {
-    clearMessages();
+    useConversationStore.getState().clearMessages();
     setBotOutputSupported(null);
     clearTimeout(botStoppedSpeakingTimeoutRef.current);
     botStoppedSpeakingTimeoutRef.current = undefined;
@@ -109,12 +97,12 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
         const messageId = lastAssistant.createdAt;
         const cursor = store.botOutputMessageState.get(messageId);
         if (cursor && hasUnspokenContent(cursor, lastAssistant.parts || [])) {
-          updateLastMessage("assistant", { final: false });
+          store.updateLastMessage("assistant", { final: false });
           return false;
         }
       }
 
-      addMessage({
+      store.addMessage({
         role: "assistant",
         final: false,
         parts: [],
@@ -161,12 +149,14 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
 
     // Update both spoken and unspoken text streams
     const isFinal = data.aggregated_by === "sentence";
-    updateAssistantBotOutput(
-      textToAdd,
-      isFinal,
-      data.spoken,
-      data.aggregated_by,
-    );
+    useConversationStore
+      .getState()
+      .updateAssistantBotOutput(
+        textToAdd,
+        isFinal,
+        data.spoken,
+        data.aggregated_by,
+      );
   });
 
   useRTVIClientEvent(RTVIEvent.BotStoppedSpeaking, () => {
@@ -179,7 +169,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     if (!lastAssistant || lastAssistant.final) return;
     botStoppedSpeakingTimeoutRef.current = setTimeout(() => {
       botStoppedSpeakingTimeoutRef.current = undefined;
-      finalizeLastMessage("assistant");
+      useConversationStore.getState().finalizeLastMessage("assistant");
     }, BOT_STOPPED_FINALIZE_DELAY_MS);
   });
 
@@ -198,7 +188,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   useRTVIClientEvent(RTVIEvent.UserTranscript, (data) => {
     const text = data.text ?? "";
     const final = Boolean(data.final);
-    upsertUserTranscript(text, final);
+    useConversationStore.getState().upsertUserTranscript(text, final);
 
     // If we got any transcript, cancel pending cleanup
     clearTimeout(userStoppedTimeout.current);
@@ -213,10 +203,11 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
         .messages.findLast((m: ConversationMessage) => m.role === "user");
       const hasParts =
         Array.isArray(lastUser?.parts) && lastUser!.parts.length > 0;
+      const actions = useConversationStore.getState();
       if (!lastUser || !hasParts) {
-        removeEmptyLastMessage("user");
+        actions.removeEmptyLastMessage("user");
       } else if (!lastUser.final) {
-        finalizeLastMessage("user");
+        actions.finalizeLastMessage("user");
       }
     }, 3000);
   });
@@ -225,14 +216,16 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   useRTVIClientEvent(
     RTVIEvent.LLMFunctionCallStarted,
     (data: LLMFunctionCallStartedData) => {
-      handleFunctionCallStarted({ function_name: data.function_name });
+      useConversationStore
+        .getState()
+        .handleFunctionCallStarted({ function_name: data.function_name });
     },
   );
 
   useRTVIClientEvent(
     RTVIEvent.LLMFunctionCallInProgress,
     (data: LLMFunctionCallInProgressData) => {
-      handleFunctionCallInProgress({
+      useConversationStore.getState().handleFunctionCallInProgress({
         function_name: data.function_name,
         tool_call_id: data.tool_call_id,
         args: data.arguments,
@@ -243,7 +236,7 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
   useRTVIClientEvent(
     RTVIEvent.LLMFunctionCallStopped,
     (data: LLMFunctionCallStoppedData) => {
-      handleFunctionCallStopped({
+      useConversationStore.getState().handleFunctionCallStopped({
         function_name: data.function_name,
         tool_call_id: data.tool_call_id,
         result: data.result,
@@ -252,11 +245,14 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     },
   );
 
-  const contextValue: ConversationContextValue = {
-    messages,
-    injectMessage,
-    botOutputSupported,
-  };
+  const contextValue = useMemo<ConversationContextValue>(
+    () => ({
+      messages,
+      injectMessage,
+      botOutputSupported,
+    }),
+    [messages, injectMessage, botOutputSupported],
+  );
 
   return (
     <ConversationContext.Provider value={contextValue}>

@@ -12,7 +12,6 @@ import { create } from "zustand";
 
 interface ConversationState {
   messages: ConversationMessage[];
-  messageCallbacks: Map<string, (message: ConversationMessage) => void>;
   // Simple state per message for tracking spoken position
   botOutputMessageState: Map<string, BotOutputMessageCursor>;
 
@@ -99,7 +98,7 @@ export const sortByCreatedAt = (
   a: ConversationMessage,
   b: ConversationMessage,
 ): number => {
-  return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  return a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0;
 };
 
 export const isMessageEmpty = (message: ConversationMessage): boolean => {
@@ -174,7 +173,7 @@ export const mergeMessages = (
         final: currentMessage.final !== false,
       };
     } else {
-      mergedMessages.push({ ...currentMessage });
+      mergedMessages.push(currentMessage);
     }
   }
 
@@ -233,12 +232,15 @@ const normalizeMessagesForUI = (
   );
 };
 
+// Module-level callback registry — mutations here do not trigger store re-renders
+const messageCallbacks = new Map<
+  string,
+  (message: ConversationMessage) => void
+>();
+
 // Helper function to call all registered callbacks
-const callAllMessageCallbacks = (
-  callbacks: Map<string, (message: ConversationMessage) => void>,
-  message: ConversationMessage,
-) => {
-  callbacks.forEach((callback) => {
+const callAllMessageCallbacks = (message: ConversationMessage) => {
+  messageCallbacks.forEach((callback) => {
     try {
       callback(message);
     } catch (error) {
@@ -249,22 +251,15 @@ const callAllMessageCallbacks = (
 
 export const useConversationStore = create<ConversationState>()((set, get) => ({
   messages: [],
-  messageCallbacks: new Map(),
   botOutputMessageState: new Map(),
 
-  registerMessageCallback: (id, callback) =>
-    set((state) => {
-      const newState = { ...state };
-      newState.messageCallbacks.set(id, callback || (() => {}));
-      return newState;
-    }),
+  registerMessageCallback: (id, callback) => {
+    messageCallbacks.set(id, callback || (() => {}));
+  },
 
-  unregisterMessageCallback: (id) =>
-    set((state) => {
-      const newState = { ...state };
-      newState.messageCallbacks.delete(id);
-      return newState;
-    }),
+  unregisterMessageCallback: (id) => {
+    messageCallbacks.delete(id);
+  },
 
   clearMessages: () =>
     set({
@@ -284,7 +279,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
       const updatedMessages = [...state.messages, message];
       const processedMessages = normalizeMessagesForUI(updatedMessages);
 
-      callAllMessageCallbacks(state.messageCallbacks, message);
+      callAllMessageCallbacks(message);
       return { messages: processedMessages };
     });
   },
@@ -307,7 +302,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
       messages[lastMessageIndex] = updatedMessage;
       const processedMessages = normalizeMessagesForUI(messages);
 
-      callAllMessageCallbacks(state.messageCallbacks, updatedMessage);
+      callAllMessageCallbacks(updatedMessage);
       return { messages: processedMessages };
     });
   },
@@ -342,10 +337,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
           final: true,
           updatedAt: new Date().toISOString(),
         };
-        callAllMessageCallbacks(
-          state.messageCallbacks,
-          messages[lastMessageIndex],
-        );
+        callAllMessageCallbacks(messages[lastMessageIndex]);
       }
 
       const processedMessages = normalizeMessagesForUI(messages);
@@ -389,7 +381,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
       const updatedMessages = [...state.messages, message];
       const processedMessages = normalizeMessagesForUI(updatedMessages);
 
-      callAllMessageCallbacks(state.messageCallbacks, message);
+      callAllMessageCallbacks(message);
       return { messages: processedMessages };
     });
   },
@@ -433,7 +425,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
 
         const processedMessages = normalizeMessagesForUI(messages);
 
-        callAllMessageCallbacks(state.messageCallbacks, updatedMessage);
+        callAllMessageCallbacks(updatedMessage);
         return { messages: processedMessages };
       }
 
@@ -454,7 +446,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
 
       const updatedMessages = [...messages, newMessage];
       const processedMessages = normalizeMessagesForUI(updatedMessages);
-      callAllMessageCallbacks(state.messageCallbacks, newMessage);
+      callAllMessageCallbacks(newMessage);
       return { messages: processedMessages };
     });
   },
@@ -600,7 +592,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
         }
       }
 
-      const processedMessages = mergeMessages(messages.sort(sortByCreatedAt));
+      const processedMessages = normalizeMessagesForUI(messages);
 
       return {
         messages: processedMessages,
@@ -638,7 +630,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
 
       const updatedMessages = [...state.messages, message];
       const processedMessages = normalizeMessagesForUI(updatedMessages);
-      callAllMessageCallbacks(state.messageCallbacks, message);
+      callAllMessageCallbacks(message);
       return { messages: processedMessages };
     });
   },
@@ -668,7 +660,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
       messages[index] = updated;
 
       const processedMessages = normalizeMessagesForUI(messages);
-      callAllMessageCallbacks(state.messageCallbacks, updated);
+      callAllMessageCallbacks(updated);
       return { messages: processedMessages };
     });
     return found;
@@ -699,7 +691,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
       messages[index] = updated;
 
       const processedMessages = normalizeMessagesForUI(messages);
-      callAllMessageCallbacks(state.messageCallbacks, updated);
+      callAllMessageCallbacks(updated);
       return { messages: processedMessages };
     });
     return found;

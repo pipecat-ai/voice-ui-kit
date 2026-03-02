@@ -5,12 +5,7 @@ import type {
 } from "@/types/conversation";
 import { useConversationContext } from "@/components/ConversationProvider";
 import { useEffect, useId, useMemo } from "react";
-import {
-  filterEmptyMessages,
-  mergeMessages,
-  sortByCreatedAt,
-  useConversationStore,
-} from "@/stores/conversationStore";
+import { useConversationStore } from "@/stores/conversationStore";
 
 /**
  * Options for `usePipecatConversation`.
@@ -51,8 +46,12 @@ export const usePipecatConversation = ({
   aggregationMetadata,
 }: Props = {}) => {
   const { injectMessage } = useConversationContext();
-  const { registerMessageCallback, unregisterMessageCallback } =
-    useConversationStore();
+  const registerMessageCallback = useConversationStore(
+    (state) => state.registerMessageCallback,
+  );
+  const unregisterMessageCallback = useConversationStore(
+    (state) => state.unregisterMessageCallback,
+  );
 
   // Generate a unique ID for this hook instance
   const callbackId = useId();
@@ -167,10 +166,7 @@ export const usePipecatConversation = ({
       return message;
     });
 
-    // Then process the messages normally
-    return mergeMessages(
-      filterEmptyMessages(processedMessages.sort(sortByCreatedAt)),
-    );
+    return processedMessages;
   }, [messages, botOutputMessageState, aggregationMetadata]);
 
   return {

@@ -9,6 +9,12 @@ import {
 import { Fragment } from "react";
 import Thinking from "./Thinking";
 
+const timeFormatter = new Intl.DateTimeFormat(undefined, {
+  hour: "numeric",
+  minute: "numeric",
+  second: "numeric",
+});
+
 type CustomBotOutputRenderer = (
   content: string,
   metadata: { spoken: string; unspoken: string },
@@ -207,7 +213,7 @@ export const MessageContent = ({
       <div
         className={cn("self-end text-xs text-gray-500 mb-1", classNames.time)}
       >
-        {new Date(message.createdAt).toLocaleTimeString()}
+        {timeFormatter.format(new Date(message.createdAt))}
       </div>
     </div>
   );
