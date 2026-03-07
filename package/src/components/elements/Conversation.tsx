@@ -201,6 +201,23 @@ export const Conversation: React.FC<ConversationProps> = memo(
       [allMessages, noFunctionCalls],
     );
 
+    const messageClassNames = useMemo(
+      () => ({
+        container: classNames.message,
+        messageContent: classNames.messageContent,
+        thinking: classNames.thinking,
+        time: classNames.time,
+        role: classNames.role,
+      }),
+      [
+        classNames.message,
+        classNames.messageContent,
+        classNames.thinking,
+        classNames.time,
+        classNames.role,
+      ],
+    );
+
     // Determine connection states based on transport state
     const isConnecting =
       transportState === "authenticating" || transportState === "connecting";
@@ -215,17 +232,33 @@ export const Conversation: React.FC<ConversationProps> = memo(
     }, [messages, maybeScrollToEdge, noAutoscroll]);
 
     // Set up scroll event listener to track user scroll position
+    const rafRef = useRef<number | undefined>(undefined);
+
     useEffect(() => {
       const scrollElement = scrollRef.current;
       if (!scrollElement) return;
 
-      const handleScroll = () => updateScrollState();
-      scrollElement.addEventListener("scroll", handleScroll);
+      const handleScroll = () => {
+        if (rafRef.current !== undefined) return;
+        rafRef.current = requestAnimationFrame(() => {
+          rafRef.current = undefined;
+          updateScrollState();
+        });
+      };
+      scrollElement.addEventListener("scroll", handleScroll, {
+        passive: true,
+      });
 
       // Initial check
       updateScrollState();
 
-      return () => scrollElement.removeEventListener("scroll", handleScroll);
+      return () => {
+        scrollElement.removeEventListener("scroll", handleScroll);
+        if (rafRef.current !== undefined) {
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = undefined;
+        }
+      };
     }, [updateScrollState]);
 
     const textInput = noTextInput ? null : (
@@ -255,20 +288,14 @@ export const Conversation: React.FC<ConversationProps> = memo(
               {(reverseOrder ? [...messages].reverse() : messages).map(
                 (message, index) => (
                   <MessageContainer
-                    key={index}
+                    key={`${message.createdAt}-${index}`}
                     message={message}
                     assistantLabel={assistantLabel}
                     clientLabel={clientLabel}
                     systemLabel={systemLabel}
                     functionCallLabel={functionCallLabel}
                     functionCallRenderer={functionCallRenderer}
-                    classNames={{
-                      container: classNames.message,
-                      messageContent: classNames.messageContent,
-                      thinking: classNames.thinking,
-                      time: classNames.time,
-                      role: classNames.role,
-                    }}
+                    classNames={messageClassNames}
                     botOutputRenderers={botOutputRenderers}
                     aggregationMetadata={aggregationMetadata}
                   />
