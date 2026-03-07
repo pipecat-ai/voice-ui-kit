@@ -183,6 +183,23 @@ export const ConversationProvider = ({ children }: React.PropsWithChildren) => {
     // User started a new turn; bot's turn is done. Fast-forward: finalize immediately.
     finalizeLastAssistantMessageIfPending();
     clearTimeout(userStoppedTimeout.current);
+
+    // Only finalize the previous user message if the bot has responded since
+    // the user last spoke. This prevents finalizing during VAD gaps (brief
+    // breathing pauses within the same user turn where UserStoppedSpeaking/
+    // UserStartedSpeaking fire without an actual turn change).
+    const store = useConversationStore.getState();
+    const lastUserIdx = store.messages.findLastIndex(
+      (m: ConversationMessage) => m.role === "user",
+    );
+    if (lastUserIdx !== -1 && !store.messages[lastUserIdx].final) {
+      const hasBotActivityAfterUser = store.messages
+        .slice(lastUserIdx + 1)
+        .some((m: ConversationMessage) => m.role === "assistant");
+      if (hasBotActivityAfterUser) {
+        store.finalizeLastMessage("user");
+      }
+    }
   });
 
   useRTVIClientEvent(RTVIEvent.UserTranscript, (data) => {

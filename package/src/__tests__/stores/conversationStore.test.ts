@@ -141,24 +141,30 @@ describe("conversationStore", () => {
       expect(messages[0].parts[0].text).toBe("Hello world");
     });
 
-    it("finalizes message on final transcript", () => {
+    it("finalizes part but not message on final transcript", () => {
       getState().upsertUserTranscript("Hello", false);
       getState().upsertUserTranscript("Hello world", true);
       const messages = getState().messages;
       expect(messages[0].parts[0].text).toBe("Hello world");
       expect(messages[0].parts[0].final).toBe(true);
-      expect(messages[0].final).toBe(true);
+      // Message stays non-final; finalization is deferred to
+      // finalizeLastMessage("user") via UserStoppedSpeaking.
+      expect(messages[0].final).toBe(false);
     });
 
     it("creates new part after a final part", () => {
       getState().upsertUserTranscript("First sentence", true);
 
-      // New transcript on the same (now finalized) message won't update it;
-      // it creates a new message because the existing one is final.
+      // Message stays non-final, so the next transcript adds a new part
+      // to the same message (the part is final, but the message is not).
       getState().upsertUserTranscript("Second sentence", false);
       const messages = getState().messages;
-      // Should have 2 messages since the first was finalized
-      expect(messages.length).toBeGreaterThanOrEqual(1);
+      expect(messages).toHaveLength(1);
+      expect(messages[0].parts).toHaveLength(2);
+      expect(messages[0].parts[0].text).toBe("First sentence");
+      expect(messages[0].parts[0].final).toBe(true);
+      expect(messages[0].parts[1].text).toBe("Second sentence");
+      expect(messages[0].parts[1].final).toBe(false);
     });
   });
 

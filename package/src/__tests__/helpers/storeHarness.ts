@@ -122,6 +122,20 @@ export function createStoreHarness() {
     }
   }
 
+  /**
+   * Finalize the last user message if it's pending (not yet final).
+   * Called on UserStartedSpeaking to close the previous user turn.
+   */
+  function finalizeUserIfPending() {
+    const messages = useConversationStore.getState().messages;
+    const lastUser = messages.findLast(
+      (m: ConversationMessage) => m.role === "user",
+    );
+    if (lastUser && !lastUser.final) {
+      finalizeUser();
+    }
+  }
+
   function removeEmptyLastUserMessage() {
     useConversationStore.getState().removeEmptyLastMessage("user");
   }
@@ -182,6 +196,7 @@ export function createStoreHarness() {
     finalizeAssistant,
     finalizeUser,
     finalizeAssistantIfPending,
+    finalizeUserIfPending,
     removeEmptyLastUserMessage,
     getMessages,
     getBotOutputState,
