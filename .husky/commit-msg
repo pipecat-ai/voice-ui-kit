@@ -1,1 +1,3 @@
-pnpm exec commitlint --edit $1
+if [ "$(git config --local hooks.commitlint)" = "true" ]; then
+  npx commitlint --edit $1
+fi

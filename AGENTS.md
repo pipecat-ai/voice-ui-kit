@@ -75,7 +75,17 @@ Linting also runs automatically on staged files via **lint-staged** during pre-c
 
 ## Commit Convention
 
-This project enforces [**Conventional Commits**](https://www.conventionalcommits.org/) via Husky + commitlint.
+This project enforces [**Conventional Commits**](https://www.conventionalcommits.org/). At least one commit per PR must be conventional, enforced by the `lint-commits` GitHub Actions workflow. Local commitlint is available but opt-in.
+
+### Local Commitlint (opt-in)
+
+To enable local commit message linting via the Husky hook:
+
+```bash
+git config --local hooks.commitlint true
+```
+
+To disable: `git config --local --unset hooks.commitlint`
 
 ### Format
 
