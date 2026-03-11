@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.1](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.8.0...v0.8.1) (2026-03-11)
+
+
+### Bug Fixes
+
+* improve turn detection and karaoke highlighting ([ccdf529](https://github.com/pipecat-ai/voice-ui-kit/commit/ccdf529a9acc3c169d5e53340f480988c502fdbf))
+* improve turn detection and karaoke highlighting ([e37f57b](https://github.com/pipecat-ai/voice-ui-kit/commit/e37f57bf1e31879aea205b00cd8f8438d59d35ad))
+
+
+### Performance Improvements
+
+* optimize conversation rendering pipeline ([4fa54b3](https://github.com/pipecat-ai/voice-ui-kit/commit/4fa54b30afb4344a02b15be9796562a644b46331))
+* optimize conversation rendering pipeline ([5d6d6ae](https://github.com/pipecat-ai/voice-ui-kit/commit/5d6d6ae2306431533247c22a19b3ecd5c7e950cf))
+
 ## [0.8.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.7.2...v0.8.0) (2026-02-25)
 
 
