@@ -416,7 +416,6 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
 
         const updatedMessage: ConversationMessage = {
           ...target,
-          final: final ? true : target.final,
           parts,
           updatedAt: now.toISOString(),
         };
@@ -429,10 +428,13 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
         return { messages: processedMessages };
       }
 
-      // Create a new user message initialized with this transcript
+      // Create a new user message initialized with this transcript.
+      // Message stays non-final; only parts track STT segment boundaries.
+      // The message itself is finalized by finalizeLastMessage("user")
+      // when UserStoppedSpeaking fires.
       const newMessage: ConversationMessage = {
         role: "user",
-        final,
+        final: false,
         parts: [
           {
             text,

@@ -66,7 +66,10 @@ const findSpokenPositionInUnspoken = (
     .filter(Boolean);
 
   // Sequential match, allowing prefix match for contractions (e.g. "I" vs "I'm")
+  // and limited skipping of mismatched unspoken words (e.g. punctuation artifacts).
   let matchedWords = 0;
+  let consecutiveSkips = 0;
+  const MAX_CONSECUTIVE_SKIPS = 2;
   for (
     let i = 0;
     i < unspokenWords.length && matchedWords < spokenWords.length;
@@ -76,12 +79,15 @@ const findSpokenPositionInUnspoken = (
     const candidate = unspokenWords[i];
     if (candidate === target || candidate.startsWith(target)) {
       matchedWords++;
+      consecutiveSkips = 0;
       continue;
     }
-    return actualStart;
+    consecutiveSkips++;
+    if (consecutiveSkips > MAX_CONSECUTIVE_SKIPS) return actualStart;
+    // Skip this unspoken word and try matching the next one
   }
 
-  if (matchedWords === 0) return actualStart;
+  if (matchedWords < spokenWords.length) return actualStart;
 
   // Convert word matches back into a character position in the original unspoken string.
   const isWordChar = (char: string): boolean => /[a-zA-Z0-9]/.test(char);
@@ -184,6 +190,42 @@ export function applySpokenBotOutputProgress(
       }
     }
     return true;
+  }
+
+  // Intra-part scan-ahead recovery: if matching failed at the current position,
+  // scan forward word-by-word within the same part. This prevents the cursor
+  // from getting permanently stuck mid-part when a single word mismatch occurs
+  // (e.g. TTS variation, punctuation boundary like `apexes."Sometimes`).
+  if (startChar > 0) {
+    const MAX_SCAN_WORDS = 8;
+    let scanPos = startChar;
+    for (let scan = 0; scan < MAX_SCAN_WORDS; scan++) {
+      // Advance past current word
+      while (scanPos < partText.length && !/\s/.test(partText[scanPos]))
+        scanPos++;
+      // Advance past whitespace to next word
+      while (scanPos < partText.length && /\s/.test(partText[scanPos]))
+        scanPos++;
+      if (scanPos >= partText.length) break;
+
+      const retryPos = findSpokenPositionInUnspoken(
+        spokenText,
+        partText,
+        scanPos,
+      );
+      const scanWsEnd = skipWhitespace(partText, scanPos);
+      if (retryPos > scanWsEnd) {
+        cursor.currentCharIndex = retryPos;
+        if (retryPos >= partText.length) {
+          cursor.partFinalFlags[cursor.currentPartIndex] = true;
+          if (cursor.currentPartIndex < parts.length - 1) {
+            cursor.currentPartIndex++;
+            cursor.currentCharIndex = 0;
+          }
+        }
+        return true;
+      }
+    }
   }
 
   // Mismatch recovery: try to find the spoken text in a later part.

@@ -407,7 +407,7 @@ export function playScenario(
         break;
       }
 
-      case "userStartedSpeaking":
+      case "userStartedSpeaking": {
         // Immediately finalize pending assistant message
         if (botStoppedTimeout !== undefined) {
           clearTimeout(botStoppedTimeout);
@@ -418,7 +418,23 @@ export function playScenario(
           clearTimeout(userStoppedTimeout);
           userStoppedTimeout = undefined;
         }
+        // Finalize any pending user message, but only if the bot has
+        // responded since the user last spoke. This prevents finalizing
+        // during VAD gaps (brief pauses within the same user turn).
+        const msgs = harness.getMessages();
+        const lastUserIdx = msgs.findLastIndex(
+          (m: ConversationMessage) => m.role === "user",
+        );
+        if (lastUserIdx !== -1 && !msgs[lastUserIdx].final) {
+          const hasBotActivity = msgs
+            .slice(lastUserIdx + 1)
+            .some((m: ConversationMessage) => m.role === "assistant");
+          if (hasBotActivity) {
+            harness.finalizeUserIfPending();
+          }
+        }
         break;
+      }
 
       case "userTranscript":
         harness.emitUserTranscript(step.text, step.final);
