@@ -4,7 +4,7 @@ import type {
   AggregationMetadata,
   ConversationMessage,
   FunctionCallRenderer,
-} from "@/types/conversation";
+} from "@pipecat-ai/client-react";
 import { MessageRole } from "./MessageRole";
 import { MessageContent } from "./MessageContent";
 import { FunctionCallContent } from "./FunctionCallContent";
