@@ -271,6 +271,83 @@ describe("applySpokenBotOutputProgress", () => {
       expect(result).toBe(true);
     });
 
+    it("handles CJK characters", () => {
+      const parts = [textPart("こんにちは世界 today")];
+      const c = cursor(1);
+
+      const result = applySpokenBotOutputProgress(c, parts, "こんにちは世界");
+
+      expect(result).toBe(true);
+      expect(c.currentCharIndex).toBe("こんにちは世界 ".length);
+    });
+
+    it("handles accented characters", () => {
+      const parts = [textPart("café résumé")];
+      const c = cursor(1);
+
+      const result = applySpokenBotOutputProgress(c, parts, "café");
+
+      expect(result).toBe(true);
+      expect(c.currentCharIndex).toBe("café ".length);
+    });
+
+    it("handles Cyrillic characters", () => {
+      const parts = [textPart("привет мир today")];
+      const c = cursor(1);
+
+      const result = applySpokenBotOutputProgress(c, parts, "привет");
+
+      expect(result).toBe(true);
+      expect(c.currentCharIndex).toBe("привет ".length);
+    });
+
+    it("handles quoted text", () => {
+      const parts = [textPart('She said "hello" to everyone')];
+      const c = cursor(1);
+
+      applySpokenBotOutputProgress(c, parts, "She said");
+      const result = applySpokenBotOutputProgress(c, parts, "hello");
+
+      expect(result).toBe(true);
+      expect(c.currentCharIndex).toBe('She said "hello" '.length);
+    });
+
+    it("handles curly quotes", () => {
+      const parts = [textPart("She said \u201Chello\u201D to everyone")];
+      const c = cursor(1);
+
+      applySpokenBotOutputProgress(c, parts, "She said");
+      const result = applySpokenBotOutputProgress(c, parts, "hello");
+
+      expect(result).toBe(true);
+      expect(c.currentCharIndex).toBe("She said \u201Chello\u201D ".length);
+    });
+
+    it("treats pure-punctuation spoken text as consumed (e.g. em dash)", () => {
+      const parts = [textPart("Hello — world")];
+      const c = cursor(1);
+
+      applySpokenBotOutputProgress(c, parts, "Hello");
+      const posBefore = c.currentCharIndex;
+      const result = applySpokenBotOutputProgress(c, parts, "—");
+
+      expect(result).toBe(true);
+      // Cursor should not move — the punctuation is simply ignored
+      expect(c.currentCharIndex).toBe(posBefore);
+    });
+
+    it("continues matching after pure-punctuation spoken text", () => {
+      const parts = [textPart("Hello — world")];
+      const c = cursor(1);
+
+      applySpokenBotOutputProgress(c, parts, "Hello");
+      applySpokenBotOutputProgress(c, parts, "—");
+      const result = applySpokenBotOutputProgress(c, parts, "world");
+
+      expect(result).toBe(true);
+      expect(c.currentCharIndex).toBe("Hello — world".length);
+    });
+
     it("returns false for non-string part text", () => {
       // Part with non-string text (e.g. ReactNode)
       const parts: ConversationMessagePart[] = [

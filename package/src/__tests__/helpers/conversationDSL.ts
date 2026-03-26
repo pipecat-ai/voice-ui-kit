@@ -1,3 +1,4 @@
+import { normalizeForMatching } from "@/stores/botOutput";
 import type { StoreHarness } from "./storeHarness";
 import type { ConversationMessage } from "@/types/conversation";
 import { vi } from "vitest";
@@ -242,10 +243,8 @@ class ConversationBuilder {
           for (const word of allSpokenWords) {
             if (matched >= interruptWords.length) break;
             // Check if this spoken word matches the next interrupt word
-            const wordNorm = word.toLowerCase().replace(/[^\w\s]/g, "");
-            const targetNorm = interruptWords[matched]
-              .toLowerCase()
-              .replace(/[^\w\s]/g, "");
+            const wordNorm = normalizeForMatching(word);
+            const targetNorm = normalizeForMatching(interruptWords[matched]);
             steps.push({
               type: "botOutput",
               text: word,
