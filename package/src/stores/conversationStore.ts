@@ -369,15 +369,35 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
 
   injectMessage: (messageData) => {
     const now = new Date();
-    const message: ConversationMessage = {
-      role: messageData.role,
-      final: true,
-      parts: [...messageData.parts],
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-    };
 
     set((state) => {
+      // If the most recent message is an active (non-final) assistant message,
+      // backdate the injected message so it sorts before the assistant's
+      // createdAt. This prevents the injected message from splitting the bot's
+      // response across two bubbles and breaking the karaoke cursor.
+      const lastMessage = state.messages[state.messages.length - 1];
+      const lastAssistant =
+        lastMessage?.role === "assistant" ? lastMessage : undefined;
+      let timestamp: string;
+      if (
+        lastAssistant &&
+        lastAssistant.final === false &&
+        messageData.role === "system"
+      ) {
+        const assistantTime = new Date(lastAssistant.createdAt);
+        timestamp = new Date(assistantTime.getTime() - 1).toISOString();
+      } else {
+        timestamp = now.toISOString();
+      }
+
+      const message: ConversationMessage = {
+        role: messageData.role,
+        final: true,
+        parts: [...messageData.parts],
+        createdAt: timestamp,
+        updatedAt: now.toISOString(),
+      };
+
       const updatedMessages = [...state.messages, message];
       const processedMessages = normalizeMessagesForUI(updatedMessages);
 

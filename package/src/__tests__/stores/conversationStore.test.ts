@@ -411,6 +411,101 @@ describe("conversationStore", () => {
     });
   });
 
+  // -----------------------------------------------------------------------
+  // injectMessage -- backdating during active assistant message
+  // -----------------------------------------------------------------------
+  describe("injectMessage (backdating)", () => {
+    const T0 = "2024-01-01T00:00:00.000Z";
+
+    it("backdates injected message before active assistant message", () => {
+      getState().addMessage({
+        role: "assistant",
+        final: false,
+        parts: [{ text: "Hello", final: false, createdAt: T0 }],
+      });
+      const assistantCreatedAt = getState().messages[0].createdAt;
+
+      getState().injectMessage({
+        role: "system",
+        parts: [{ text: "System info", final: true, createdAt: T0 }],
+      });
+
+      const messages = getState().messages;
+      expect(messages).toHaveLength(2);
+      // System message should sort before the assistant message
+      expect(messages[0].role).toBe("system");
+      expect(messages[1].role).toBe("assistant");
+      expect(messages[0].createdAt < assistantCreatedAt).toBe(true);
+    });
+
+    it("does not backdate when assistant message is final", () => {
+      getState().addMessage({
+        role: "assistant",
+        final: false,
+        parts: [{ text: "Hello", final: false, createdAt: T0 }],
+      });
+      getState().finalizeLastMessage("assistant");
+
+      getState().injectMessage({
+        role: "system",
+        parts: [{ text: "System info", final: true, createdAt: T0 }],
+      });
+
+      const messages = getState().messages;
+      // System message should sort after the finalized assistant message
+      expect(messages[0].role).toBe("assistant");
+      expect(messages[1].role).toBe("system");
+    });
+
+    it("does not backdate when no assistant message exists", () => {
+      getState().injectMessage({
+        role: "system",
+        parts: [{ text: "System info", final: true, createdAt: T0 }],
+      });
+
+      const messages = getState().messages;
+      expect(messages).toHaveLength(1);
+      expect(messages[0].role).toBe("system");
+    });
+
+    it("does not backdate injected user messages", () => {
+      getState().addMessage({
+        role: "assistant",
+        final: false,
+        parts: [{ text: "Hello", final: false, createdAt: T0 }],
+      });
+
+      getState().injectMessage({
+        role: "user",
+        parts: [{ text: "Hi there", final: true, createdAt: T0 }],
+      });
+
+      const messages = getState().messages;
+      // User message should sort after the assistant (not backdated)
+      expect(messages[messages.length - 1].role).toBe("user");
+    });
+
+    it("does not backdate when non-final assistant is not the last message", () => {
+      getState().addMessage({
+        role: "assistant",
+        final: false,
+        parts: [{ text: "Hello", final: false, createdAt: T0 }],
+      });
+      // User message comes after the assistant
+      getState().upsertUserTranscript("Hey", true);
+      getState().finalizeLastMessage("user");
+
+      getState().injectMessage({
+        role: "system",
+        parts: [{ text: "System info", final: true, createdAt: T0 }],
+      });
+
+      const messages = getState().messages;
+      // System message should be last, not backdated before the user message
+      expect(messages[messages.length - 1].role).toBe("system");
+    });
+  });
+
   describe("filterEmptyMessages", () => {
     it("removes empty messages that have a later non-empty message with same role", () => {
       const messages: ConversationMessage[] = [
