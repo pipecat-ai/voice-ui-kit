@@ -616,11 +616,25 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
       }
 
       const now = new Date();
+
+      // If the most recent message is an active (non-final) assistant message,
+      // backdate the function call so it sorts before the assistant's
+      // createdAt. This prevents the function call from splitting the bot's
+      // response across two bubbles and breaking the karaoke cursor.
+      const lastMessage = state.messages[state.messages.length - 1];
+      let timestamp: string;
+      if (lastMessage?.role === "assistant" && lastMessage.final === false) {
+        const assistantTime = new Date(lastMessage.createdAt);
+        timestamp = new Date(assistantTime.getTime() - 1).toISOString();
+      } else {
+        timestamp = now.toISOString();
+      }
+
       const message: ConversationMessage = {
         role: "function_call",
         final: false,
         parts: [],
-        createdAt: now.toISOString(),
+        createdAt: timestamp,
         updatedAt: now.toISOString(),
         functionCall: {
           function_name: data.function_name,
@@ -711,7 +725,8 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
     if (
       lastFc?.functionCall &&
       lastFc.functionCall.status !== "started" &&
-      Date.now() - new Date(lastFc.createdAt).getTime() < 2000
+      Date.now() - new Date(lastFc.updatedAt ?? lastFc.createdAt).getTime() <
+        2000
     ) {
       if (
         data.function_name &&
