@@ -27,8 +27,9 @@ import React, { useCallback, useEffect, useState } from "react";
  * Props for the PipecatAppBase component.
  */
 export interface PipecatBaseProps {
-  /** Optional parameters for connect(). Only used when no startBotParams are provided. */
-  connectParams?: TransportConnectionParams;
+  /** Optional connection parameters. Accepts either TransportConnectionParams for direct
+   *  transport connections, or APIRequest to start and connect to a bot in one step. */
+  connectParams?: TransportConnectionParams | APIRequest;
   /** Optional parameters for startBot. */
   startBotParams?: APIRequest;
   /** Callback function to transform the startBot response before connecting. */
@@ -197,6 +198,12 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
             await startBotResponseTransformer(response);
           await client.connect(transformedResponse);
           setTransformedStartBotResponse(transformedResponse);
+        } else if (
+          connectParams &&
+          typeof connectParams === "object" &&
+          "endpoint" in connectParams
+        ) {
+          await client.startBotAndConnect(connectParams as APIRequest);
         } else {
           await client.connect(connectParams ?? {});
         }
