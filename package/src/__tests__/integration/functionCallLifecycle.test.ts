@@ -255,6 +255,36 @@ describe("function call lifecycle – integration", () => {
       expect(fcMessages).toHaveLength(2);
     });
 
+    it("Started after backdated InProgress does not create duplicate", () => {
+      // Active assistant message causes function call to be backdated
+      getState().addMessage({
+        role: "assistant",
+        final: false,
+        parts: [
+          {
+            text: "Let me look that up",
+            final: false,
+            createdAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
+      });
+
+      // InProgress arrives first (out-of-order), gets backdated
+      harness.handleFunctionCallInProgress({
+        function_name: "search",
+        tool_call_id: "call_1",
+        args: { q: "test" },
+      });
+
+      // Started arrives — should still detect the duplicate via updatedAt
+      harness.handleFunctionCallStarted({ function_name: "search" });
+
+      const messages = harness.getMessages();
+      const fcMessages = messages.filter((m) => m.role === "function_call");
+      expect(fcMessages).toHaveLength(1);
+      expect(fcMessages[0].functionCall!.status).toBe("in_progress");
+    });
+
     it("Started fills in missing function_name on existing entry", () => {
       // InProgress arrives first WITHOUT function_name
       harness.handleFunctionCallInProgress({

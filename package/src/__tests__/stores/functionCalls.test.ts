@@ -88,6 +88,73 @@ describe("conversationStore – function calls", () => {
 
       expect(getState().messages).toHaveLength(2);
     });
+
+    it("backdates function call before active assistant message", () => {
+      getState().addMessage({
+        role: "assistant",
+        final: false,
+        parts: [
+          {
+            text: "Let me check",
+            final: false,
+            createdAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
+      });
+      const assistantCreatedAt = getState().messages[0].createdAt;
+
+      getState().addFunctionCall({ function_name: "get_weather" });
+
+      const messages = getState().messages;
+      expect(messages).toHaveLength(2);
+      // Function call should sort before the assistant message
+      expect(messages[0].role).toBe("function_call");
+      expect(messages[1].role).toBe("assistant");
+      expect(messages[0].createdAt < assistantCreatedAt).toBe(true);
+    });
+
+    it("does not backdate when assistant message is final", () => {
+      getState().addMessage({
+        role: "assistant",
+        final: false,
+        parts: [
+          {
+            text: "Done",
+            final: false,
+            createdAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
+      });
+      getState().finalizeLastMessage("assistant");
+
+      getState().addFunctionCall({ function_name: "get_weather" });
+
+      const messages = getState().messages;
+      expect(messages[0].role).toBe("assistant");
+      expect(messages[1].role).toBe("function_call");
+    });
+
+    it("does not backdate when assistant is not the last message", () => {
+      getState().addMessage({
+        role: "assistant",
+        final: false,
+        parts: [
+          {
+            text: "Hello",
+            final: false,
+            createdAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
+      });
+      getState().upsertUserTranscript("Hey", true);
+      getState().finalizeLastMessage("user");
+
+      getState().addFunctionCall({ function_name: "get_weather" });
+
+      const messages = getState().messages;
+      // Function call should be last, not backdated
+      expect(messages[messages.length - 1].role).toBe("function_call");
+    });
   });
 
   // -----------------------------------------------------------------------
