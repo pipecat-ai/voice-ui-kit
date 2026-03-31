@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.8.2](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.8.1...v0.8.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* backdate injected messages during active bot response ([9568928](https://github.com/pipecat-ai/voice-ui-kit/commit/9568928ce06697d37cf8819512057abd6b1a1932))
+* backdate injected messages during active bot response ([818edc8](https://github.com/pipecat-ai/voice-ui-kit/commit/818edc89c2c82de081b61dfef87fac816adae861))
+* backdate mid-turn function calls to preserve karaoke cursor ([6da24cf](https://github.com/pipecat-ai/voice-ui-kit/commit/6da24cf188049291c9fd32c36c694c2a9042cd73))
+* backdate mid-turn function calls to preserve karaoke cursor ([8583fa6](https://github.com/pipecat-ai/voice-ui-kit/commit/8583fa67aba132464cf109c8ab0579c6cdd7b231))
+* fix karaoke highlighting for non-ASCII text and punctuation ([8692c28](https://github.com/pipecat-ai/voice-ui-kit/commit/8692c2872a5e6ba80305d8bfeb8c5eca4857d93d))
+* fix karaoke highlighting for non-ASCII text and punctuation ([f21e44c](https://github.com/pipecat-ai/voice-ui-kit/commit/f21e44c5c0e1f606be4a73c4903ff5114095e311))
+* use startBotAndConnect when connectParams is an APIRequest ([bccdc81](https://github.com/pipecat-ai/voice-ui-kit/commit/bccdc8172e1ac63a46392b9c53053546b5af2b59))
+
 ## [0.8.1](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.8.0...v0.8.1) (2026-03-11)
 
 
