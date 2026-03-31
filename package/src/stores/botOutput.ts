@@ -10,8 +10,8 @@ export type BotOutputMessageCursor = {
   partFinalFlags: boolean[];
 };
 
-const normalizeForMatching = (text: string): string => {
-  return text.toLowerCase().replace(/[^\w\s]/g, "");
+export const normalizeForMatching = (text: string): string => {
+  return text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "");
 };
 
 const skipWhitespace = (text: string, start: number): number => {
@@ -90,7 +90,7 @@ const findSpokenPositionInUnspoken = (
   if (matchedWords < spokenWords.length) return actualStart;
 
   // Convert word matches back into a character position in the original unspoken string.
-  const isWordChar = (char: string): boolean => /[a-zA-Z0-9]/.test(char);
+  const isWordChar = (char: string): boolean => /[\p{L}\p{N}]/u.test(char);
   let wordCount = 0;
   let i = actualStart;
   let inWord = false;
@@ -143,8 +143,10 @@ export function hasUnspokenContent(
 }
 
 /**
- * Advances the cursor for spoken text. Returns true if the cursor was advanced
- * (text was consumed), false if there was nothing to advance (e.g. no parts).
+ * Attempts to consume spoken text against the current cursor position.
+ * Returns true if the text was successfully consumed (cursor may or may not
+ * advance — pure punctuation is consumed without moving the cursor), or false
+ * if there was nothing to consume (e.g. no parts, all parts already spoken).
  * Used to detect "spoken-only" bots that never send unspoken events.
  */
 export function applySpokenBotOutputProgress(
@@ -171,6 +173,13 @@ export function applySpokenBotOutputProgress(
 
   const partText = currentPart.text;
   const startChar = cursor.currentCharIndex;
+
+  // If the spoken text is pure punctuation (e.g. an em dash "—"), normalization
+  // strips it to empty and word-matching would fail. Treat it as successfully
+  // consumed so the cursor stays put and subsequent words continue matching.
+  if (normalizeForMatching(spokenText).trim().length === 0) {
+    return true;
+  }
 
   const newPosition = findSpokenPositionInUnspoken(
     spokenText,
