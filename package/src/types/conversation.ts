@@ -78,6 +78,21 @@ export interface ConversationMessagePart {
   displayMode?: "inline" | "block";
 }
 
+/**
+ * A raw BotOutput event stored for debugging and replay.
+ * Each event represents a single BotOutput RTVI event as received.
+ */
+export interface BotOutputEvent {
+  /** The raw text from the BotOutput event */
+  text: string;
+  /** Whether this was a spoken (TTS) event */
+  spoken: boolean;
+  /** Aggregation type (e.g., "sentence", "word", "code") */
+  aggregatedBy?: string;
+  /** ISO timestamp of when the event was received */
+  receivedAt: string;
+}
+
 export interface ConversationMessage {
   role: "user" | "assistant" | "system" | "function_call";
   final?: boolean;

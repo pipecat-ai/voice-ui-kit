@@ -8,6 +8,18 @@ export type BotOutputMessageCursor = {
    * to be spoken, or mismatch recovery advanced past it).
    */
   partFinalFlags: boolean[];
+  /**
+   * Per-part: true if the part was created as a spoken-only fallback (a
+   * spoken event arrived with no matching unspoken content). Such parts
+   * can be absorbed when an unspoken event later arrives that spans them.
+   */
+  partSpokenOnly: boolean[];
+  /**
+   * True once any unspoken event has been received for this message. When
+   * true, unmatched spoken events are dropped instead of spawning fallback
+   * parts (since the unspoken stream is authoritative for this message).
+   */
+  hasReceivedUnspoken: boolean;
 };
 
 export const normalizeForMatching = (text: string): string => {
@@ -69,6 +81,7 @@ const findSpokenPositionInUnspoken = (
   // and limited skipping of mismatched unspoken words (e.g. punctuation artifacts).
   let matchedWords = 0;
   let consecutiveSkips = 0;
+  let lastMatchedUnspokenIdx = -1;
   const MAX_CONSECUTIVE_SKIPS = 2;
   for (
     let i = 0;
@@ -80,6 +93,7 @@ const findSpokenPositionInUnspoken = (
     if (candidate === target || candidate.startsWith(target)) {
       matchedWords++;
       consecutiveSkips = 0;
+      lastMatchedUnspokenIdx = i;
       continue;
     }
     consecutiveSkips++;
@@ -89,34 +103,35 @@ const findSpokenPositionInUnspoken = (
 
   if (matchedWords < spokenWords.length) return actualStart;
 
-  // Convert word matches back into a character position in the original unspoken string.
-  const isWordChar = (char: string): boolean => /[\p{L}\p{N}]/u.test(char);
-  let wordCount = 0;
+  // Convert the matched unspoken-word index back into a character position.
+  // Walk whitespace-separated "chunks" that contain at least one alphanumeric
+  // char (so pure-punctuation chunks like "—" are skipped — matching the
+  // normalize+split tokenization used above). Stop at the chunk whose index
+  // equals lastMatchedUnspokenIdx, then advance past any trailing whitespace
+  // so the cursor sits at the start of the next chunk.
+  const targetChunkCount = lastMatchedUnspokenIdx + 1;
+  const isAlnum = (char: string): boolean => /[\p{L}\p{N}]/u.test(char);
+  const isWs = (char: string): boolean => /\s/.test(char);
+  let chunkCount = 0;
+  let inChunk = false;
+  let chunkHasAlnum = false;
   let i = actualStart;
-  let inWord = false;
 
   while (i < unspoken.length) {
-    const charIsWord = isWordChar(unspoken[i]);
-    if (charIsWord && !inWord) {
-      inWord = true;
-      wordCount++;
-
-      if (wordCount === matchedWords) {
-        // Consume the rest of this word
-        i++;
-        while (i < unspoken.length && isWordChar(unspoken[i])) i++;
-        // Include any punctuation after the word until the next space, then include the space
-        while (i < unspoken.length) {
-          if (unspoken[i] === " ") {
-            i++;
-            break;
-          }
-          i++;
+    const c = unspoken[i];
+    if (isWs(c)) {
+      if (inChunk && chunkHasAlnum) {
+        chunkCount++;
+        if (chunkCount === targetChunkCount) {
+          while (i < unspoken.length && isWs(unspoken[i])) i++;
+          return i;
         }
-        return i;
       }
-    } else if (!charIsWord && inWord) {
-      inWord = false;
+      inChunk = false;
+      chunkHasAlnum = false;
+    } else {
+      inChunk = true;
+      if (isAlnum(c)) chunkHasAlnum = true;
     }
     i++;
   }

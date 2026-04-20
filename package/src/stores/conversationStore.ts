@@ -1,4 +1,5 @@
 import {
+  type BotOutputEvent,
   type BotOutputText,
   type ConversationMessage,
   type ConversationMessagePart,
@@ -7,6 +8,8 @@ import {
 import {
   applySpokenBotOutputProgress,
   type BotOutputMessageCursor,
+  hasUnspokenContent,
+  normalizeForMatching,
 } from "@/stores/botOutput";
 import { create } from "zustand";
 
@@ -14,6 +17,8 @@ interface ConversationState {
   messages: ConversationMessage[];
   // Simple state per message for tracking spoken position
   botOutputMessageState: Map<string, BotOutputMessageCursor>;
+  // Raw BotOutput events per message (keyed by message createdAt), for debugging/replay
+  botOutputEvents: Map<string, BotOutputEvent[]>;
 
   // Actions
   registerMessageCallback: (
@@ -252,6 +257,7 @@ const callAllMessageCallbacks = (message: ConversationMessage) => {
 export const useConversationStore = create<ConversationState>()((set, get) => ({
   messages: [],
   botOutputMessageState: new Map(),
+  botOutputEvents: new Map(),
 
   registerMessageCallback: (id, callback) => {
     messageCallbacks.set(id, callback || (() => {}));
@@ -265,6 +271,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
     set({
       messages: [],
       botOutputMessageState: new Map(),
+      botOutputEvents: new Map(),
     }),
 
   addMessage: (messageData) => {
@@ -501,6 +508,8 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
           currentPartIndex: 0,
           currentCharIndex: 0,
           partFinalFlags: [],
+          partSpokenOnly: [],
+          hasReceivedUnspoken: false,
         });
       } else {
         // Update existing assistant message
@@ -519,9 +528,24 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
             currentPartIndex: 0,
             currentCharIndex: 0,
             partFinalFlags: [],
+            partSpokenOnly: [],
+            hasReceivedUnspoken: false,
           });
         }
       }
+
+      // Store raw event for debugging/replay
+      const botOutputEvents = new Map(state.botOutputEvents);
+      const existingEvents = botOutputEvents.get(messageId) || [];
+      botOutputEvents.set(messageId, [
+        ...existingEvents,
+        {
+          text,
+          spoken,
+          aggregatedBy,
+          receivedAt: now.toISOString(),
+        },
+      ]);
 
       const messageState = botOutputMessageState.get(messageId)!;
       const message =
@@ -543,7 +567,8 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
           lastPart &&
           aggregatedBy === "word" &&
           lastPart.aggregatedBy === "word" &&
-          typeof lastPart.text === "string";
+          typeof lastPart.text === "string" &&
+          !messageState.partSpokenOnly[parts.length - 1];
 
         if (shouldAppend) {
           // Append to last part (word-level only)
@@ -557,6 +582,74 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
             text: lastPartText + separator + text,
           };
         } else {
+          // Before creating a new unspoken part, check whether the trailing run
+          // of spoken-only fallback parts forms a word-prefix of this new text.
+          // If so, absorb them: S2S pipelines can emit word-level spoken events
+          // for a sentence before the sentence-level unspoken event arrives.
+          let scanStart = parts.length;
+          while (
+            scanStart > 0 &&
+            messageState.partSpokenOnly[scanStart - 1] &&
+            typeof parts[scanStart - 1].text === "string"
+          ) {
+            scanStart--;
+          }
+
+          // Character-level prefix match: concatenate the alphanumeric chars
+          // of each trailing spoken-only part in order and check that the
+          // running concatenation is a prefix of the new text's alphanumeric
+          // chars. This handles TTS sub-word splits (e.g. "Pi"/"pec"/"at"
+          // speaking "Pipecat") that a word-level matcher can't reconcile.
+          let absorbed = 0;
+          let absorbedAlnumCount = 0;
+          if (scanStart < parts.length) {
+            const alnumOnly = (s: string): string =>
+              s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+            const textAlnum = alnumOnly(text);
+            let running = 0;
+            for (let i = scanStart; i < parts.length; i++) {
+              const partAlnum = alnumOnly(parts[i].text as string);
+              if (partAlnum.length === 0) {
+                // Pure-punctuation fragment: absorb silently without extending
+                // the running prefix (same semantics as applySpokenBotOutputProgress).
+                absorbed++;
+                continue;
+              }
+              const next = running + partAlnum.length;
+              if (
+                next <= textAlnum.length &&
+                textAlnum.slice(running, next) === partAlnum
+              ) {
+                running = next;
+                absorbedAlnumCount = running;
+                absorbed++;
+              } else {
+                break;
+              }
+            }
+          }
+
+          // Translate the absorbed alphanumeric prefix count into a char
+          // index inside the original (non-normalized) unspoken text,
+          // advancing past any trailing punctuation and whitespace so the
+          // cursor sits at the start of the next unspoken word.
+          let absorbedCharIndex = 0;
+          if (absorbedAlnumCount > 0) {
+            const isAlnum = (c: string): boolean => /[\p{L}\p{N}]/u.test(c);
+            let count = 0;
+            for (let i = 0; i < text.length; i++) {
+              if (isAlnum(text[i])) {
+                count++;
+                if (count === absorbedAlnumCount) {
+                  let j = i + 1;
+                  while (j < text.length && !isAlnum(text[j])) j++;
+                  absorbedCharIndex = j;
+                  break;
+                }
+              }
+            }
+          }
+
           // Create new part (sentence-level, custom types, or first word chunk)
           // Default to inline; custom types get displayMode from metadata in the hook
           const defaultDisplayMode = isDefaultType ? "inline" : undefined;
@@ -567,10 +660,31 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
             aggregatedBy,
             displayMode: defaultDisplayMode,
           };
-          parts.push(newPart);
-          // Extend partFinalFlags array
-          messageState.partFinalFlags.push(false);
+
+          if (absorbed > 0) {
+            // Replace the absorbed spoken-only parts in place so the new
+            // unspoken part sits where its spoken fragments originally landed
+            // (before any trailing fallback parts that belong to later turns).
+            const insertAt = scanStart;
+            parts.splice(insertAt, absorbed, newPart);
+            messageState.partFinalFlags.splice(insertAt, absorbed, false);
+            messageState.partSpokenOnly.splice(insertAt, absorbed, false);
+
+            if (absorbedCharIndex > 0) {
+              messageState.currentPartIndex = insertAt;
+              messageState.currentCharIndex = absorbedCharIndex;
+              if (absorbedCharIndex >= text.length) {
+                messageState.partFinalFlags[insertAt] = true;
+              }
+            }
+          } else {
+            parts.push(newPart);
+            messageState.partFinalFlags.push(false);
+            messageState.partSpokenOnly.push(false);
+          }
         }
+
+        messageState.hasReceivedUnspoken = true;
 
         // Update message with new parts
         messages[
@@ -580,21 +694,51 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
           parts,
         };
       } else {
-        // SPOKEN EVENT: advance cursor into existing text, or add as new part if
-        // there is none (bots that only send spoken: true, never unspoken).
-        const advanced =
-          parts.length > 0 &&
-          applySpokenBotOutputProgress(messageState, parts, text);
+        // SPOKEN EVENT: advance cursor into existing text, or add as new part
+        // if there is none. Multi-word events (e.g. TTS emitting "Hello! I'm"
+        // as a single chunk that crosses a sentence boundary) are split into
+        // whitespace-separated tokens and processed one at a time so the
+        // cursor can advance across unspoken-part boundaries.
+        const tokens = text.trim().split(/\s+/).filter(Boolean);
+        const leadingSpace = /^\s/.test(text) ? " " : "";
+        const isDefaultType =
+          aggregatedBy === "sentence" ||
+          aggregatedBy === "word" ||
+          !aggregatedBy;
+        const defaultDisplayMode = isDefaultType ? "inline" : undefined;
 
-        if (!advanced) {
-          // No unspoken content to advance: add this text as a part already fully spoken
-          const isDefaultType =
-            aggregatedBy === "sentence" ||
-            aggregatedBy === "word" ||
-            !aggregatedBy;
-          const defaultDisplayMode = isDefaultType ? "inline" : undefined;
+        let partsMutated = false;
+        for (let tokenIdx = 0; tokenIdx < tokens.length; tokenIdx++) {
+          const tokenText =
+            (tokenIdx === 0 ? leadingSpace : " ") + tokens[tokenIdx];
+          const advanced =
+            parts.length > 0 &&
+            applySpokenBotOutputProgress(messageState, parts, tokenText);
+
+          if (advanced) continue;
+
+          if (messageState.hasReceivedUnspoken) {
+            if (hasUnspokenContent(messageState, parts)) {
+              // Mid-stream: the unspoken stream is authoritative for this
+              // message and still has pending content to be spoken. An
+              // unmatched spoken token here is TTS-granularity noise (e.g.
+              // "Pi" / "pec" / "at" tokenization of "Pipecat"). Drop.
+              continue;
+            }
+            if (normalizeForMatching(tokenText).trim().length === 0) {
+              // Trailing punctuation after every part has been consumed has
+              // nothing to attach to. Drop silently.
+              continue;
+            }
+          }
+
+          // Either no unspoken content has ever been seen (spoken-only bot),
+          // or every part has been fully consumed and this token likely
+          // belongs to the next sentence — whose unspoken event hasn't arrived
+          // yet. Add as a spoken-only fallback so a later unspoken event can
+          // absorb it.
           const newPart: ConversationMessagePart = {
-            text,
+            text: tokenText,
             final: false,
             createdAt: now.toISOString(),
             aggregatedBy,
@@ -602,9 +746,13 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
           };
           parts.push(newPart);
           messageState.partFinalFlags.push(true);
+          messageState.partSpokenOnly.push(true);
           messageState.currentPartIndex = parts.length - 1;
-          messageState.currentCharIndex = text.length;
+          messageState.currentCharIndex = tokenText.length;
+          partsMutated = true;
+        }
 
+        if (partsMutated) {
           messages[
             lastAssistantIndex === -1 ? messages.length - 1 : lastAssistantIndex
           ] = {
@@ -619,6 +767,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
       return {
         messages: processedMessages,
         botOutputMessageState,
+        botOutputEvents,
       };
     });
   },

@@ -241,4 +241,357 @@ describe("BotOutput assembly", () => {
       expect(cursor!.currentCharIndex).toBeGreaterThan(0);
     });
   });
+
+  // -----------------------------------------------------------------------
+  // Out-of-order: spoken-before-unspoken (S2S race)
+  // -----------------------------------------------------------------------
+  describe("S2S race: spoken events arrive before unspoken", () => {
+    it("absorbs leading spoken-only fallback parts into the arriving unspoken sentence", () => {
+      harness.ensureAssistantMessage();
+
+      // Word-level spoken events arrive first (the bot's TTS races ahead of the
+      // LLM aggregator). There is no unspoken content yet.
+      harness.emitBotOutput("Hello", true, "sentence");
+      harness.emitBotOutput("there", true, "sentence");
+      harness.emitBotOutput("!", true, "sentence");
+
+      // At this point three spoken-only fallback parts exist.
+      let parts = harness.getMessages()[0].parts;
+      expect(parts).toHaveLength(3);
+      const cursorBefore = harness.getLastAssistantCursor()!;
+      expect(cursorBefore.partSpokenOnly).toEqual([true, true, true]);
+
+      // Now the unspoken sentence arrives. The three fallback parts should be
+      // absorbed into the single sentence part.
+      harness.emitBotOutput("Hello there!", false, "sentence");
+
+      parts = harness.getMessages()[0].parts;
+      expect(parts).toHaveLength(1);
+      expect(parts[0].aggregatedBy).toBe("sentence");
+      expect(parts[0].text).toBe("Hello there!");
+
+      const cursor = harness.getLastAssistantCursor()!;
+      // The absorbed spoken prefix covers the full sentence, so the part is
+      // marked final and the cursor sits at the end.
+      expect(cursor.partFinalFlags[0]).toBe(true);
+      expect(cursor.currentPartIndex).toBe(0);
+      expect(cursor.currentCharIndex).toBe("Hello there!".length);
+      expect(cursor.hasReceivedUnspoken).toBe(true);
+      // Text should not be duplicated in the rendered output.
+      expect(getRawPartTexts(harness.getMessages()[0]).join("")).toBe(
+        "Hello there!",
+      );
+    });
+
+    it("does not absorb when leading spoken-only parts do not prefix the new unspoken text", () => {
+      harness.ensureAssistantMessage();
+
+      harness.emitBotOutput("Goodbye", true, "sentence");
+
+      // Unspoken text that does not start with "Goodbye" — no absorption.
+      harness.emitBotOutput("Hello there!", false, "sentence");
+
+      const parts = harness.getMessages()[0].parts;
+      expect(parts).toHaveLength(2);
+      expect(parts[0].text).toBe("Goodbye");
+      expect(parts[1].text).toBe("Hello there!");
+    });
+
+    it("absorbs spoken fragments that contain TTS sub-word splits (Pi/pec/at)", () => {
+      harness.ensureAssistantMessage();
+
+      // Word-level spoken events for most of a sentence arrive before the
+      // unspoken aggregator emits. One of the "words" is a multi-token TTS
+      // split of "Pipecat" into "Pi"/"pec"/"at".
+      const leadingSpoken = [
+        "Let",
+        "me",
+        "check",
+        "the",
+        "Pi",
+        "pec",
+        "at",
+        "documentation",
+        "for",
+        "details",
+      ];
+      for (const word of leadingSpoken) {
+        harness.emitBotOutput(word, true, "sentence");
+      }
+
+      expect(harness.getMessages()[0].parts).toHaveLength(leadingSpoken.length);
+
+      // Unspoken sentence arrives. Every leading spoken fragment should be
+      // absorbed — including the "Pi"/"pec"/"at" split — leaving just the
+      // single unspoken part.
+      const unspokenText =
+        "Let me check the Pipecat documentation for details on how filter_user_turns works.";
+      harness.emitBotOutput(unspokenText, false, "sentence");
+
+      const parts = harness.getMessages()[0].parts;
+      expect(parts).toHaveLength(1);
+      expect(parts[0].text).toBe(unspokenText);
+
+      const cursor = harness.getLastAssistantCursor()!;
+      expect(cursor.partSpokenOnly).toEqual([false]);
+      // The cursor should sit after "details " inside the new unspoken part,
+      // reflecting the portion already covered by the absorbed spoken events.
+      expect(cursor.currentPartIndex).toBe(0);
+      const spokenPrefix =
+        "Let me check the Pipecat documentation for details ";
+      expect(cursor.currentCharIndex).toBe(spokenPrefix.length);
+    });
+
+    it("only absorbs the prefix portion when trailing spoken parts span multiple sentences", () => {
+      harness.ensureAssistantMessage();
+
+      // Spoken events for sentence 1 AND the start of sentence 2 arrive before
+      // either unspoken sentence event.
+      harness.emitBotOutput("Hello", true, "sentence");
+      harness.emitBotOutput("there", true, "sentence");
+      harness.emitBotOutput("!", true, "sentence");
+      harness.emitBotOutput("How", true, "sentence");
+      harness.emitBotOutput("are", true, "sentence");
+
+      expect(harness.getMessages()[0].parts).toHaveLength(5);
+
+      // Unspoken "Hello there!" arrives. Only the first three spoken parts
+      // should be absorbed; "How" and "are" remain as fallback parts (they
+      // belong to the next sentence).
+      harness.emitBotOutput("Hello there!", false, "sentence");
+
+      const parts = harness.getMessages()[0].parts;
+      expect(parts).toHaveLength(3);
+      expect(parts[0].text).toBe("Hello there!");
+      expect(parts[0].aggregatedBy).toBe("sentence");
+      expect(parts[1].text).toBe("How");
+      expect(parts[2].text).toBe("are");
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Cascaded pipeline (unspoken first): ensure absorption is inert
+  // -----------------------------------------------------------------------
+  describe("cascaded pipeline: unspoken arrives before spoken", () => {
+    it("keeps the existing karaoke-cursor behavior intact", () => {
+      const scenario = conversation()
+        .bot("Hello there!", { aggregation: "sentence" })
+        .build();
+
+      playScenario(harness, scenario);
+
+      const messages = harness.getMessages();
+      expectMessages(messages, [{ role: "assistant", final: true }]);
+
+      const parts = messages[0].parts;
+      expect(parts).toHaveLength(1);
+      expect(parts[0].text).toBe("Hello there!");
+      expect(parts[0].aggregatedBy).toBe("sentence");
+
+      const cursor = harness.getLastAssistantCursor()!;
+      // No spoken-only parts should have been created.
+      expect(cursor.partSpokenOnly).toEqual([false]);
+      expect(cursor.partFinalFlags[0]).toBe(true);
+      expect(cursor.hasReceivedUnspoken).toBe(true);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // TTS mid-sentence tokenization splits
+  // -----------------------------------------------------------------------
+  describe("TTS splits mid-sentence tokens after unspoken arrived", () => {
+    it("advances cursor through a sentence with contractions and sub-word splits", () => {
+      // Regression: the user reported "the info." was left unspoken at the
+      // end of a message because cursor advancement drifted one word behind
+      // for every spoken event that had to skip past earlier words. The root
+      // cause was findSpokenPositionInUnspoken returning the position of the
+      // wrong word when skipping, compounded by contractions ("shouldn't",
+      // "I'll") making the char-walker over-count word starts.
+      harness.ensureAssistantMessage();
+
+      harness.emitBotOutput(
+        "It shouldn't take too long, so hang tight and I'll explain filters and turns in Pipecat as soon as I have the info.",
+        false,
+        "sentence",
+      );
+
+      const spokenWords = [
+        "It",
+        "shouldn't",
+        "take",
+        "too",
+        "long",
+        ",",
+        "so",
+        "hang",
+        "tight",
+        "and",
+        "I'll",
+        "explain",
+        "filters",
+        "and",
+        "turns",
+        "in",
+        "Pi",
+        "pec",
+        "at",
+        "as",
+        "soon",
+        "as",
+        "I",
+        "have",
+        "the",
+        "info",
+        ".",
+      ];
+      for (const word of spokenWords) {
+        harness.emitBotOutput(word, true, "sentence");
+      }
+
+      const cursor = harness.getLastAssistantCursor()!;
+      // The cursor must have reached the end of the part — not stalled a few
+      // words before it. "Pi"/"pec"/"at" splits and the drop-after-unspoken
+      // logic should let "the" and "info" both advance the cursor normally.
+      expect(cursor.partFinalFlags[0]).toBe(true);
+      const partText = harness.getMessages()[0].parts[0].text as string;
+      expect(cursor.currentCharIndex).toBe(partText.length);
+      expect(harness.getMessages()[0].parts).toHaveLength(1);
+    });
+
+    it("keeps unmatched spoken words as fallbacks when the current sentence is fully consumed", () => {
+      // Regression: after the first sentence was fully spoken and absorbed,
+      // TTS started speaking the *next* sentence before its unspoken event
+      // arrived. The drop-when-unspoken logic was too aggressive and lost
+      // those words, leaving the UI stuck on sentence 1 until absorption
+      // finally happened.
+      harness.ensureAssistantMessage();
+
+      // Sentence 1: S2S race — spoken words first, then unspoken.
+      for (const word of ["I'll", "look", "that", "up", "for", "you"]) {
+        harness.emitBotOutput(word, true, "sentence");
+      }
+      harness.emitBotOutput("I'll look that up for you.", false, "sentence");
+      harness.emitBotOutput(".", true, "sentence");
+
+      // Sentence 2: TTS begins speaking before the unspoken aggregator emits.
+      // These should survive as fallback parts (not be dropped).
+      for (const word of ["Give", "me", "just", "a"]) {
+        harness.emitBotOutput(word, true, "sentence");
+      }
+
+      // At this point the trailing spoken words must exist as fallback parts.
+      const partsBefore = harness.getMessages()[0].parts;
+      expect(partsBefore.length).toBeGreaterThan(1);
+      const cursorBefore = harness.getLastAssistantCursor()!;
+      expect(
+        cursorBefore.partSpokenOnly.slice(1).every((v) => v === true),
+      ).toBe(true);
+
+      // Sentence 2 unspoken arrives and absorbs the trailing fallbacks.
+      harness.emitBotOutput(
+        "Give me just a moment to gather the details.",
+        false,
+        "sentence",
+      );
+
+      const parts = harness.getMessages()[0].parts;
+      expect(parts).toHaveLength(2);
+      expect(parts[0].text).toBe("I'll look that up for you.");
+      expect(parts[1].text).toBe(
+        "Give me just a moment to gather the details.",
+      );
+
+      const cursor = harness.getLastAssistantCursor()!;
+      expect(cursor.partSpokenOnly).toEqual([false, false]);
+      // Cursor is positioned after the absorbed "Give me just a " prefix.
+      expect(cursor.currentPartIndex).toBe(1);
+      expect(cursor.currentCharIndex).toBe("Give me just a ".length);
+    });
+
+    it("handles multi-word spoken tokens that cross a sentence boundary", () => {
+      // Regression: a TTS source emitted "Hello! I'm" as a single spoken event
+      // that spans the end of sentence 1 and the start of sentence 2 (whose
+      // unspoken event arrives later). Multi-word tokens like "a friendly"
+      // and "the open-source" are also emitted. All of these should be split
+      // and processed token-by-token so the cursor advances correctly.
+      harness.ensureAssistantMessage();
+
+      harness.emitBotOutput("Hello!", false, "sentence");
+      harness.emitBotOutput("Hello! I'm", true, "sentence");
+      harness.emitBotOutput("a friendly", true, "sentence");
+      harness.emitBotOutput(
+        "I'm a friendly AI assistant knowledgeable about Pipecat.",
+        false,
+        "sentence",
+      );
+      harness.emitBotOutput("AI", true, "sentence");
+      harness.emitBotOutput("assistant", true, "sentence");
+      harness.emitBotOutput("knowledgeable", true, "sentence");
+      harness.emitBotOutput("about", true, "sentence");
+      harness.emitBotOutput("Pipecat.", true, "sentence");
+
+      const parts = harness.getMessages()[0].parts;
+      // After absorption, only the two sentence parts should remain — no
+      // stray fallbacks like "I'm" or "a friendly" between them.
+      expect(parts).toHaveLength(2);
+      expect(parts[0].text).toBe("Hello!");
+      expect(parts[1].text).toBe(
+        "I'm a friendly AI assistant knowledgeable about Pipecat.",
+      );
+
+      const cursor = harness.getLastAssistantCursor()!;
+      expect(cursor.partSpokenOnly).toEqual([false, false]);
+      // Cursor has advanced through the full second sentence.
+      expect(cursor.currentPartIndex).toBe(1);
+      const part2Text = parts[1].text as string;
+      expect(cursor.currentCharIndex).toBe(part2Text.length);
+    });
+
+    it("drops unmatched spoken fragments instead of appending duplicate text", () => {
+      harness.ensureAssistantMessage();
+
+      // LLM delivers the full sentence first (cascaded path).
+      harness.emitBotOutput(
+        "I know a lot about Pipecat and can guide you through that too.",
+        false,
+        "sentence",
+      );
+
+      // TTS word timing events. "Pi" prefix-matches "Pipecat" and consumes
+      // the whole token; "pec" and "at" then fail to match and should be
+      // dropped silently (not spawn trailing fallback parts).
+      const spokenWords = [
+        "I",
+        "know",
+        "a",
+        "lot",
+        "about",
+        "Pi",
+        "pec",
+        "at",
+        "and",
+        "can",
+        "guide",
+        "you",
+        "through",
+        "that",
+        "too",
+        ".",
+      ];
+      for (const word of spokenWords) {
+        harness.emitBotOutput(word, true, "sentence");
+      }
+
+      const parts = harness.getMessages()[0].parts;
+      // Only the single unspoken sentence part — no trailing spoken-only
+      // fragments should have been spawned for "pec" / "at".
+      expect(parts).toHaveLength(1);
+      expect(parts[0].text).toBe(
+        "I know a lot about Pipecat and can guide you through that too.",
+      );
+
+      const cursor = harness.getLastAssistantCursor()!;
+      expect(cursor.partSpokenOnly).toEqual([false]);
+    });
+  });
 });

@@ -17,6 +17,8 @@ function cursor(partCount: number): BotOutputMessageCursor {
     currentPartIndex: 0,
     currentCharIndex: 0,
     partFinalFlags: Array(partCount).fill(false),
+    partSpokenOnly: Array(partCount).fill(false),
+    hasReceivedUnspoken: false,
   };
 }
 
@@ -346,6 +348,32 @@ describe("applySpokenBotOutputProgress", () => {
 
       expect(result).toBe(true);
       expect(c.currentCharIndex).toBe("Hello — world".length);
+    });
+
+    it("advances cursor past the matched word when earlier words were skipped", () => {
+      // Spoken "take" arrives when the cursor sits at the start of a part
+      // that begins with two unrelated words ("It shouldn't"). The matcher
+      // should skip those and the cursor should land after "take ", not
+      // after the first skipped word.
+      const parts = [textPart("It shouldn't take too long")];
+      const c = cursor(1);
+
+      const result = applySpokenBotOutputProgress(c, parts, "take");
+
+      expect(result).toBe(true);
+      expect(c.currentCharIndex).toBe("It shouldn't take ".length);
+    });
+
+    it("treats contractions as a single chunk when walking word positions", () => {
+      // A trailing spoken word that must skip past a contraction should land
+      // past the contraction as a whole, not past the 't' in "shouldn't".
+      const parts = [textPart("It shouldn't happen")];
+      const c = cursor(1);
+
+      const result = applySpokenBotOutputProgress(c, parts, "happen");
+
+      expect(result).toBe(true);
+      expect(c.currentCharIndex).toBe("It shouldn't happen".length);
     });
 
     it("returns false for non-string part text", () => {
