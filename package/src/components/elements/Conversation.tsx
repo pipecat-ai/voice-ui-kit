@@ -1,5 +1,6 @@
 import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
+import type { TextRenderMode } from "@/types/conversation";
 import { usePipecatClientTransportState } from "@pipecat-ai/client-react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { MessageContainer } from "./MessageContainer";
@@ -106,6 +107,14 @@ export interface ConversationProps {
   aggregationMetadata?: React.ComponentProps<
     typeof MessageContainer
   >["aggregationMetadata"];
+  /**
+   * Controls how bot message text is rendered.
+   * - "karaoke": Spoken text normal, unspoken text muted (default)
+   * - "spoken": Show only the spoken portion
+   * - "unspoken": Show full LLM text without highlighting
+   * @default "karaoke"
+   */
+  textRenderMode?: TextRenderMode;
 }
 
 /**
@@ -150,6 +159,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
     functionCallRenderer,
     botOutputRenderers,
     aggregationMetadata,
+    textRenderMode,
   }) => {
     const transportState = usePipecatClientTransportState();
 
@@ -188,8 +198,15 @@ export const Conversation: React.FC<ConversationProps> = memo(
       }
     }, [noAutoscroll, reverseOrder]);
 
+    // Map textRenderMode to botOutputFilter
+    const botOutputFilter = useMemo(() => {
+      if (textRenderMode === "spoken") return { unspoken: false };
+      return undefined; // "karaoke" and "unspoken" both need all data
+    }, [textRenderMode]);
+
     const { messages: allMessages } = usePipecatConversation({
       aggregationMetadata,
+      botOutputFilter,
     });
     const { botOutputSupported } = useConversationContext();
 
@@ -298,6 +315,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
                     classNames={messageClassNames}
                     botOutputRenderers={botOutputRenderers}
                     aggregationMetadata={aggregationMetadata}
+                    textRenderMode={textRenderMode}
                   />
                 ),
               )}

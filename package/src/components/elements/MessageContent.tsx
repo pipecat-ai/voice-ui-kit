@@ -5,6 +5,7 @@ import {
   BotOutputText,
   ConversationMessage,
   ConversationMessagePart,
+  TextRenderMode,
 } from "@/types/conversation";
 import { Fragment } from "react";
 import Thinking from "./Thinking";
@@ -52,6 +53,11 @@ interface Props {
    * Key is the aggregation type (e.g., "code", "link"), value is metadata configuration
    */
   aggregationMetadata?: Record<string, AggregationMetadata>;
+  /**
+   * Controls how bot message text is rendered.
+   * @default "karaoke"
+   */
+  textRenderMode?: TextRenderMode;
 }
 
 /**
@@ -69,6 +75,7 @@ const renderBotOutput = (
   aggregatedBy?: string,
   customRenderer?: CustomBotOutputRenderer,
   metadata?: AggregationMetadata,
+  textRenderMode?: TextRenderMode,
 ): React.ReactNode => {
   // Use custom renderer if provided and aggregation type matches
   if (aggregatedBy && customRenderer) {
@@ -79,6 +86,16 @@ const renderBotOutput = (
   // Default rendering - unspoken is already split at the correct position
   const displayMode = metadata?.displayMode || "inline";
   const Wrapper = displayMode === "block" ? "div" : "span";
+
+  // In "unspoken" mode, render all text in normal color (no karaoke highlighting)
+  if (textRenderMode === "unspoken") {
+    return (
+      <Wrapper>
+        {spoken}
+        {unspoken}
+      </Wrapper>
+    );
+  }
 
   return (
     <Wrapper>
@@ -104,6 +121,7 @@ const renderPartContent = (
   part: ConversationMessagePart,
   botOutputRenderers?: Record<string, CustomBotOutputRenderer>,
   aggregationMetadata?: Record<string, AggregationMetadata>,
+  textRenderMode?: TextRenderMode,
 ): React.ReactNode => {
   if (!part.text) return null;
   if (isBotOutputText(part)) {
@@ -120,6 +138,7 @@ const renderPartContent = (
       part.aggregatedBy,
       customRenderer,
       metadata,
+      textRenderMode,
     );
   }
   return part.text as React.ReactNode;
@@ -130,6 +149,7 @@ export const MessageContent = ({
   aggregationMetadata,
   classNames = {},
   message,
+  textRenderMode,
 }: Props) => {
   const parts = Array.isArray(message.parts) ? message.parts : [];
 
@@ -178,6 +198,7 @@ export const MessageContent = ({
                   part,
                   botOutputRenderers,
                   aggregationMetadata,
+                  textRenderMode,
                 );
                 const shouldAddSpace = partIdx > 0 && !isBotOutputText(part);
 
@@ -200,6 +221,7 @@ export const MessageContent = ({
                     part,
                     botOutputRenderers,
                     aggregationMetadata,
+                    textRenderMode,
                   )}
                 </Fragment>
               ))}

@@ -40,7 +40,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
-import { type ConversationMessage } from "@/types/conversation";
+import {
+  type ConversationMessage,
+  type TextRenderMode,
+} from "@/types/conversation";
 import {
   type APIRequest,
   type PipecatClientOptions,
@@ -143,6 +146,21 @@ export interface ConsoleTemplateProps
    * The bot may still send metrics, but they won't be displayed.
    */
   noMetrics?: boolean;
+
+  /**
+   * Text rendering mode for bot messages.
+   * - "karaoke": Spoken text normal, unspoken text muted (default)
+   * - "spoken": Show only the spoken portion
+   * - "unspoken": Show full LLM text without highlighting
+   * @default "karaoke"
+   */
+  textRenderMode?: TextRenderMode;
+
+  /**
+   * Hides the text render mode switch in the conversation panel header.
+   * @default false
+   */
+  noTextRenderModeSwitch?: boolean;
 
   /**
    * Custom logo component to display in the header.
@@ -325,6 +343,8 @@ const ConsoleUI = ({
   videoCodec = "default",
   noConversation = false,
   noMetrics = false,
+  textRenderMode,
+  noTextRenderModeSwitch = false,
   logoComponent,
   conversationElementProps,
   onInjectMessage,
@@ -497,6 +517,8 @@ const ConsoleUI = ({
                         noConversation={noConversation}
                         noMetrics={noMetrics}
                         noTextInput={noTextInput}
+                        textRenderMode={textRenderMode}
+                        noTextRenderModeSwitch={noTextRenderModeSwitch}
                         conversationElementProps={{
                           ...conversationElementProps,
                           assistantLabel: assistantLabelText,
@@ -625,6 +647,8 @@ const ConsoleUI = ({
                   noConversation={noConversation}
                   noMetrics={noMetrics}
                   noTextInput={noTextInput}
+                  textRenderMode={textRenderMode}
+                  noTextRenderModeSwitch={noTextRenderModeSwitch}
                 />
               </TabsContent>
             )}

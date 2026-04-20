@@ -4,6 +4,7 @@ import type {
   AggregationMetadata,
   ConversationMessage,
   FunctionCallRenderer,
+  TextRenderMode,
 } from "@/types/conversation";
 import { MessageRole } from "./MessageRole";
 import { MessageContent } from "./MessageContent";
@@ -80,6 +81,11 @@ interface Props {
    * Metadata for aggregation types to control rendering and speech progress behavior
    */
   aggregationMetadata?: Record<string, AggregationMetadata>;
+  /**
+   * Controls how bot message text is rendered.
+   * @default "karaoke"
+   */
+  textRenderMode?: TextRenderMode;
 }
 
 export const MessageContainer = memo(
@@ -93,6 +99,7 @@ export const MessageContainer = memo(
     message,
     botOutputRenderers,
     aggregationMetadata,
+    textRenderMode,
   }: Props) => {
     if (message.role === "function_call" && message.functionCall) {
       return (
@@ -133,6 +140,7 @@ export const MessageContainer = memo(
           message={message}
           botOutputRenderers={botOutputRenderers}
           aggregationMetadata={aggregationMetadata}
+          textRenderMode={textRenderMode}
         />
       </div>
     );
