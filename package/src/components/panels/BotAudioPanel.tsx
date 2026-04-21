@@ -1,3 +1,4 @@
+import { BotAudioControl } from "@/components/elements/BotAudioControl";
 import {
   Panel,
   PanelContent,
@@ -15,8 +16,18 @@ interface BotAudioPanelProps {
   className?: string;
   collapsed?: boolean;
   visualization?: "bar" | "circle";
+  /**
+   * Reserved for a future mute affordance. Currently unwired — see plan notes.
+   * @deprecated Not yet implemented. Will be used when mute semantics are finalized.
+   */
   isMuted?: boolean;
+  /**
+   * Reserved for a future mute affordance. Currently unwired — see plan notes.
+   * @deprecated Not yet implemented. Will be used when mute semantics are finalized.
+   */
   onMuteToggle?: () => void;
+  /** Hide the header bot audio controls (e.g. volume). Defaults to `false`. */
+  noControls?: boolean;
 }
 
 const barCount = 10;
@@ -24,6 +35,7 @@ const barCount = 10;
 export const BotAudioPanel: React.FC<BotAudioPanelProps> = ({
   className,
   collapsed = false,
+  noControls = false,
 }) => {
   const track = usePipecatClientMediaTrack("audio", "bot");
 
@@ -69,8 +81,9 @@ export const BotAudioPanel: React.FC<BotAudioPanelProps> = ({
       )}
     >
       {!collapsed && (
-        <PanelHeader>
+        <PanelHeader className="flex items-center justify-between gap-2">
           <PanelTitle>Bot Audio</PanelTitle>
+          {!noControls && <BotAudioControl size="sm" variant="ghost" />}
         </PanelHeader>
       )}
       <PanelContent

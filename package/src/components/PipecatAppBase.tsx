@@ -1,5 +1,6 @@
 "use client";
 
+import { BotAudioOutput } from "@/components/BotAudioOutput";
 import {
   ThemeProvider,
   type ThemeProviderProps,
@@ -12,10 +13,7 @@ import {
   type PipecatClientOptions,
   type TransportConnectionParams,
 } from "@pipecat-ai/client-js";
-import {
-  PipecatClientAudio,
-  PipecatClientProvider,
-} from "@pipecat-ai/client-react";
+import { PipecatClientProvider } from "@pipecat-ai/client-react";
 import type { DailyTransportConstructorOptions } from "@pipecat-ai/daily-transport";
 import type {
   SmallWebRTCTransport,
@@ -316,7 +314,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
     <PipecatClientProvider client={client!}>
       <ConversationProvider>
         {typeof children === "function" ? children(passedProps) : children}
-        {!noAudioOutput && <PipecatClientAudio />}
+        {!noAudioOutput && <BotAudioOutput />}
       </ConversationProvider>
     </PipecatClientProvider>
   );

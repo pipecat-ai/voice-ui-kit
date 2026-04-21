@@ -18,6 +18,7 @@ export * from "./popover";
 export * from "./progress";
 export * from "./resizable";
 export * from "./select";
+export * from "./slider";
 export * from "./tabs";
 export * from "./textarea";
 export * from "./tooltip";

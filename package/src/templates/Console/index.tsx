@@ -83,6 +83,11 @@ export interface ConsoleTemplateProps
   noAudioOutput?: boolean;
   /** Disables audio visualization for the bot. Default: false */
   noBotAudio?: boolean;
+  /**
+   * Hides the bot audio controls (e.g. volume) in the bot audio panel header.
+   * Implicitly hidden when `noAudioOutput` is true. Default: false
+   */
+  noBotAudioControls?: boolean;
   /** Disables video visualization for the bot. Default: true */
   noBotVideo?: boolean;
   /** Disables automatic initialization of devices. Default: false */
@@ -289,7 +294,9 @@ const ConsoleUI = ({
   noScreenControl = false,
   noTextInput = false,
   noBotAudio = false,
+  noBotAudioControls = false,
   noBotVideo = false,
+  noAudioOutput = false,
 
   // Transport and client options
   startBotParams,
@@ -462,6 +469,7 @@ const ConsoleUI = ({
                             "mb-auto": noBotVideo,
                           })}
                           collapsed={isBotAreaCollapsed}
+                          noControls={noBotAudioControls || noAudioOutput}
                         />
                       )}
                       {!noBotVideo && (
@@ -600,7 +608,11 @@ const ConsoleUI = ({
                 value="bot"
                 className="flex-1 overflow-auto flex flex-col gap-4 p-2"
               >
-                {!noBotAudio && <BotAudioPanel />}
+                {!noBotAudio && (
+                  <BotAudioPanel
+                    noControls={noBotAudioControls || noAudioOutput}
+                  />
+                )}
                 {!noBotVideo && <BotVideoPanel />}
               </TabsContent>
             )}
