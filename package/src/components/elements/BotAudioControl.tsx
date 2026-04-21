@@ -42,7 +42,7 @@ interface Props {
   /**
    * Props forwarded to `PopoverContent`. Use this to adjust placement —
    * `align`, `side`, `sideOffset`, `alignOffset`, `collisionPadding`, etc.
-   * Defaults: `align="center"`.
+   * Defaults: `align="end"`.
    */
   popoverContentProps?: Partial<React.ComponentProps<typeof PopoverContent>>;
   /**
@@ -136,7 +136,7 @@ export const BotAudioComponent: React.FC<ComponentProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        align="center"
+        align="end"
         {...popoverContentProps}
         className={cn(
           "w-56",

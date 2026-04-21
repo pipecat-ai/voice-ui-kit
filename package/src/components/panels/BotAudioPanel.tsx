@@ -81,7 +81,7 @@ export const BotAudioPanel: React.FC<BotAudioPanelProps> = ({
       )}
     >
       {!collapsed && (
-        <PanelHeader className="flex items-center justify-between gap-2">
+        <PanelHeader className={cn(!noControls && "justify-between gap-2")}>
           <PanelTitle>Bot Audio</PanelTitle>
           {!noControls && <BotAudioControl size="sm" variant="ghost" />}
         </PanelHeader>

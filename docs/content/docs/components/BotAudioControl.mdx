@@ -57,7 +57,7 @@ Mute is intentionally not provided as its own control yet. For now, sliding volu
       description: "Props forwarded to PopoverContent. Use to adjust placement — align, side, sideOffset, alignOffset, collisionPadding, etc.",
       type: "Partial<React.ComponentProps<typeof PopoverContent>>",
       required: false,
-      default: '{ align: "center" }',
+      default: '{ align: "end" }',
     },
     volumeSliderProps: {
       description: "Props forwarded to the inner BotVolumeSliderComponent (noLabel, noPercent, orientation, sliderProps, etc.)",
@@ -163,7 +163,7 @@ The `BotAudioComponent` is the headless variant. It accepts `volume` and `onVolu
       description: "Props forwarded to PopoverContent. Use to adjust placement — align, side, sideOffset, alignOffset, collisionPadding, etc.",
       type: "Partial<React.ComponentProps<typeof PopoverContent>>",
       required: false,
-      default: '{ align: "center" }',
+      default: '{ align: "end" }',
     },
     volumeSliderProps: {
       description: "Props forwarded to the inner BotVolumeSliderComponent (noLabel, noPercent, orientation, sliderProps, etc.)",
@@ -207,8 +207,8 @@ Pass `popoverContentProps` to override placement defaults:
 ```tsx
 <BotAudioControl
   popoverContentProps={{
-    align: "end",
-    side: "bottom",
+    align: "center",
+    side: "top",
     sideOffset: 8,
   }}
 />
