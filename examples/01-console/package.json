@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@pipecat-ai/voice-ui-kit": "workspace:*",
-    "next": "15.5.14",
+    "next": "15.5.15",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
@@ -20,7 +20,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.3.4",
+    "eslint-config-next": "15.5.15",
     "typescript": "^5"
   }
 }

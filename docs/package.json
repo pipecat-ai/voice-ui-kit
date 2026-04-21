@@ -18,7 +18,7 @@
     "fumadocs-mdx": "^14.2.2",
     "fumadocs-ui": "^15.6.11",
     "lucide-react": "^0.511.0",
-    "next": "15.5.14",
+    "next": "15.5.15",
     "next-themes": "^0.4.6",
     "react-live": "^4.1.8",
     "shiki": "^3.11.0",
@@ -33,7 +33,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "eslint": "^8",
-    "eslint-config-next": "15.4.2",
+    "eslint-config-next": "15.5.15",
     "tsx": "^4.20.4"
   }
 }
