@@ -16,17 +16,7 @@ interface BotAudioPanelProps {
   className?: string;
   collapsed?: boolean;
   visualization?: "bar" | "circle";
-  /**
-   * Reserved for a future mute affordance. Currently a no-op; will be wired
-   * up once the mute design (local playback vs. conversation pause vs.
-   * server-side TTS suppression) is finalized.
-   */
   isMuted?: boolean;
-  /**
-   * Reserved for a future mute affordance. Currently a no-op; will be wired
-   * up once the mute design (local playback vs. conversation pause vs.
-   * server-side TTS suppression) is finalized.
-   */
   onMuteToggle?: () => void;
   /** Hide the header bot audio controls (e.g. volume). Defaults to `false`. */
   noControls?: boolean;
