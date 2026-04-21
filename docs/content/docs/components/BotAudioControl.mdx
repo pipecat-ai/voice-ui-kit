@@ -226,7 +226,7 @@ Pass `popoverProps` to control open state (e.g. for a controlled popover):
 
 The connected `BotAudioControl` reads and writes volume through the [`useBotAudioOutput`](/hooks/useBotAudioOutput) hook, and uses `usePipecatClientTransportState` to disable the control while the transport is disconnected or initializing. It must be used within a `PipecatClientProvider` context (typically provided by `PipecatAppBase`).
 
-Volume is applied to the `<audio>` element rendered by `BotAudioOutput`, which `PipecatAppBase` mounts in place of `PipecatClientAudio` unless `noAudioOutput` is `true`.
+Volume is applied to the `<audio>` element rendered by `BotAudioOutput`, which `PipecatAppBase` mounts automatically unless `noAudioOutput` is `true`.
 
 ## Visual States
 

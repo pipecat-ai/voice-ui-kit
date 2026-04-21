@@ -59,6 +59,9 @@ export const BotVolumeSliderComponent: React.FC<ComponentProps> = ({
   sliderProps,
 }) => {
   const pct = Math.round(volume * 100);
+  // Guard the accessible name: an empty or whitespace-only `label` would
+  // leave the slider unannounced for assistive tech.
+  const accessibleLabel = label.trim() || "Bot volume";
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
@@ -86,9 +89,9 @@ export const BotVolumeSliderComponent: React.FC<ComponentProps> = ({
         max={1}
         step={0.01}
         value={[volume]}
-        onValueChange={(v) => onVolumeChange?.(v[0] ?? 0)}
+        onValueChange={(v: number[]) => onVolumeChange?.(v[0] ?? 0)}
         orientation={orientation}
-        aria-label={label}
+        aria-label={accessibleLabel}
         {...sliderProps}
         className={cn(classNames.slider, sliderProps?.className)}
       />

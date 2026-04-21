@@ -44,14 +44,18 @@ export const BotAudioOutput: React.FC = () => {
     el.volume = volume;
   }, [volume]);
 
-  // Mirror PipecatClientAudio's speaker routing behavior.
+  // Mirror PipecatClientAudio's speaker routing behavior. `setSinkId` returns
+  // a Promise that can reject (unsupported deviceId, permission denied, etc.);
+  // swallow and log so failures stay non-fatal and observable.
   useRTVIClientEvent(
     RTVIEvent.SpeakerUpdated,
     useCallback((speaker: MediaDeviceInfo) => {
       const el = audioRef.current;
       if (!el) return;
       if (typeof el.setSinkId !== "function") return;
-      el.setSinkId(speaker.deviceId);
+      el.setSinkId(speaker.deviceId).catch((err: unknown) => {
+        console.warn("BotAudioOutput: setSinkId failed", err);
+      });
     }, []),
   );
 

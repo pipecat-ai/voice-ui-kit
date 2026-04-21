@@ -13,7 +13,7 @@ const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
 >(({ className, orientation = "horizontal", ...props }, ref) => {
-  const values = Array.isArray(props.value)
+  const values: number[] = Array.isArray(props.value)
     ? props.value
     : Array.isArray(props.defaultValue)
       ? props.defaultValue

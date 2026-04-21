@@ -126,7 +126,7 @@ export const BotAudioComponent: React.FC<ComponentProps> = ({
           variant={variant}
           size={size}
           state={state}
-          aria-label={label ?? "Bot volume"}
+          aria-label={label?.trim() || "Bot volume"}
           {...buttonProps}
           className={cn(classNames.button, buttonProps?.className)}
         >
