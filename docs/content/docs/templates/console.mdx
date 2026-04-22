@@ -163,6 +163,12 @@ The ConsoleTemplate extends `PipecatBaseProps` and adds additional configuration
       required: false,
       default: "false",
     },
+    noBotAudioControls: {
+      description: "Hides the bot audio controls (e.g. volume) in the bot audio panel header. Implicitly hidden when noAudioOutput is true",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
     noBotVideo: {
       description: "Disables video visualization for the bot",
       type: "boolean",

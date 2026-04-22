@@ -1,0 +1,239 @@
+---
+title: Bot Audio Control
+description: Control for adjusting the bot's audio output volume
+component: BotAudioControl
+---
+
+The `BotAudioControl` component provides a button with a popover-mounted volume slider for controlling the bot's audio output level. It integrates with the kit's bot audio store so any number of instances stay in sync, and it drives the `<audio>` element rendered by `BotAudioOutput` (used automatically by `PipecatAppBase`).
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotAudioControl } from "@pipecat-ai/voice-ui-kit";
+
+  <BotAudioControl />
+`}
+</LiveComponent>
+
+---
+
+<Callout>
+Mute is intentionally not provided as its own control yet. For now, sliding volume to `0` silences the bot locally. A dedicated mute affordance is being designed separately because it requires a decision about whether muting should also pause the user's microphone (to avoid the bot's LLM receiving user speech that references something the user never actually heard).
+</Callout>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    variant: {
+      description: "Visual style variant of the button",
+      type: '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "link" | "active" | "inactive"',
+      required: false,
+      default: '"secondary"',
+    },
+    size: {
+      description: "Size of the button component",
+      type: '"sm" | "md" | "lg" | "xl"',
+      required: false,
+      default: '"md"',
+    },
+    state: {
+      description: "Button state for visual feedback",
+      type: '"default" | "active" | "inactive"',
+      required: false,
+      default: "undefined",
+    },
+    buttonProps: {
+      description: "Props to pass to the trigger button",
+      type: "Partial<ButtonProps>",
+      required: false,
+      default: "undefined",
+    },
+    popoverProps: {
+      description: "Props forwarded to the Radix Popover root (e.g. open, defaultOpen, onOpenChange, modal)",
+      type: "Partial<React.ComponentProps<typeof Popover>>",
+      required: false,
+      default: "undefined",
+    },
+    popoverContentProps: {
+      description: "Props forwarded to PopoverContent. Use to adjust placement — align, side, sideOffset, alignOffset, collisionPadding, etc.",
+      type: "Partial<React.ComponentProps<typeof PopoverContent>>",
+      required: false,
+      default: '{ align: "end" }',
+    },
+    volumeSliderProps: {
+      description: "Props forwarded to the inner BotVolumeSliderComponent (noLabel, noPercent, orientation, sliderProps, etc.)",
+      type: "Partial<Omit<BotVolumeSliderComponentProps, 'volume' | 'onVolumeChange'>>",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ button?: string; popoverContent?: string; slider?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    noIcon: {
+      description: "Hide the volume icon in the trigger button",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    label: {
+      description: "Optional visible label rendered next to the icon",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    children: {
+      description: "Additional content to render inside the button",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+### BotAudioComponent
+
+The `BotAudioComponent` is the headless variant. It accepts `volume` and `onVolumeChange` directly, so you can drive it from any state source (tests, custom stores, etc.).
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { BotAudioComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    const [volume, setVolume] = React.useState(0.8);
+    return (
+      <BotAudioComponent
+        volume={volume}
+        onVolumeChange={setVolume}
+      />
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    volume: {
+      description: "Current volume, in the range 0.0 – 1.0",
+      type: "number",
+      required: false,
+      default: "1",
+    },
+    onVolumeChange: {
+      description: "Callback fired when the user changes the volume. Receives a value in the range 0.0 – 1.0",
+      type: "(volume: number) => void",
+      required: false,
+      default: "undefined",
+    },
+    variant: {
+      description: "Visual style variant of the button",
+      type: '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "link" | "active" | "inactive"',
+      required: false,
+      default: '"secondary"',
+    },
+    size: {
+      description: "Size of the button component",
+      type: '"sm" | "md" | "lg" | "xl"',
+      required: false,
+      default: '"md"',
+    },
+    state: {
+      description: "Button state for visual feedback",
+      type: '"default" | "active" | "inactive"',
+      required: false,
+      default: "undefined",
+    },
+    buttonProps: {
+      description: "Props to pass to the trigger button",
+      type: "Partial<ButtonProps>",
+      required: false,
+      default: "undefined",
+    },
+    popoverProps: {
+      description: "Props forwarded to the Radix Popover root (e.g. open, defaultOpen, onOpenChange, modal)",
+      type: "Partial<React.ComponentProps<typeof Popover>>",
+      required: false,
+      default: "undefined",
+    },
+    popoverContentProps: {
+      description: "Props forwarded to PopoverContent. Use to adjust placement — align, side, sideOffset, alignOffset, collisionPadding, etc.",
+      type: "Partial<React.ComponentProps<typeof PopoverContent>>",
+      required: false,
+      default: '{ align: "end" }',
+    },
+    volumeSliderProps: {
+      description: "Props forwarded to the inner BotVolumeSliderComponent (noLabel, noPercent, orientation, sliderProps, etc.)",
+      type: "Partial<Omit<BotVolumeSliderComponentProps, 'volume' | 'onVolumeChange'>>",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component",
+      type: "{ button?: string; popoverContent?: string; slider?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    noIcon: {
+      description: "Hide the volume icon in the trigger button",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    label: {
+      description: "Optional visible label rendered next to the icon",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    children: {
+      description: "Additional content to render inside the button",
+      type: "React.ReactNode",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Adjusting placement
+
+Pass `popoverContentProps` to override placement defaults:
+
+```tsx
+<BotAudioControl
+  popoverContentProps={{
+    align: "center",
+    side: "top",
+    sideOffset: 8,
+  }}
+/>
+```
+
+Pass `popoverProps` to control open state (e.g. for a controlled popover):
+
+```tsx
+<BotAudioControl
+  popoverProps={{ open, onOpenChange: setOpen }}
+/>
+```
+
+## Integration
+
+The connected `BotAudioControl` reads and writes volume through the [`useBotAudioOutput`](/hooks/useBotAudioOutput) hook, and uses `usePipecatClientTransportState` to disable the control while the transport is disconnected or initializing. It must be used within a `PipecatClientProvider` context (typically provided by `PipecatAppBase`).
+
+Volume is applied to the `<audio>` element rendered by `BotAudioOutput`, which `PipecatAppBase` mounts automatically unless `noAudioOutput` is `true`.
+
+## Visual States
+
+The icon inside the trigger button reflects the current volume level (muted, low, medium, high). This is purely cosmetic and does not represent a separate mute state.
+
+## Also see
+
+- [`BotVolumeSlider`](/components/BotVolumeSlider) — the inline slider rendered inside this control's popover, usable standalone.
+- [`useBotAudioOutput`](/hooks/useBotAudioOutput) for reading or driving the bot volume from anywhere in your app.
+- [`BotAudioPanel`](/panels/BotAudioPanel) — renders a `BotAudioControl` in its header by default; pass `noControls` to hide it.

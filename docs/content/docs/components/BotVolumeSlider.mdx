@@ -1,0 +1,162 @@
+---
+title: Bot Volume Slider
+description: Inline slider for controlling the bot's audio output volume
+component: BotVolumeSlider
+---
+
+The `BotVolumeSlider` component is an inline volume slider for the bot's audio output. It is the same slider that lives inside [`BotAudioControl`](/components/BotAudioControl)'s popover, extracted so you can embed it standalone — for example in a settings panel, a sidebar, or a custom toolbar.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { BotVolumeSlider } from "@pipecat-ai/voice-ui-kit";
+
+  <div style={{ width: 280 }}>
+    <BotVolumeSlider />
+  </div>
+`}
+</LiveComponent>
+
+---
+
+<TypeTable
+  className="text-sm"
+  type={{
+    noLabel: {
+      description: "Hide the label + percent readout row",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noPercent: {
+      description: "Hide just the percent readout (keeps the label)",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    label: {
+      description: "Override the label text",
+      type: "string",
+      required: false,
+      default: '"Bot volume"',
+    },
+    orientation: {
+      description: "Slider orientation",
+      type: '"horizontal" | "vertical"',
+      required: false,
+      default: '"horizontal"',
+    },
+    className: {
+      description: "Classes for the outer wrapper",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Classes for individual parts of the component",
+      type: "{ labelRow?: string; label?: string; percent?: string; slider?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    sliderProps: {
+      description: "Props forwarded to the underlying Slider primitive",
+      type: "Partial<React.ComponentProps<typeof Slider>>",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+### BotVolumeSliderComponent
+
+The `BotVolumeSliderComponent` is the headless variant. It accepts `volume` and `onVolumeChange` directly, so you can drive it from any state source.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { BotVolumeSliderComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    const [volume, setVolume] = React.useState(0.8);
+    return (
+      <div style={{ width: 280 }}>
+        <BotVolumeSliderComponent
+          volume={volume}
+          onVolumeChange={setVolume}
+        />
+      </div>
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    volume: {
+      description: "Current volume, in the range 0.0 – 1.0",
+      type: "number",
+      required: false,
+      default: "1",
+    },
+    onVolumeChange: {
+      description: "Callback fired when the user changes the volume. Receives a value in the range 0.0 – 1.0",
+      type: "(volume: number) => void",
+      required: false,
+      default: "undefined",
+    },
+    noLabel: {
+      description: "Hide the label + percent readout row",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noPercent: {
+      description: "Hide just the percent readout (keeps the label)",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    label: {
+      description: "Override the label text",
+      type: "string",
+      required: false,
+      default: '"Bot volume"',
+    },
+    orientation: {
+      description: "Slider orientation",
+      type: '"horizontal" | "vertical"',
+      required: false,
+      default: '"horizontal"',
+    },
+    className: {
+      description: "Classes for the outer wrapper",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    classNames: {
+      description: "Classes for individual parts of the component",
+      type: "{ labelRow?: string; label?: string; percent?: string; slider?: string; }",
+      required: false,
+      default: "undefined",
+    },
+    sliderProps: {
+      description: "Props forwarded to the underlying Slider primitive",
+      type: "Partial<React.ComponentProps<typeof Slider>>",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Integration
+
+The connected `BotVolumeSlider` reads and writes volume through the [`useBotAudioOutput`](/hooks/useBotAudioOutput) hook. It does not require `PipecatClientProvider` to render, but needs `BotAudioOutput` to be mounted somewhere in the tree for the volume to have any audible effect — handled by `PipecatAppBase` unless you pass `noAudioOutput`.
+
+## See Also
+
+- [`BotAudioControl`](/components/BotAudioControl) — a button + popover that wraps this slider.
+- [`useBotAudioOutput`](/hooks/useBotAudioOutput) — the underlying hook.

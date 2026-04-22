@@ -1,3 +1,4 @@
+import { BotAudioControl } from "@/components/elements/BotAudioControl";
 import {
   Panel,
   PanelContent,
@@ -17,6 +18,8 @@ interface BotAudioPanelProps {
   visualization?: "bar" | "circle";
   isMuted?: boolean;
   onMuteToggle?: () => void;
+  /** Hide the header bot audio controls (e.g. volume). Defaults to `false`. */
+  noControls?: boolean;
 }
 
 const barCount = 10;
@@ -24,6 +27,7 @@ const barCount = 10;
 export const BotAudioPanel: React.FC<BotAudioPanelProps> = ({
   className,
   collapsed = false,
+  noControls = false,
 }) => {
   const track = usePipecatClientMediaTrack("audio", "bot");
 
@@ -69,8 +73,9 @@ export const BotAudioPanel: React.FC<BotAudioPanelProps> = ({
       )}
     >
       {!collapsed && (
-        <PanelHeader>
+        <PanelHeader className={cn(!noControls && "justify-between gap-2")}>
           <PanelTitle>Bot Audio</PanelTitle>
+          {!noControls && <BotAudioControl size="sm" variant="ghost" />}
         </PanelHeader>
       )}
       <PanelContent

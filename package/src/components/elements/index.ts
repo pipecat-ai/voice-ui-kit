@@ -1,3 +1,5 @@
+export * from "./BotAudioControl";
+export * from "./BotVolumeSlider";
 export * from "./ClientStatus";
 export * from "./ConnectButton";
 export * from "./ControlBar";

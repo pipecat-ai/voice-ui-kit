@@ -11,7 +11,7 @@ It handles the common setup tasks that are typically the same across most applic
 - Creates a Pipecat Client instance and manages its lifecycle.
 - Wraps children with the necessary providers (such as `ThemeProvider` and `PipecatClientProvider`).
 - Provides connect and disconnect handlers (sync or async).
-- Mounts any available audio tracks using the Pipecat React `<PipecatClientAudio />` component.
+- Mounts the bot audio track via `<BotAudioOutput />`, which also binds playback volume to `useBotAudioOutput`.
 - Passes through transport and client options from the constructor.
 - Automatically disconnects and disposes the client when unmounting.
 - Surfaces error states to the child components.
@@ -277,7 +277,7 @@ export default function Home() {
     },
     noAudioOutput: {
       description:
-        "Whether to disable audio output for the bot. When true, the PipecatClientAudio component is not rendered.",
+        "Whether to disable audio output for the bot. When true, no bot audio element is rendered.",
       type: "boolean",
       default: "false",
       required: false,

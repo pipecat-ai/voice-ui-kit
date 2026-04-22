@@ -1,0 +1,48 @@
+---
+title: useBotAudioOutput
+description: Hook for reading and updating the bot's audio output volume
+---
+
+The `useBotAudioOutput` hook exposes the bot audio output state that drives the `<audio>` element rendered by `BotAudioOutput`. Use it to read the current volume or to set it from anywhere in your app — the `BotAudioControl` component and any other consumer stay in sync automatically.
+
+## Usage
+
+```tsx
+import { useBotAudioOutput } from "@pipecat-ai/voice-ui-kit";
+
+function VolumeReadout() {
+  const { volume, setVolume } = useBotAudioOutput();
+  return (
+    <div>
+      <p>Bot volume: {Math.round(volume * 100)}%</p>
+      <button onClick={() => setVolume(0.5)}>Set to 50%</button>
+    </div>
+  );
+}
+```
+
+## Return Value
+
+<TypeTable
+  className="text-sm"
+  type={{
+    volume: {
+      description: "Current bot audio output volume, in the range 0.0 – 1.0",
+      type: "number",
+      required: true,
+    },
+    setVolume: {
+      description: "Set the bot audio output volume. Values are clamped to [0, 1]",
+      type: "(volume: number) => void",
+      required: true,
+    },
+  }}
+/>
+
+## Integration
+
+The hook is backed by a module-scoped Zustand store, so it does not require a provider. It does, however, need `BotAudioOutput` to be mounted somewhere in the tree to have any audible effect — this is handled by `PipecatAppBase` unless you pass `noAudioOutput`.
+
+## See Also
+
+- [`BotAudioControl`](/components/BotAudioControl) — a ready-made UI for changing the bot volume.

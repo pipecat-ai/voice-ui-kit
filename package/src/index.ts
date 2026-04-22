@@ -1,4 +1,5 @@
 // Components
+export * from "@/components/BotAudioOutput";
 export * from "@/components/elements";
 export * from "@/components/panels";
 export * from "@/components/PipecatAppBase";

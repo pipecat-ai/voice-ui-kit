@@ -1,6 +1,8 @@
 {
     "pages": [
         "overview",
+        "BotAudioControl",
+        "BotVolumeSlider",
         "ClientStatus",
         "ConnectButton",
         "Conversation",

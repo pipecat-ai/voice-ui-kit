@@ -1,4 +1,8 @@
 export {
+  useBotAudioOutput,
+  type UseBotAudioOutputReturn,
+} from "./useBotAudioOutput";
+export {
   usePipecatConnectionState,
   type PipecatConnectionState,
 } from "./usePipecatConnectionState";
