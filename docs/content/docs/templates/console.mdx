@@ -271,6 +271,18 @@ The ConsoleTemplate extends `PipecatBaseProps` and adds additional configuration
       required: false,
       default: "false",
     },
+    textRenderMode: {
+      description: 'Initial text render mode for bot messages in the conversation panel. "karaoke": full text with the already-spoken portion normal and the upcoming portion muted. "captions": show only the portion that has been spoken (synced to audio). "instant": show the full LLM text immediately, no highlighting. Users can flip between modes at runtime via the switch in the conversation panel header.',
+      type: '"karaoke" | "captions" | "instant"',
+      required: false,
+      default: '"karaoke"',
+    },
+    noTextRenderModeSwitch: {
+      description: "Hide the text render mode switch in the conversation panel header.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
     logoComponent: {
       description: "Custom logo component to display in the header",
       type: "React.ReactNode",

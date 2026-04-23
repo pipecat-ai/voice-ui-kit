@@ -149,9 +149,9 @@ export interface ConsoleTemplateProps
 
   /**
    * Text rendering mode for bot messages.
-   * - "karaoke": Spoken text normal, unspoken text muted (default)
-   * - "spoken": Show only the spoken portion
-   * - "unspoken": Show full LLM text without highlighting
+   * - "karaoke": Full text, already-spoken portion normal, upcoming portion muted (default)
+   * - "captions": Show only the portion that has been spoken (synced to audio)
+   * - "instant": Show the full LLM text immediately, no highlighting
    * @default "karaoke"
    */
   textRenderMode?: TextRenderMode;

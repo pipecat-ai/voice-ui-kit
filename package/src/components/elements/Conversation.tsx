@@ -109,9 +109,9 @@ export interface ConversationProps {
   >["aggregationMetadata"];
   /**
    * Controls how bot message text is rendered.
-   * - "karaoke": Spoken text normal, unspoken text muted (default)
-   * - "spoken": Show only the spoken portion
-   * - "unspoken": Show full LLM text without highlighting
+   * - "karaoke": Full text, already-spoken portion normal, upcoming portion muted (default)
+   * - "captions": Show only the portion that has been spoken (synced to audio)
+   * - "instant": Show the full LLM text immediately, no highlighting
    * @default "karaoke"
    */
   textRenderMode?: TextRenderMode;
@@ -200,8 +200,8 @@ export const Conversation: React.FC<ConversationProps> = memo(
 
     // Map textRenderMode to botOutputFilter
     const botOutputFilter = useMemo(() => {
-      if (textRenderMode === "spoken") return { unspoken: false };
-      return undefined; // "karaoke" and "unspoken" both need all data
+      if (textRenderMode === "captions") return { unspoken: false };
+      return undefined; // "karaoke" and "instant" both need all data
     }, [textRenderMode]);
 
     const { messages: allMessages } = usePipecatConversation({

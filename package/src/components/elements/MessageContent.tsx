@@ -87,8 +87,8 @@ const renderBotOutput = (
   const displayMode = metadata?.displayMode || "inline";
   const Wrapper = displayMode === "block" ? "div" : "span";
 
-  // In "unspoken" mode, render all text in normal color (no karaoke highlighting)
-  if (textRenderMode === "unspoken") {
+  // In "instant" mode, render all text in normal color (no karaoke highlighting)
+  if (textRenderMode === "instant") {
     return (
       <Wrapper>
         {spoken}

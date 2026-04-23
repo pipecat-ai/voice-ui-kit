@@ -107,8 +107,8 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="karaoke">Karaoke</SelectItem>
-                  <SelectItem value="spoken">Spoken</SelectItem>
-                  <SelectItem value="unspoken">Unspoken</SelectItem>
+                  <SelectItem value="captions">Captions</SelectItem>
+                  <SelectItem value="instant">Instant</SelectItem>
                 </SelectContent>
               </Select>
             )}

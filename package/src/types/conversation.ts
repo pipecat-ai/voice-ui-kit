@@ -79,7 +79,7 @@ export interface ConversationMessagePart {
 }
 
 /** Controls how bot message text is rendered in the UI */
-export type TextRenderMode = "karaoke" | "spoken" | "unspoken";
+export type TextRenderMode = "karaoke" | "captions" | "instant";
 
 /**
  * A raw BotOutput event stored for debugging and replay.
