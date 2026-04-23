@@ -169,9 +169,14 @@ export const usePipecatConversation = ({
     return processedMessages;
   }, [messages, botOutputMessageState, aggregationMetadata]);
 
+  const botOutputEvents = useConversationStore(
+    (state) => state.botOutputEvents,
+  );
+
   return {
     messages: filteredMessages,
     injectMessage,
+    botOutputEvents,
   };
 };
 
