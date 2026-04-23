@@ -594,4 +594,101 @@ describe("BotOutput assembly", () => {
       expect(cursor.partSpokenOnly).toEqual([false]);
     });
   });
+
+  describe("non-spoken aggregation types coexist with new absorption/drop logic", () => {
+    it("never absorbs an existing non-spoken aggregation part into a later unspoken event", () => {
+      // A code-block-style part arrives first as unspoken (skip_tts-like —
+      // `aggregatedBy` is not "sentence"/"word"). A later unspoken sentence
+      // must NOT absorb it — partSpokenOnly=false means it stays put.
+      harness.ensureAssistantMessage();
+
+      harness.emitBotOutput("code_snippet", false, "code");
+      harness.emitBotOutput("Here is the explanation.", false, "sentence");
+
+      const parts = harness.getMessages()[0].parts;
+      expect(parts).toHaveLength(2);
+      expect(parts[0].aggregatedBy).toBe("code");
+      expect(parts[0].text).toBe("code_snippet");
+      expect(parts[1].aggregatedBy).toBe("sentence");
+
+      const cursor = harness.getLastAssistantCursor()!;
+      // Neither part is a spoken-only fallback.
+      expect(cursor.partSpokenOnly).toEqual([false, false]);
+    });
+
+    it("lets mismatch-recovery skip a non-spoken part when spoken words only match the next sentence", () => {
+      // Cascaded order (the common case for non-spoken parts): an unspoken
+      // code block sits between a sentence and... itself. The spoken events
+      // only match the surrounding sentence. The existing mismatch-recovery
+      // marks the code block as "skipped" and the cursor advances past it.
+      // The new drop logic must not fire here.
+      harness.ensureAssistantMessage();
+
+      harness.emitBotOutput("Here is some code:", false, "sentence");
+      harness.emitBotOutput("console.log('hi')", false, "code");
+      harness.emitBotOutput("Pretty cool right?", false, "sentence");
+
+      // Spoken events cover only the two sentences.
+      harness.emitBotOutput("Here is some code:", true, "sentence");
+      harness.emitBotOutput("Pretty cool right?", true, "sentence");
+
+      const parts = harness.getMessages()[0].parts;
+      // All three parts still present; the code block is not absorbed, not
+      // dropped, not mutated.
+      expect(parts).toHaveLength(3);
+      expect(parts[1].aggregatedBy).toBe("code");
+      // The harness prepends a space between consecutive unspoken chunks.
+      expect(parts[1].text).toBe(" console.log('hi')");
+
+      const cursor = harness.getLastAssistantCursor()!;
+      // No spoken-only fallbacks spawned. Cursor has moved to the last part.
+      expect(cursor.partSpokenOnly).toEqual([false, false, false]);
+      // Code block is marked as skipped (pre-existing mismatch-recovery).
+      expect(cursor.partFinalFlags[1]).toBe(true);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Interruption still works alongside the new absorption logic
+  // -----------------------------------------------------------------------
+  describe("interruption cooperates with absorption", () => {
+    it("preserves the absorbed cursor offset when the assistant is interrupted mid-utterance", () => {
+      // S2S race: spoken prefix arrives before unspoken. Absorption folds
+      // the prefix into the new unspoken part and positions the cursor
+      // inside it. Interrupting before the rest of the sentence is spoken
+      // must leave that cursor offset intact (so the hook can render the
+      // spoken prefix correctly in the finalized message).
+      harness.ensureAssistantMessage();
+
+      for (const word of ["Hello", "there"]) {
+        harness.emitBotOutput(word, true, "sentence");
+      }
+      harness.emitBotOutput(
+        "Hello there, how are you today?",
+        false,
+        "sentence",
+      );
+
+      const absorbedCursor = harness.getLastAssistantCursor()!;
+      const absorbedOffset = absorbedCursor.currentCharIndex;
+      // Cursor sits after the "Hello there" prefix inside the sentence.
+      expect(absorbedOffset).toBeGreaterThan(0);
+      expect(absorbedOffset).toBeLessThan(
+        "Hello there, how are you today?".length,
+      );
+      expect(absorbedCursor.partFinalFlags[0]).toBe(false);
+
+      // User interrupts; finalize the message.
+      harness.finalizeAssistantIfPending();
+
+      const messages = harness.getMessages();
+      expect(messages).toHaveLength(1);
+      expect(messages[0].final).toBe(true);
+
+      // Cursor offset is preserved through finalization.
+      const cursorAfter = harness.getLastAssistantCursor()!;
+      expect(cursorAfter.currentPartIndex).toBe(0);
+      expect(cursorAfter.currentCharIndex).toBe(absorbedOffset);
+    });
+  });
 });
