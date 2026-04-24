@@ -78,6 +78,9 @@ export interface ConversationMessagePart {
   displayMode?: "inline" | "block";
 }
 
+/** Controls how bot message text is rendered in the UI */
+export type TextRenderMode = "karaoke" | "captions" | "instant";
+
 /**
  * A raw BotOutput event stored for debugging and replay.
  * Each event represents a single BotOutput RTVI event as received.

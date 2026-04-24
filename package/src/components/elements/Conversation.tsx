@@ -1,5 +1,6 @@
 import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
+import type { TextRenderMode } from "@/types/conversation";
 import { usePipecatClientTransportState } from "@pipecat-ai/client-react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { MessageContainer } from "./MessageContainer";
@@ -106,6 +107,14 @@ export interface ConversationProps {
   aggregationMetadata?: React.ComponentProps<
     typeof MessageContainer
   >["aggregationMetadata"];
+  /**
+   * Controls how bot message text is rendered.
+   * - "karaoke": Full text, already-spoken portion normal, upcoming portion muted (default)
+   * - "captions": Show only the portion that has been spoken (synced to audio)
+   * - "instant": Show the full LLM text immediately, no highlighting
+   * @default "karaoke"
+   */
+  textRenderMode?: TextRenderMode;
 }
 
 /**
@@ -150,6 +159,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
     functionCallRenderer,
     botOutputRenderers,
     aggregationMetadata,
+    textRenderMode,
   }) => {
     const transportState = usePipecatClientTransportState();
 
@@ -188,8 +198,15 @@ export const Conversation: React.FC<ConversationProps> = memo(
       }
     }, [noAutoscroll, reverseOrder]);
 
+    // Map textRenderMode to botOutputFilter
+    const botOutputFilter = useMemo(() => {
+      if (textRenderMode === "captions") return { unspoken: false };
+      return undefined; // "karaoke" and "instant" both need all data
+    }, [textRenderMode]);
+
     const { messages: allMessages } = usePipecatConversation({
       aggregationMetadata,
+      botOutputFilter,
     });
     const { botOutputSupported } = useConversationContext();
 
@@ -298,6 +315,7 @@ export const Conversation: React.FC<ConversationProps> = memo(
                     classNames={messageClassNames}
                     botOutputRenderers={botOutputRenderers}
                     aggregationMetadata={aggregationMetadata}
+                    textRenderMode={textRenderMode}
                   />
                 ),
               )}

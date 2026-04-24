@@ -51,6 +51,18 @@ The ConversationPanel component provides a tabbed interface combining conversati
       required: false,
       default: "false",
     },
+    textRenderMode: {
+      description: 'Initial text render mode for bot messages. "karaoke": full text with the already-spoken portion normal and the upcoming portion muted. "captions": show only the portion that has been spoken (synced to audio). "instant": show the full LLM text immediately, no highlighting. The panel header also renders a switch so end users can change this at runtime.',
+      type: '"karaoke" | "captions" | "instant"',
+      required: false,
+      default: '"karaoke"',
+    },
+    noTextRenderModeSwitch: {
+      description: "Hide the text render mode switch in the panel header.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
   }}
 />
 

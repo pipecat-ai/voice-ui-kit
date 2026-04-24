@@ -95,6 +95,12 @@ The Conversation component displays real-time conversation history between users
       required: false,
       default: "false",
     },
+    textRenderMode: {
+      description: 'Controls how bot message text is rendered. "karaoke": full text with the already-spoken portion normal and the upcoming portion muted. "captions": show only the portion that has been spoken (synced to audio). "instant": show the full LLM text immediately, no highlighting.',
+      type: '"karaoke" | "captions" | "instant"',
+      required: false,
+      default: '"karaoke"',
+    },
   }}
 />
 

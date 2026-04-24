@@ -2,9 +2,17 @@ import type { ConversationProps } from "@/components/elements/Conversation";
 import Conversation from "@/components/elements/Conversation";
 import { Metrics } from "@/components/metrics";
 import { Panel, PanelContent, PanelHeader } from "@/components/ui/panel";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { TextRenderMode } from "@/types/conversation";
 import { LineChartIcon, MessagesSquareIcon } from "lucide-react";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 
 interface ConversationPanelProps {
   /**
@@ -32,6 +40,16 @@ interface ConversationPanelProps {
    * @default false
    */
   noFunctionCalls?: boolean;
+  /**
+   * Text rendering mode for bot messages.
+   * @default "karaoke"
+   */
+  textRenderMode?: TextRenderMode;
+  /**
+   * Hides the text render mode switch in the panel header.
+   * @default false
+   */
+  noTextRenderModeSwitch?: boolean;
 }
 
 export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
@@ -41,7 +59,18 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
     noMetrics = false,
     noTextInput = false,
     noFunctionCalls = false,
+    textRenderMode,
+    noTextRenderModeSwitch = false,
   }) => {
+    const [localTextRenderMode, setLocalTextRenderMode] =
+      useState<TextRenderMode>(textRenderMode ?? "karaoke");
+
+    useEffect(() => {
+      if (textRenderMode !== undefined) {
+        setLocalTextRenderMode(textRenderMode);
+      }
+    }, [textRenderMode]);
+
     const defaultValue = noConversation ? "metrics" : "conversation";
 
     return (
@@ -62,6 +91,27 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
                 </TabsTrigger>
               )}
             </TabsList>
+            {!noTextRenderModeSwitch && (
+              <Select
+                value={localTextRenderMode}
+                onValueChange={(v) =>
+                  setLocalTextRenderMode(v as TextRenderMode)
+                }
+              >
+                <SelectTrigger
+                  variant="ghost"
+                  size="sm"
+                  className="ml-auto w-auto gap-1"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="karaoke">Karaoke</SelectItem>
+                  <SelectItem value="captions">Captions</SelectItem>
+                  <SelectItem value="instant">Instant</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </PanelHeader>
           <PanelContent className="p-0! overflow-hidden h-full">
             {!noConversation && (
@@ -80,6 +130,7 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = memo(
                   botOutputRenderers={
                     conversationElementProps?.botOutputRenderers
                   }
+                  textRenderMode={localTextRenderMode}
                 />
               </TabsContent>
             )}
