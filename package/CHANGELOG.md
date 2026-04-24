@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.9.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.8.2...v0.9.0) (2026-04-24)
+
+
+### Features
+
+* **audio:** add bot audio output volume control ([7dd1e4d](https://github.com/pipecat-ai/voice-ui-kit/commit/7dd1e4d541b34ddd7d22d3bcfee0d633012936d3))
+* **audio:** add bot audio output volume control ([52b3e88](https://github.com/pipecat-ai/voice-ui-kit/commit/52b3e889e47c4eb8fc3ea8772431b0e3fd84a619))
+* **conversation:** add textRenderMode switch for bot message display ([6a2f5c1](https://github.com/pipecat-ai/voice-ui-kit/commit/6a2f5c1b86c26b0f5f920ce7df2b34d0c51bcd7d))
+* **conversation:** add textRenderMode switch for bot message display ([bdf017d](https://github.com/pipecat-ai/voice-ui-kit/commit/bdf017d7341133dd576ebb08df1ff4590b11892b))
+
+
+### Bug Fixes
+
+* **audio:** address PR review feedback on bot volume control ([01f7065](https://github.com/pipecat-ai/voice-ui-kit/commit/01f70656ac726b853e4880f1970d5d3957a19346))
+* **audio:** center panel title when controls hidden, align popover end ([b2a9255](https://github.com/pipecat-ai/voice-ui-kit/commit/b2a92555828d47aa940df11b473ae65e1b4ebc2e))
+* **audio:** drop reserved mute prop comments on BotAudioPanel ([4fd3bea](https://github.com/pipecat-ai/voice-ui-kit/commit/4fd3bea4a5e1b31199a0a24743c3a2283dcf7bf7))
+* **bot-output:** handle S2S races, mid-sentence drift, and multi-word TTS events ([1c1540e](https://github.com/pipecat-ai/voice-ui-kit/commit/1c1540e9508d5fb22a1ca89da6e6c6f3416fb9df))
+* **bot-output:** handle S2S races, mid-sentence drift, and multi-word TTS events ([f2492f1](https://github.com/pipecat-ai/voice-ui-kit/commit/f2492f1538fe98c9e0a2741efacfeac2b89e063f))
+
 ## [0.8.2](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.8.1...v0.8.2) (2026-03-31)
 
 
