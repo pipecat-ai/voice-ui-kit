@@ -2,6 +2,17 @@
 title: Text Input
 description: Text input component for sending text messages to the bot
 component: TextInput
+source: package/src/components/elements/TextInput.tsx
+changelog:
+  - version: "v0.6.0"
+    date: "2025-12-15"
+    changes:
+      - "Added `noInject` prop to prevent user text messages from being injected into conversation state."
+      - "Added `onSend` callback prop."
+  - version: "v0.3.0"
+    date: "2025-09-17"
+    changes:
+      - "Added. Component for sending text messages from the UI."
 ---
 
 The TextInput component provides a user interface for entering and sending textual messages to the bot. It includes both a headless variant for full control and a connected variant that automatically integrates with the Pipecat Client SDK.

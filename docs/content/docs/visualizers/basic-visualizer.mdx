@@ -2,6 +2,16 @@
 title: Basic Visualizer
 description: Real-time audio spectrum visualizer with customizable bars and peak indicators
 component: VoiceVisualizer
+source: package/src/visualizers/VoiceVisualizer/index.tsx
+changelog:
+  - version: "v0.8.0"
+    date: "2026-02-25"
+    changes:
+      - "Optimized rendering performance."
+  - version: "v0.3.0"
+    date: "2025-09-17"
+    changes:
+      - "Added optional bar peaks: `noPeaks`, `peakLineColor`, `peakLineSpeed`, `peakLineThickness`, `peakOffset`, and `peakFadeSpeed` props."
 ---
 
 The `VoiceVisualizer` component provides a real-time audio spectrum visualization that displays frequency data as animated bars. It integrates with the Pipecat Client SDK to automatically connect to audio streams and provides extensive customization options for visual appearance and behavior.

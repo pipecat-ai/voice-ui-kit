@@ -2,6 +2,16 @@
 title: User Audio Output Control
 description: Speaker device selection component for user audio output
 component: UserAudioOutputControl
+source: package/src/components/elements/UserAudioOutputControl.tsx
+changelog:
+  - version: "v0.6.0"
+    date: "2025-12-15"
+    changes:
+      - "`Console` template now uses `UserAudioControl` for speaker selection instead of `UserAudioOutputControl`."
+  - version: "v0.3.0"
+    date: "2025-09-17"
+    changes:
+      - "Renamed from `AudioOutput` for naming consistency."
 ---
 
 The UserAudioOutputControl component provides a user interface for selecting and managing audio output devices in your voice application. When using the connected variant, it integrates with the Pipecat Client SDK to automatically detect available speakers and allow users to switch between them.

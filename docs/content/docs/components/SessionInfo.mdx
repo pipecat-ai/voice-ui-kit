@@ -2,6 +2,17 @@
 title: Session Info
 description: Component for displaying session information including transport type, session ID, and participant ID
 component: SessionInfo
+source: package/src/components/elements/SessionInfo.tsx
+changelog:
+  - version: "v0.7.0"
+    date: "2026-02-05"
+    changes:
+      - "Now displays the RTVI Server version (from `BotReady`)."
+      - "Added `noRTVIVersion` prop to hide the RTVI version section."
+  - version: "v0.4.0"
+    date: "2025-10-02"
+    changes:
+      - "Now shows the session ID from the transport."
 ---
 
 The SessionInfo component displays session-related information in a structured format, including transport type, session ID, participant ID, and RTVI version. It automatically integrates with the Pipecat Client SDK to fetch this information.

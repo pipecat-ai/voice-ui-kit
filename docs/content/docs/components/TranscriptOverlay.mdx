@@ -2,6 +2,16 @@
 title: Transcript Overlay
 description: Real-time speech transcript display component with smooth animations
 component: TranscriptOverlay
+source: package/src/components/elements/TranscriptOverlay.tsx
+changelog:
+  - version: "v0.7.0"
+    date: "2026-02-05"
+    changes:
+      - "Now uses `BotOutput` events for the remote participant when supported (word-level), and falls back gracefully on servers that send sentence-level or non-word-level TTS."
+  - version: "v0.3.0"
+    date: "2025-09-17"
+    changes:
+      - "Animation durations are now configurable via props."
 ---
 
 The `TranscriptOverlay` component displays real-time speech transcripts as an animated overlay. It automatically listens to Pipecat Client events to show speech transcripts from either the local user or remote bot, with smooth fade-in and fade-out animations.

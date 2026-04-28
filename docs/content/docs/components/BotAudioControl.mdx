@@ -2,6 +2,13 @@
 title: Bot Audio Control
 description: Control for adjusting the bot's audio output volume
 component: BotAudioControl
+source: package/src/components/elements/BotAudioControl.tsx
+changelog:
+  - version: "v0.9.0"
+    date: "2026-04-24"
+    changes:
+      - "Added. Renders a button with a popover-mounted volume slider for the bot's audio output."
+      - "Stays in sync with other `BotAudioControl`, `BotVolumeSlider`, and `useBotAudioOutput` consumers via the shared bot audio store."
 ---
 
 The `BotAudioControl` component provides a button with a popover-mounted volume slider for controlling the bot's audio output level. It integrates with the kit's bot audio store so any number of instances stay in sync, and it drives the `<audio>` element rendered by `BotAudioOutput` (used automatically by `PipecatAppBase`).

@@ -2,6 +2,28 @@
 title: Console Template
 description: Full-featured console interface template for Pipecat applications
 component: ConsoleTemplate
+source:
+  - package/src/templates/Console/index.tsx
+  - package/src/templates/Console/SmallWebRTCCodecSetter.tsx
+changelog:
+  - version: "v0.8.0"
+    date: "2026-02-25"
+    changes:
+      - "Added a tooltip on the Connect button showing the connection endpoint."
+  - version: "v0.6.0"
+    date: "2025-12-15"
+    changes:
+      - "Now uses `UserAudioControl` for speaker selection instead of `UserAudioOutputControl`."
+      - "Added `noTextInput` prop to hide text input controls."
+      - "Fixed `noAudioOutput` being correctly passed down to `PipecatAppBase`."
+  - version: "v0.4.1"
+    date: "2025-10-14"
+    changes:
+      - "Added `UserScreenControl` integration when supported."
+  - version: "v0.4.0"
+    date: "2025-10-02"
+    changes:
+      - "Now shows session ID from the transport."
 ---
 
 The Console template provides a complete, production-ready interface for Pipecat applications. It includes resizable panels, conversation display, bot media visualization, device controls, event logging, and more.

@@ -8,7 +8,8 @@ import {
 import { notFound } from 'next/navigation';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { getMDXComponents } from '@/mdx-components';
-import { LLMCopyButton, ViewOptions } from '@/components/page-actions';
+import { LLMCopyButton, ViewOptions, ViewSourceButton } from '@/components/page-actions';
+import { PageChangelog, type ChangelogEntry } from '@/components/PageChangelog';
 import type React from 'react';
 import type { MDXComponents } from 'mdx/types';
 
@@ -18,6 +19,8 @@ type PageDataWithBody = {
   full: boolean;
   title: string;
   description?: string;
+  source?: string | string[];
+  changelog?: ChangelogEntry[];
   getText: (type: 'processed' | 'raw') => Promise<string>;
 };
 
@@ -39,6 +42,7 @@ export default async function Page(props: {
           markdownUrl={`${page.url}.mdx`}
           githubUrl={`https://github.com/pipecat-ai/voice-ui-kit/blob/main/docs/content/docs/${page.path}`}
         />
+        {pageData.source && <ViewSourceButton sources={pageData.source} />}
       </div>
       <DocsTitle>{pageData.title}</DocsTitle>
       <DocsDescription>{pageData.description}</DocsDescription>
@@ -49,6 +53,7 @@ export default async function Page(props: {
             a: createRelativeLink(source, page),
           })}
         />
+        <PageChangelog entries={pageData.changelog} />
       </DocsBody>
     </DocsPage>
   );

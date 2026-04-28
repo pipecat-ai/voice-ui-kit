@@ -1,6 +1,16 @@
 ---
 title: usePipecatConnectionState
 description: Hook that provides a simplified connection state for Pipecat transport.
+source: package/src/hooks/usePipecatConnectionState.ts
+changelog:
+  - version: "v0.4.1"
+    date: "2025-10-14"
+    changes:
+      - "Fixed bug where state would not update if the component was conditionally rendered after the client connected."
+  - version: "v0.3.0"
+    date: "2025-09-17"
+    changes:
+      - "Now returns boolean helpers `isConnected`, `isConnecting`, and `isDisconnected` alongside the state."
 ---
 
 ## Overview
