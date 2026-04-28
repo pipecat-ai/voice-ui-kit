@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,12 +15,199 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs['package--release_created'] }}
+      release_pr_number: ${{ steps.release.outputs.pr && fromJson(steps.release.outputs.pr).number || '' }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  docs-update:
+    # Runs whenever release-please has an open release PR (newly created or
+    # updated). Lives in this workflow rather than a separate `pull_request`
+    # workflow because PRs opened by GITHUB_TOKEN do not trigger downstream
+    # `pull_request` events. Chaining inside the same workflow run avoids the
+    # need for a PAT or GitHub App token.
+    needs: release-please
+    if: needs.release-please.outputs.release_pr_number != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: docs-update-${{ needs.release-please.outputs.release_pr_number }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout repo (full history for tag diffs)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Determine release version and previous tag
+        id: ctx
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.release-please.outputs.release_pr_number }}
+        run: |
+          set -euo pipefail
+          # release-please writes the next version into the manifest before
+          # opening the PR, so reading it from the PR head is reliable.
+          gh pr checkout "$PR_NUMBER"
+          NEXT_VERSION=$(jq -r '.package' .release-please-manifest.json)
+          git checkout main
+          PREV_TAG=$(git describe --tags --abbrev=0 --match 'v*' --exclude '*-rc*' 2>/dev/null || echo "")
+          echo "next_version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "previous_tag=$PREV_TAG" >> "$GITHUB_OUTPUT"
+          echo "docs_branch=docs/release-v$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "today=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare docs branch
+        env:
+          DOCS_BRANCH: ${{ steps.ctx.outputs.docs_branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Reset the docs branch to current main on every run so the agent
+          # always works from the latest state.
+          git fetch origin "$DOCS_BRANCH" || true
+          git checkout -B "$DOCS_BRANCH" origin/main
+
+      - name: Collect release context
+        id: collect
+        env:
+          PREV_TAG: ${{ steps.ctx.outputs.previous_tag }}
+          NEXT_VERSION: ${{ steps.ctx.outputs.next_version }}
+          PR_NUMBER: ${{ needs.release-please.outputs.release_pr_number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p .release-context
+
+          # Extract just the upcoming-version section from the release PR body.
+          gh pr view "$PR_NUMBER" --json body --jq '.body' > .release-context/release-pr-body.md
+
+          # Diff of package source between previous release tag and main.
+          if [ -n "$PREV_TAG" ]; then
+            git diff "$PREV_TAG"..HEAD -- 'package/src/**' > .release-context/package-src.diff || true
+            git log --oneline "$PREV_TAG"..HEAD -- 'package/src/**' > .release-context/package-src.log || true
+          else
+            echo "(no previous tag; first release)" > .release-context/package-src.diff
+          fi
+
+          # File list of pages that already exist (helps the agent avoid duplicates).
+          find docs/content/docs -type f -name '*.mdx' | sort > .release-context/existing-pages.txt
+
+      - name: Run Claude Code to update docs
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # `claude_args` are forwarded to the headless CLI; tune as needed.
+          claude_args: |
+            --max-turns 60
+            --allowed-tools Read,Edit,Write,Bash,Grep,Glob
+          prompt: |
+            You are updating the documentation for the @pipecat-ai/voice-ui-kit
+            release v${{ steps.ctx.outputs.next_version }} (previous release:
+            ${{ steps.ctx.outputs.previous_tag }}).
+
+            ## Inputs available to you
+            - `.release-context/release-pr-body.md` — the release-please PR body,
+              which contains the proposed changelog for this release.
+            - `.release-context/package-src.diff` — the full diff of
+              `package/src/**` from the previous release to current main.
+            - `.release-context/package-src.log` — commit log for the same range.
+            - `.release-context/existing-pages.txt` — every existing docs page.
+            - `docs/content/docs/**/*.mdx` — current docs (read and edit).
+            - `package/src/**` — current source (read only).
+
+            ## What to do
+            For every change in the diff that affects a public export
+            (component, hook, util, template, visualizer, panel, primitive,
+            type), update the corresponding docs page. Specifically:
+
+            1. **Update prose & prop tables** so they match the current
+               implementation. Pay attention to renamed props, new props,
+               removed props, changed defaults, and changed types.
+            2. **Append a per-page changelog entry** to the page's frontmatter
+               under the `changelog` field. Each page's changelog is a list,
+               newest first. The new entry uses:
+                 - `version: "v${{ steps.ctx.outputs.next_version }}"`
+                 - `date: "${{ steps.ctx.outputs.today }}"`
+                 - `changes:` a list of short, user-facing bullets describing
+                   only what changed for THIS page (not the whole release).
+               Skip the changelog entry on a page if nothing on that page
+               actually changed.
+            3. **Verify the `source` frontmatter field** points to the correct
+               implementation file(s) under `package/src/`. Add or fix it if
+               wrong. Use a string for a single file, an array for multi-file
+               primitives.
+            4. **Create new docs pages** for any newly exported public API
+               that has no corresponding page. Place them in the matching
+               folder under `docs/content/docs/` (components, hooks, panels,
+               primitives, templates, visualizers). Follow the structure of
+               existing pages: frontmatter (title, description, source,
+               changelog), prose, `<TypeTable>` for props, `<LiveComponent>`
+               examples where it makes sense.
+            5. **Do not delete pages** for removed exports. Instead, add a
+               changelog entry noting the removal and add a banner at the top
+               of the page explaining the removal. Flag these in your summary.
+
+            ## Constraints
+            - Edit only files under `docs/content/docs/` and (for source
+              verification) read `package/src/`. Do not touch
+              `package/CHANGELOG.md`, the manifest, or the release config.
+            - Match the existing prose style. Do not use em dashes.
+            - Keep changelog bullets factual and short. No marketing language.
+            - If something is ambiguous, leave a clear `{/* TODO: ... */}`
+              MDX comment in the page rather than guessing.
+
+            ## Final output
+            After making edits, write a summary to
+            `.release-context/agent-summary.md` containing:
+              - Pages updated (with one-line reason each)
+              - New pages created
+              - Pages flagged for human review (and why)
+              - Any exports you couldn't map to a page
+
+      - name: Commit and push docs updates
+        id: commit
+        env:
+          DOCS_BRANCH: ${{ steps.ctx.outputs.docs_branch }}
+          NEXT_VERSION: ${{ steps.ctx.outputs.next_version }}
+        run: |
+          set -euo pipefail
+          # Strip the throwaway context dir before committing.
+          rm -rf .release-context
+          git add docs/content/docs
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "docs: update for v$NEXT_VERSION"
+          git push --force-with-lease origin "$DOCS_BRANCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Open or update docs PR
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCS_BRANCH: ${{ steps.ctx.outputs.docs_branch }}
+          NEXT_VERSION: ${{ steps.ctx.outputs.next_version }}
+          RELEASE_PR_NUMBER: ${{ needs.release-please.outputs.release_pr_number }}
+        run: |
+          set -euo pipefail
+          EXISTING=$(gh pr list --head "$DOCS_BRANCH" --base main --state open --json number --jq '.[0].number' || true)
+          BODY=$(printf "Generated docs updates for the upcoming v%s release.\n\nPaired with #%s. Review and merge after the release lands.\n\nThis PR is regenerated automatically every time the release-please PR is updated. Manual edits on this branch will be overwritten." "$NEXT_VERSION" "$RELEASE_PR_NUMBER")
+          if [ -n "$EXISTING" ]; then
+            gh pr edit "$EXISTING" --title "docs: update for v$NEXT_VERSION" --body "$BODY"
+          else
+            gh pr create \
+              --base main \
+              --head "$DOCS_BRANCH" \
+              --title "docs: update for v$NEXT_VERSION" \
+              --body "$BODY"
+          fi
 
   publish:
     needs: release-please
