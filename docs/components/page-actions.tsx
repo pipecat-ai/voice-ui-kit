@@ -1,11 +1,73 @@
 'use client';
 import { useMemo, useState } from 'react';
-import { Check, ChevronDown, Copy, ExternalLinkIcon, MessageCircleIcon } from 'lucide-react';
+import { Check, ChevronDown, CodeIcon, Copy, ExternalLinkIcon, MessageCircleIcon } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from './ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cva } from 'class-variance-authority';
+
+const REPO_BLOB_BASE = 'https://github.com/pipecat-ai/voice-ui-kit/blob/main/';
+
+export function ViewSourceButton({
+  sources,
+}: {
+  /**
+   * Repo-relative path(s) to the implementation source. A single string renders
+   * a direct link; multiple paths render a popover menu.
+   */
+  sources: string | string[];
+}) {
+  const list = Array.isArray(sources) ? sources : [sources];
+  if (list.length === 0) return null;
+
+  const buttonClass = cn(
+    buttonVariants({
+      color: 'secondary',
+      size: 'sm',
+      className: 'gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground',
+    }),
+  );
+
+  if (list.length === 1) {
+    return (
+      <a
+        href={`${REPO_BLOB_BASE}${list[0]}`}
+        rel="noreferrer noopener"
+        target="_blank"
+        className={buttonClass}
+      >
+        <CodeIcon />
+        View source
+      </a>
+    );
+  }
+
+  return (
+    <Popover>
+      <PopoverTrigger className={buttonClass}>
+        <CodeIcon />
+        View source
+        <ChevronDown className="size-3.5 text-fd-muted-foreground" />
+      </PopoverTrigger>
+      <PopoverContent className="flex flex-col">
+        {list.map((path) => (
+          <a
+            key={path}
+            href={`${REPO_BLOB_BASE}${path}`}
+            rel="noreferrer noopener"
+            target="_blank"
+            className="text-sm p-2 rounded-lg inline-flex items-center gap-2 hover:text-fd-accent-foreground hover:bg-fd-accent [&_svg]:size-4"
+          >
+            <CodeIcon />
+            <span className="font-mono text-xs">{path}</span>
+            <ExternalLinkIcon className="text-fd-muted-foreground size-3.5 ms-auto" />
+          </a>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 const cache = new Map<string, string>();
 
