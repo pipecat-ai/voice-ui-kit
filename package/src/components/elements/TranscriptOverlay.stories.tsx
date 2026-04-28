@@ -140,6 +140,14 @@ export const SingleWord: Story<{
   />
 );
 
+const samplePhrases = [
+  "Hello, how can I help you today?",
+  "I can assist you with various tasks and answer your questions.",
+  "What would you like to know about our services?",
+  "I'm here to provide information and support whenever you need it.",
+  "Feel free to ask me anything you'd like to know.",
+];
+
 export const SimulatedSpeech: Story<{
   size: "sm" | "md" | "lg";
   fadeInDuration: number;
@@ -148,14 +156,6 @@ export const SimulatedSpeech: Story<{
   const [transcript, setTranscript] = useState<string[]>([]);
   const [turnEnd, setTurnEnd] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-
-  const samplePhrases = [
-    "Hello, how can I help you today?",
-    "I can assist you with various tasks and answer your questions.",
-    "What would you like to know about our services?",
-    "I'm here to provide information and support whenever you need it.",
-    "Feel free to ask me anything you'd like to know.",
-  ];
 
   const startNewSpeech = useCallback(() => {
     const phrase =
@@ -180,7 +180,7 @@ export const SimulatedSpeech: Story<{
         }
       }, index * 200);
     });
-  }, [samplePhrases]);
+  }, []);
 
   const endTurn = useCallback(() => {
     setTurnEnd(true);

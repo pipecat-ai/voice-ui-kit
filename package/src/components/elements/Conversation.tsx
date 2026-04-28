@@ -1,11 +1,13 @@
-import { usePipecatConversation } from "@/hooks/usePipecatConversation";
 import { cn } from "@/lib/utils";
 import type { TextRenderMode } from "@/types/conversation";
-import { usePipecatClientTransportState } from "@pipecat-ai/client-react";
+import {
+  useConversationContext,
+  usePipecatClientTransportState,
+  usePipecatConversation,
+} from "@pipecat-ai/client-react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { MessageContainer } from "./MessageContainer";
 import { TextInput } from "./TextInput";
-import { useConversationContext } from "@/components/ConversationProvider";
 
 /**
  * Props for the Conversation component

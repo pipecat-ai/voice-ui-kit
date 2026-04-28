@@ -7,9 +7,10 @@ export {
   type PipecatConnectionState,
 } from "./usePipecatConnectionState";
 export {
-  useConversation,
   usePipecatConversation,
-} from "./usePipecatConversation";
+  /** @deprecated Use `usePipecatConversation` instead. This alias will be removed in a future major release. */
+  usePipecatConversation as useConversation,
+} from "@pipecat-ai/client-react";
 export { usePipecatEventStream } from "./usePipecatEventStream";
 export type {
   PipecatEventGroup,

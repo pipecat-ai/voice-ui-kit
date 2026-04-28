@@ -61,11 +61,12 @@ export function ConversationList() {
 }
 ```
 
-### With callback
+### With lifecycle callbacks
 
 ```tsx
 const { messages } = usePipecatConversation({
-  onMessageAdded: (message) => console.log("New message:", message),
+  onMessageCreated: (message) => console.log("New message:", message),
+  onMessageUpdated: (message) => console.log("Message updated:", message),
 });
 ```
 

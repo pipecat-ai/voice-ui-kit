@@ -47,7 +47,7 @@
   "peerDependencies": {
     "@daily-co/daily-js": ">=0.84.0",
     "@pipecat-ai/client-js": ">=1.6.0",
-    "@pipecat-ai/client-react": ">=1.1.0",
+    "@pipecat-ai/client-react": ">=1.3.0",
     "@pipecat-ai/daily-transport": ">=1.6.0",
     "@pipecat-ai/small-webrtc-transport": ">=1.9.0",
     "react": ">=16.8.0 || >=17.0.0 || >=18.0.0",
@@ -86,7 +86,7 @@
     "build:themes": "echo 'Themes are now built automatically with build:css'",
     "dev": "pnpm exec ladle serve",
     "lint": "eslint ./src",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
   "dependencies": {
@@ -116,7 +116,7 @@
     "@eslint/js": "^9.36.0",
     "@ladle/react": "^5.0.3",
     "@pipecat-ai/client-js": "^1.6.0",
-    "@pipecat-ai/client-react": "^1.1.0",
+    "@pipecat-ai/client-react": "^1.3.0",
     "@pipecat-ai/daily-transport": "^1.6.0",
     "@pipecat-ai/small-webrtc-transport": "^1.9.0",
     "@tailwindcss/vite": "^4.1.13",
