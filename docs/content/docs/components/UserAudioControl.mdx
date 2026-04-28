@@ -2,6 +2,25 @@
 title: User Audio Control
 description: Microphone control component with device selection and visualizer
 component: UserAudioControl
+source: package/src/components/elements/UserAudioControl.tsx
+changelog:
+  - version: "v0.6.0"
+    date: "2025-12-15"
+    changes:
+      - "Dropdown can now list both microphones and speakers with grouped sections."
+      - "Added `dropdownMenuLabel`, `microphoneLabel`, and `speakerLabel` props."
+      - "Added `noMicrophones` and `noSpeakers` props to independently hide dropdown sections."
+  - version: "v0.3.0"
+    date: "2025-09-17"
+    changes:
+      - "Now accepts `deviceDropDownProps` for configuring the underlying dropdown."
+      - "Visualizer color now uses `currentColor` instead of resolving from a CSS variable."
+  - version: "v0.2.1"
+    date: "2025-08-20"
+    changes:
+      - "Added `activeText` and `inactiveText` props for simpler mute buttons."
+      - "Added `noIcon` prop to hide the mic icon."
+      - "Now accepts children for further flexibility."
 ---
 
 The `UserAudioControl` component provides a comprehensive microphone control interface that includes microphone toggle functionality, device selection, and optional audio visualization. It integrates with the Pipecat Client SDK to automatically manage microphone state and device selection.

@@ -2,6 +2,21 @@
 title: Message Content
 description: Component for displaying the content of conversation messages
 component: MessageContent
+source: package/src/components/elements/MessageContent.tsx
+changelog:
+  - version: "v0.8.2"
+    date: "2026-03-31"
+    changes:
+      - "Karaoke highlighting now handles non-ASCII text and punctuation."
+  - version: "v0.8.1"
+    date: "2026-03-11"
+    changes:
+      - "Improved turn detection and karaoke highlighting."
+      - "Performance improvements as part of the conversation rendering pipeline optimization."
+  - version: "v0.7.0"
+    date: "2026-02-05"
+    changes:
+      - "Added `botOutputRenderers` prop and `aggregationMetadata` to control rendering and speech progress per aggregation type."
 ---
 
 The MessageContent component renders the actual content of a conversation message, including text parts, thinking indicators, and timestamps. It handles multiple text parts and automatically shows a thinking indicator for empty messages.

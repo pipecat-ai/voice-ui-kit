@@ -1,6 +1,13 @@
 ---
 title: useTheme
 description: Hook for accessing and managing theme state
+source: package/src/hooks/useTheme.ts
+changelog:
+  - version: "v0.2.1"
+    date: "2025-08-20"
+    changes:
+      - "Added. Reads and sets the active theme when wrapped in `ThemeProvider`."
+      - "`ThemeProvider` context now supports arbitrary theme names."
 ---
 
 The `useTheme` hook provides access to the theme context, allowing you to read and update the current theme. It must be used within a `ThemeProvider` component.

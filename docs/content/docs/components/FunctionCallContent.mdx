@@ -2,6 +2,14 @@
 title: Function Call Content
 description: Component for displaying LLM function calls with collapsible details
 component: FunctionCallContent
+source: package/src/components/elements/FunctionCallContent.tsx
+changelog:
+  - version: "v0.8.0"
+    date: "2026-02-25"
+    changes:
+      - "Added. Renders LLM function calls with collapsible details for arguments and result."
+      - "Shows a friendly label for unnamed function calls."
+      - "Accepts `functionCallRenderer` for custom rendering."
 ---
 
 The FunctionCallContent component renders LLM function call entries in the conversation. It displays the function name and status, with arguments and results collapsed by default using a collapsible UI.

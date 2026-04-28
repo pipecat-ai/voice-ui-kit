@@ -2,6 +2,12 @@
 title: Bot Volume Slider
 description: Inline slider for controlling the bot's audio output volume
 component: BotVolumeSlider
+source: package/src/components/elements/BotVolumeSlider.tsx
+changelog:
+  - version: "v0.9.0"
+    date: "2026-04-24"
+    changes:
+      - "Added. Inline volume slider for the bot's audio output, extracted from `BotAudioControl` for standalone use."
 ---
 
 The `BotVolumeSlider` component is an inline volume slider for the bot's audio output. It is the same slider that lives inside [`BotAudioControl`](/components/BotAudioControl)'s popover, extracted so you can embed it standalone — for example in a settings panel, a sidebar, or a custom toolbar.

@@ -2,6 +2,34 @@
 title: Pipecat App Base
 description: Higher-order component that streamlines setup of a Pipecat Client instance
 component: PipecatAppBase
+source: package/src/components/PipecatAppBase.tsx
+changelog:
+  - version: "v0.8.2"
+    date: "2026-03-31"
+    changes:
+      - "Use `startBotAndConnect` when `connectParams` is an `APIRequest`."
+  - version: "v0.5.0"
+    date: "2025-11-07"
+    changes:
+      - "Added `initDevicesOnMount` prop, giving control over when device-access permissions are requested."
+  - version: "v0.4.0"
+    date: "2025-10-02"
+    changes:
+      - "Updated for the latest Pipecat Client API."
+  - version: "v0.3.0"
+    date: "2025-09-17"
+    changes:
+      - "Fixed memoization regressions."
+      - "Now accepts a partial `clientOptions` object."
+  - version: "v0.2.0"
+    date: "2025-08-16"
+    changes:
+      - "Renamed from `AudioClientHelper`."
+      - "Now accepts both React node children and a render-prop list for prop injection."
+      - "Added `noThemeProvider` prop to disable the wrapping `ThemeProvider`."
+      - "Connection handlers `handleConnect` and `handleDisconnect` now accept sync or async functions."
+      - "Returns the client object via child props."
+      - "Fixed TypeScript component type to resolve JSX usage errors."
 ---
 
 The `PipecatAppBase` component reduces the boilerplate code required to bootstrap a new Pipecat Client application.

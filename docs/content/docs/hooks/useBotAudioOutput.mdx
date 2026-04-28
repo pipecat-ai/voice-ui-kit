@@ -1,6 +1,12 @@
 ---
 title: useBotAudioOutput
 description: Hook for reading and updating the bot's audio output volume
+source: package/src/hooks/useBotAudioOutput.ts
+changelog:
+  - version: "v0.9.0"
+    date: "2026-04-24"
+    changes:
+      - "Added. Reads and updates the bot's audio output volume from the shared bot audio store."
 ---
 
 The `useBotAudioOutput` hook exposes the bot audio output state that drives the `<audio>` element rendered by `BotAudioOutput`. Use it to read the current volume or to set it from anywhere in your app — the `BotAudioControl` component and any other consumer stay in sync automatically.
