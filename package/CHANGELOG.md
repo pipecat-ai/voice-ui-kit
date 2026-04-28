@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.9.0...v0.10.0) (2026-04-28)
+
+
+### Features
+
+* migrate conversation state to upstream @pipecat-ai/client-react ([#103](https://github.com/pipecat-ai/voice-ui-kit/issues/103)) ([8896ae8](https://github.com/pipecat-ai/voice-ui-kit/commit/8896ae8d7f9c93b150d7687f0bc56fc48ca0b8bf))
+
 ## [0.9.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.8.2...v0.9.0) (2026-04-24)
 
 
