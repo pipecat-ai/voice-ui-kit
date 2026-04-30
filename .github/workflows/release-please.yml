@@ -131,16 +131,17 @@ jobs:
         uses: anthropics/claude-code-base-action@v0.0.63
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # `claude_args` are forwarded to the headless CLI; tune as needed.
-          # `bypassPermissions` is appropriate here because the runner is
-          # ephemeral, the working tree is throwaway, and there is no human
-          # to answer permission prompts. The agent's blast radius is
-          # already constrained by `--allowed-tools` and by the prompt's
-          # explicit edit-scope rules.
-          claude_args: |
-            --max-turns 60
-            --allowed-tools Read,Edit,Write,Bash,Grep,Glob
-            --permission-mode bypassPermissions
+          # NB: at v0.0.63 the action exposes discrete inputs rather than
+          # the newer `claude_args` interface. Use `allowed_tools` /
+          # `max_turns` directly — passing `claude_args` here is silently
+          # ignored. There is no `permission_mode` input at this version;
+          # the action's default already allows headless writes.
+          allowed_tools: "Read,Edit,Write,Bash,Grep,Glob"
+          max_turns: "150"
+          # Leaves 2 minutes for commit/push/PR steps under the 30-min
+          # job-level timeout. The agent will exit early if it finishes
+          # before the wall clock; this is a ceiling, not a target.
+          timeout_minutes: "28"
           prompt: |
             You are updating the documentation for the @pipecat-ai/voice-ui-kit
             release v${{ steps.ctx.outputs.next_version }} (previous release:
