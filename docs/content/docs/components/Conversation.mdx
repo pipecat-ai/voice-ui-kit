@@ -4,6 +4,10 @@ description: Real-time conversation display component with message history and t
 component: Conversation
 source: package/src/components/elements/Conversation.tsx
 changelog:
+  - version: "v0.10.0"
+    date: "2026-04-30"
+    changes:
+      - "ConversationProvider is no longer required, uses upstream conversation state from @pipecat-ai/client-react."
   - version: "v0.9.0"
     date: "2026-04-24"
     changes:
@@ -54,13 +58,11 @@ The Conversation component displays real-time conversation history between users
 
 <LiveComponent language="tsx">
 {`
-  import { Conversation, ConversationProvider } from "@pipecat-ai/voice-ui-kit";
+  import { Conversation } from "@pipecat-ai/voice-ui-kit";
 
-  <ConversationProvider>
-    <div className="h-96 border rounded-lg">
-      <Conversation />
-    </div>
-  </ConversationProvider>
+  <div className="h-96 border rounded-lg">
+    <Conversation />
+  </div>
 `}
 </LiveComponent>
 
@@ -202,6 +204,5 @@ The `Conversation` component uses:
 - `TextInput` component for user input
 
 It must be used within:
-- `PipecatClientProvider` context (for transport state)
-- `ConversationProvider` context (for message store)
+- `PipecatClientProvider` context (for transport state and conversation state)
 

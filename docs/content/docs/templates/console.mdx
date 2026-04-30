@@ -6,6 +6,10 @@ source:
   - package/src/templates/Console/index.tsx
   - package/src/templates/Console/SmallWebRTCCodecSetter.tsx
 changelog:
+  - version: "v0.10.0"
+    date: "2026-04-30"
+    changes:
+      - "No longer wraps with ConversationProvider. Conversation state managed by PipecatClientProvider."
   - version: "v0.8.0"
     date: "2026-02-25"
     changes:
@@ -419,7 +423,7 @@ Subscribe to server messages:
 
 The Console template:
 - Wraps your app with `PipecatAppBase` for client setup
-- Provides all necessary providers (ThemeProvider, PipecatClientProvider, ConversationProvider)
+- Provides all necessary providers (ThemeProvider, PipecatClientProvider)
 - Handles connection state and error display
 - Manages panel collapse states
 - Tracks session and participant IDs automatically

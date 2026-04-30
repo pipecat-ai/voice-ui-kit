@@ -1,10 +1,12 @@
 ---
 title: usePipecatConversation
 description: Hook that derives a clean, ordered conversation stream from RTVI events.
-source:
-  - package/src/hooks/usePipecatConversation.ts
-  - package/src/components/ConversationProvider.tsx
+source: "@pipecat-ai/client-react"
 changelog:
+  - version: "v0.10.0"
+    date: "2026-04-30"
+    changes:
+      - "Migrated to @pipecat-ai/client-react. ConversationProvider no longer required."
   - version: "v0.3.0"
     date: "2025-09-17"
     changes:
@@ -13,11 +15,11 @@ changelog:
 
 ## Overview
 
-`usePipecatConversation` provides access to conversation state managed by the `ConversationProvider`. The provider is automatically included when using `PipecatAppBase` and handles all Pipecat RTVI events to produce a clean message list suitable for rendering a chat transcript. It handles streaming text, placeholder messages, finalization, and merging of consecutive messages from the same role.
+`usePipecatConversation` provides access to conversation state that is now managed automatically by the `PipecatClientProvider` from `@pipecat-ai/client-react`. The conversation state management handles all Pipecat RTVI events to produce a clean message list suitable for rendering a chat transcript. It handles streaming text, placeholder messages, finalization, and merging of consecutive messages from the same role.
 
 ## Setup
 
-The `ConversationProvider` is automatically included when you use `PipecatAppBase`, so no additional setup is required:
+Conversation state is automatically managed by the `PipecatClientProvider` when you use `PipecatAppBase`, so no additional setup is required:
 
 ```tsx
 import { PipecatAppBase, usePipecatConversation } from "@pipecat-ai/voice-ui-kit";
