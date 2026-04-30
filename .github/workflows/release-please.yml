@@ -175,9 +175,14 @@ jobs:
                Skip the changelog entry on a page if nothing on that page
                actually changed.
             3. **Verify the `source` frontmatter field** points to the correct
-               implementation file(s) under `package/src/`. Add or fix it if
-               wrong. Use a string for a single file, an array for multi-file
-               primitives.
+               implementation file(s) under `package/src/`. Must be a
+               repo-relative path (single string or array of strings).
+               Never put a package name like `@pipecat-ai/client-react`
+               in this field — the View source button generates a GitHub
+               link from it. If the documented export has been moved
+               entirely to an external package, point `source` at the
+               re-export site (typically `package/src/.../index.ts`) and
+               note the upstream location in the prose.
             4. **Create new docs pages** for any newly exported public API
                that has no corresponding page. Place them in the matching
                folder under `docs/content/docs/` (components, hooks, panels,
@@ -189,12 +194,36 @@ jobs:
                changelog entry noting the removal and add a banner at the top
                of the page explaining the removal. Flag these in your summary.
 
+            ## Formatting conventions
+            - Wrap component, hook, prop, type, and identifier names in
+              backtick code spans. Applies to changelog bullets and prose.
+              Examples: `` `Conversation` ``, `` `usePipecatConversation` ``,
+              `` `noTextInput` ``, `` `FunctionCallData` ``,
+              `` `ConversationMessage.role` ``.
+            - When mentioning an external `@pipecat-ai/*` package in
+              prose, render it as a link to its GitHub repo. Use:
+                - `[`@pipecat-ai/client-js`](https://github.com/pipecat-ai/pipecat-client-web)`
+                - `[`@pipecat-ai/client-react`](https://github.com/pipecat-ai/pipecat-client-web)`
+                - `[`@pipecat-ai/daily-transport`](https://github.com/pipecat-ai/pipecat-client-web-transports)`
+                - `[`@pipecat-ai/small-webrtc-transport`](https://github.com/pipecat-ai/pipecat-client-web-transports)`
+              In `changelog` frontmatter bullets, use only backticks for
+              package names (no markdown link), since the changelog
+              renderer does not parse links.
+            - When you edit a `<LiveComponent>` example, ensure the
+              resulting code can render. Components that read from
+              `PipecatClientProvider` (anything that uses
+              `useConversationContext`, `usePipecatClient`, etc.) need
+              `withPipecat` on the `<LiveComponent>` opening tag.
+              Removing a `<ConversationProvider>` wrapper without adding
+              `withPipecat` will produce a runtime error on the page.
+
             ## Constraints
             - Edit only files under `docs/content/docs/` and (for source
               verification) read `package/src/`. Do not touch
               `package/CHANGELOG.md`, the manifest, or the release config.
             - Match the existing prose style. Do not use em dashes.
             - Keep changelog bullets factual and short. No marketing language.
+            - Always end MDX files with a trailing newline.
             - If something is ambiguous, leave a clear `{/* TODO: ... */}`
               MDX comment in the page rather than guessing.
 
