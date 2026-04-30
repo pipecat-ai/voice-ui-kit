@@ -15,13 +15,38 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs['package--release_created'] }}
-      release_pr_number: ${{ steps.release.outputs.pr && fromJson(steps.release.outputs.pr).number || '' }}
+      release_pr_number: ${{ steps.find-pr.outputs.pr_number }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      - name: Resolve open release-please PR number
+        id: find-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # The action only emits `pr` when it just opened or updated the PR.
+          # On reruns where nothing changed (e.g. workflow_dispatch with the
+          # release PR already in the desired state), the output is empty.
+          # Fall back to looking up the open release-please PR by its label
+          # so the docs-update job can still chain off it.
+          PR_FROM_ACTION='${{ steps.release.outputs.pr && fromJson(steps.release.outputs.pr).number || '' }}'
+          if [ -n "$PR_FROM_ACTION" ]; then
+            echo "pr_number=$PR_FROM_ACTION" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          PR_NUMBER=$(gh pr list \
+            --label 'autorelease: pending' \
+            --base main \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+          echo "pr_number=${PR_NUMBER:-}" >> "$GITHUB_OUTPUT"
 
   docs-update:
     # Runs whenever release-please has an open release PR (newly created or
