@@ -137,8 +137,11 @@ jobs:
           # ignored. There is no `permission_mode` input at this version;
           # the action's default already allows headless writes.
           allowed_tools: "Read,Edit,Write,Bash,Grep,Glob"
-          max_turns: "60"
-          timeout_minutes: "25"
+          max_turns: "150"
+          # Leaves 2 minutes for commit/push/PR steps under the 30-min
+          # job-level timeout. The agent will exit early if it finishes
+          # before the wall clock; this is a ceiling, not a target.
+          timeout_minutes: "28"
           prompt: |
             You are updating the documentation for the @pipecat-ai/voice-ui-kit
             release v${{ steps.ctx.outputs.next_version }} (previous release:
