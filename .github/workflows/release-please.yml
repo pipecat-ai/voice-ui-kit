@@ -132,9 +132,15 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           # `claude_args` are forwarded to the headless CLI; tune as needed.
+          # `bypassPermissions` is appropriate here because the runner is
+          # ephemeral, the working tree is throwaway, and there is no human
+          # to answer permission prompts. The agent's blast radius is
+          # already constrained by `--allowed-tools` and by the prompt's
+          # explicit edit-scope rules.
           claude_args: |
             --max-turns 60
             --allowed-tools Read,Edit,Write,Bash,Grep,Glob
+            --permission-mode bypassPermissions
           prompt: |
             You are updating the documentation for the @pipecat-ai/voice-ui-kit
             release v${{ steps.ctx.outputs.next_version }} (previous release:
