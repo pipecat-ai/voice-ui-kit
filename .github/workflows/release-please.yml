@@ -97,10 +97,23 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Reset the docs branch to current main on every run so the agent
-          # always works from the latest state.
-          git fetch origin "$DOCS_BRANCH" || true
-          git checkout -B "$DOCS_BRANCH" origin/main
+          # If the docs branch already exists on the remote (i.e. the
+          # docs PR is already open from a prior run, possibly with
+          # manual fixes on top), branch from there so the agent
+          # incrementally updates instead of starting from scratch.
+          # Otherwise branch from main.
+          if git fetch origin "$DOCS_BRANCH" 2>/dev/null; then
+            git checkout -B "$DOCS_BRANCH" "origin/$DOCS_BRANCH"
+            # Bring the branch up to date with main without losing local
+            # commits. If main has moved forward, merge it in.
+            git merge --no-edit origin/main || {
+              echo "::warning::Merge from main into $DOCS_BRANCH had conflicts; falling back to main and dropping prior docs branch state."
+              git merge --abort || true
+              git checkout -B "$DOCS_BRANCH" origin/main
+            }
+          else
+            git checkout -B "$DOCS_BRANCH" origin/main
+          fi
 
       - name: Collect release context
         id: collect
@@ -156,6 +169,17 @@ jobs:
             - `.release-context/existing-pages.txt` — every existing docs page.
             - `docs/content/docs/**/*.mdx` — current docs (read and edit).
             - `package/src/**` — current source (read only).
+
+            **Note on incremental runs.** This workflow may run multiple
+            times for the same release as the release-please PR is
+            updated. The docs branch is preserved between runs, so the
+            current state of `docs/content/docs/**/*.mdx` may already
+            include changelog entries for the upcoming version (from a
+            prior agent run) and possibly manual fixes on top. Treat
+            existing changes as authoritative: don't duplicate changelog
+            entries you've already added, don't re-apply prose changes
+            that are already reflected, and don't overwrite manual
+            edits that look intentional. Only add what's missing.
 
             ## What to do
             For every change in the diff that affects a public export
@@ -245,12 +269,20 @@ jobs:
           # Strip the throwaway context dir before committing.
           rm -rf .release-context
           git add docs/content/docs
-          if git diff --cached --quiet; then
+          # `changed` covers two cases: the agent edited files in this
+          # run, or a merge with main brought in new commits. Either way
+          # we have something worth pushing.
+          if git diff --cached --quiet && [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$DOCS_BRANCH" 2>/dev/null || git rev-parse origin/main)" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git commit -m "docs: update for v$NEXT_VERSION"
-          git push --force-with-lease origin "$DOCS_BRANCH"
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: update for v$NEXT_VERSION"
+          fi
+          # Fast-forward push (the branch was either freshly created from
+          # main, or extended on top of its own previous tip). No force
+          # is needed in the common path.
+          git push origin "$DOCS_BRANCH"
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
       - name: Open or update docs PR
