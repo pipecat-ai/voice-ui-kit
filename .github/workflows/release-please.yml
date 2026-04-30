@@ -128,7 +128,7 @@ jobs:
           find docs/content/docs -type f -name '*.mdx' | sort > .release-context/existing-pages.txt
 
       - name: Run Claude Code to update docs
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-base-action@v0.0.63
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           # `claude_args` are forwarded to the headless CLI; tune as needed.
