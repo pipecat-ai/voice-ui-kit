@@ -33,6 +33,10 @@ jobs:
     if: needs.release-please.outputs.release_pr_number != ''
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
     concurrency:
       group: docs-update-${{ needs.release-please.outputs.release_pr_number }}
       cancel-in-progress: true
