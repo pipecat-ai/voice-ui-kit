@@ -7,7 +7,7 @@ changelog:
   - version: "v0.10.0"
     date: "2026-04-30"
     changes:
-      - "ConversationProvider is no longer required, uses upstream conversation state from @pipecat-ai/client-react."
+      - "`ConversationProvider` is no longer required. Conversation state is now provided by `PipecatClientProvider` from `@pipecat-ai/client-react`."
   - version: "v0.6.0"
     date: "2025-12-15"
     changes:
@@ -21,7 +21,7 @@ changelog:
 
 The TextInput component provides a user interface for entering and sending textual messages to the bot. It includes both a headless variant for full control and a connected variant that automatically integrates with the Pipecat Client SDK.
 
-<LiveComponent language="tsx">
+<LiveComponent language="tsx" withPipecat>
 {`
   import { TextInput } from "@pipecat-ai/voice-ui-kit";
 
@@ -245,7 +245,7 @@ The `TextInputComponent` is the headless variant that accepts all callbacks and 
 
 You can customize how the bot handles text messages using the `sendTextOptions` prop.
 
-<LiveComponent language="tsx">
+<LiveComponent language="tsx" withPipecat>
 {`
   import { TextInput } from "@pipecat-ai/voice-ui-kit";
 
@@ -263,7 +263,7 @@ You can customize how the bot handles text messages using the `sendTextOptions` 
 
 By default, messages sent via `TextInput` are automatically injected into the conversation store. You can disable this behavior with the `noInject` prop if you want to handle message injection manually.
 
-<LiveComponent language="tsx">
+<LiveComponent language="tsx" withPipecat>
 {`
   import { TextInput } from "@pipecat-ai/voice-ui-kit";
 

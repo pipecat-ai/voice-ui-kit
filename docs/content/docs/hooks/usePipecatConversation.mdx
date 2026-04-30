@@ -1,12 +1,12 @@
 ---
 title: usePipecatConversation
 description: Hook that derives a clean, ordered conversation stream from RTVI events.
-source: "@pipecat-ai/client-react"
+source: package/src/hooks/index.ts
 changelog:
   - version: "v0.10.0"
     date: "2026-04-30"
     changes:
-      - "Migrated to @pipecat-ai/client-react. ConversationProvider no longer required."
+      - "Implementation moved to `@pipecat-ai/client-react`. The kit now re-exports the upstream hook. `ConversationProvider` is no longer required."
   - version: "v0.3.0"
     date: "2025-09-17"
     changes:
@@ -15,7 +15,7 @@ changelog:
 
 ## Overview
 
-`usePipecatConversation` provides access to conversation state that is now managed automatically by the `PipecatClientProvider` from `@pipecat-ai/client-react`. The conversation state management handles all Pipecat RTVI events to produce a clean message list suitable for rendering a chat transcript. It handles streaming text, placeholder messages, finalization, and merging of consecutive messages from the same role.
+`usePipecatConversation` provides access to conversation state managed by the [`@pipecat-ai/client-react`](https://github.com/pipecat-ai/pipecat-client-web) `PipecatClientProvider`. The kit re-exports the upstream hook for convenience. The provider handles all Pipecat RTVI events to produce a clean message list suitable for rendering a chat transcript. It handles streaming text, placeholder messages, finalization, and merging of consecutive messages from the same role.
 
 ## Setup
 
@@ -155,4 +155,3 @@ export function InjectViaHook() {
 }
 ```
 
-```
