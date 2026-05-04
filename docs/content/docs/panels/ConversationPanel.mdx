@@ -4,6 +4,10 @@ description: Panel component with tabs for conversation and metrics
 component: ConversationPanel
 source: package/src/components/panels/ConversationPanel.tsx
 changelog:
+  - version: "v0.10.0"
+    date: "2026-04-30"
+    changes:
+      - "`ConversationProvider` is no longer required. Conversation state is now provided by `PipecatClientProvider` from `@pipecat-ai/client-react`."
   - version: "v0.9.0"
     date: "2026-04-24"
     changes:
@@ -132,6 +136,5 @@ The ConversationPanel component uses:
 - `Panel` component for consistent styling
 
 It must be used within:
-- `PipecatClientProvider` context (for conversation and metrics)
-- `ConversationProvider` context (for conversation messages)
+- `PipecatClientProvider` context (for conversation state and metrics)
 

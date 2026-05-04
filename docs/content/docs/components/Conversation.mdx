@@ -4,6 +4,10 @@ description: Real-time conversation display component with message history and t
 component: Conversation
 source: package/src/components/elements/Conversation.tsx
 changelog:
+  - version: "v0.10.0"
+    date: "2026-04-30"
+    changes:
+      - "`ConversationProvider` is no longer required. Conversation state is now provided by `PipecatClientProvider` from `@pipecat-ai/client-react`."
   - version: "v0.9.0"
     date: "2026-04-24"
     changes:
@@ -52,15 +56,13 @@ changelog:
 
 The Conversation component displays real-time conversation history between users and AI assistants. It automatically integrates with the Pipecat Client SDK to show messages, connection states, and provides smooth scrolling behavior.
 
-<LiveComponent language="tsx">
+<LiveComponent language="tsx" withPipecat>
 {`
-  import { Conversation, ConversationProvider } from "@pipecat-ai/voice-ui-kit";
+  import { Conversation } from "@pipecat-ai/voice-ui-kit";
 
-  <ConversationProvider>
-    <div className="h-96 border rounded-lg">
-      <Conversation />
-    </div>
-  </ConversationProvider>
+  <div className="h-96 border rounded-lg">
+    <Conversation />
+  </div>
 `}
 </LiveComponent>
 
@@ -173,7 +175,7 @@ The component implements smart scrolling:
 
 When the LLM invokes a function (tool use), function call entries appear as separate items in the conversation timeline. Each entry shows the function name and a status indicator, with arguments and results collapsed by default using a collapsible UI.
 
-Function call display requires `@pipecat-ai/client-js` >= 1.6.0 and corresponding transport versions (`@pipecat-ai/daily-transport` >= 1.6.0 or `@pipecat-ai/small-webrtc-transport` >= 1.9.0).
+Function call display requires [`@pipecat-ai/client-js`](https://github.com/pipecat-ai/pipecat-client-web) >= 1.6.0 and corresponding transport versions ([`@pipecat-ai/daily-transport`](https://github.com/pipecat-ai/pipecat-client-web-transports) >= 1.6.0 or [`@pipecat-ai/small-webrtc-transport`](https://github.com/pipecat-ai/pipecat-client-web-transports) >= 1.9.0).
 
 To disable function call rendering while still capturing the data in the store, set `noFunctionCalls={true}`.
 
@@ -202,6 +204,5 @@ The `Conversation` component uses:
 - `TextInput` component for user input
 
 It must be used within:
-- `PipecatClientProvider` context (for transport state)
-- `ConversationProvider` context (for message store)
+- `PipecatClientProvider` context (for transport state and conversation state)
 

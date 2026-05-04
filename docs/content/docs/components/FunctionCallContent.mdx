@@ -4,6 +4,10 @@ description: Component for displaying LLM function calls with collapsible detail
 component: FunctionCallContent
 source: package/src/components/elements/FunctionCallContent.tsx
 changelog:
+  - version: "v0.10.0"
+    date: "2026-04-30"
+    changes:
+      - "Now uses the `FunctionCallData` type from `@pipecat-ai/client-react` instead of a local definition."
   - version: "v0.8.0"
     date: "2026-02-25"
     changes:
@@ -130,6 +134,6 @@ When using a custom renderer with the `Conversation` component, you can switch o
 
 ## Integration
 
-The FunctionCallContent component is rendered by `MessageContainer` when a message has `role: "function_call"`. It is not typically used directly — instead, function call events from the SDK are automatically captured by the `ConversationProvider` and displayed in the `Conversation` component.
+The FunctionCallContent component is rendered by `MessageContainer` when a message has `role: "function_call"`. It is not typically used directly — instead, function call events from the SDK are automatically captured by the conversation state management and displayed in the `Conversation` component.
 
 To disable function call display, set `noFunctionCalls={true}` on the `Conversation` or `ConversationPanel` component.

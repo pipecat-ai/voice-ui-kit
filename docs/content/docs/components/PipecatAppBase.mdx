@@ -4,6 +4,10 @@ description: Higher-order component that streamlines setup of a Pipecat Client i
 component: PipecatAppBase
 source: package/src/components/PipecatAppBase.tsx
 changelog:
+  - version: "v0.10.0"
+    date: "2026-04-30"
+    changes:
+      - "No longer wraps children with `ConversationProvider`. Conversation state is now provided by `PipecatClientProvider` from `@pipecat-ai/client-react`."
   - version: "v0.8.2"
     date: "2026-03-31"
     changes:
