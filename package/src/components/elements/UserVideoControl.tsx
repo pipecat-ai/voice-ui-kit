@@ -12,12 +12,13 @@ import {
   type ButtonVariant,
 } from "@/components/ui/buttonVariants";
 import { cn } from "@/lib/utils";
+import { type DeviceErrorReason } from "@pipecat-ai/client-js";
 import {
   type OptionalMediaDeviceInfo,
   PipecatClientCamToggle,
   PipecatClientVideo,
+  useMediaState,
   usePipecatClientMediaDevices,
-  usePipecatClientTransportState,
 } from "@pipecat-ai/client-react";
 import {
   ChevronDownIcon,
@@ -103,6 +104,14 @@ export interface UserVideoComponentProps extends UserVideoControlBaseProps {
   selectedCam?: OptionalMediaDeviceInfo;
   /** Callback function called when a camera device is selected */
   updateCam?: (deviceId: string) => void;
+  /**
+   * When set, renders a disabled button with this message instead of the
+   * toggle and hides the picker. Used by the connected UserVideoControl to
+   * surface cam-error states (blocked, in-use, etc.) sourced from
+   * useMediaState(). Distinct from `noVideo`, which is a deliberate
+   * consumer opt-out.
+   */
+  unavailableText?: string;
 }
 
 /**
@@ -137,27 +146,38 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
   availableCams = [],
   selectedCam,
   updateCam,
-  noVideoText = "Video disabled",
+  // noVideoText is currently not rendered by this component (loading uses
+  // the spinner overlay; unavailable states use unavailableText). Kept on
+  // the public prop type for API stability — future revisions could pipe
+  // it into a "video disabled" state if needed.
   noIcon = false,
   activeText,
   inactiveText,
   children,
   onClick,
+  unavailableText,
 }) => {
   const buttonState = state || (isCamEnabled ? "active" : "inactive");
+  const isUnavailable = !!unavailableText;
+  // The button is non-interactive whenever the cam isn't usable, whether
+  // we're still figuring out (isLoading) or it's known to be in error
+  // (isUnavailable). Keep this logic in one place.
+  const buttonDisabled = buttonProps?.isLoading || isUnavailable;
 
   // Determine button content and styling based on state
   const getButtonContent = () => {
     if (buttonProps?.isLoading) {
+      // Loading: render nothing — the spinner overlay or Button's own
+      // loading indicator carries the message.
+      return null;
+    }
+
+    if (isUnavailable) {
       return (
         <>
-          {!buttonProps?.isLoading && (
-            <>
-              {!noIcon && <VideoOffIcon />}
-              {noVideoText && <span className="flex-1">{noVideoText}</span>}
-              {children}
-            </>
-          )}
+          {!noIcon && <VideoOffIcon />}
+          <span className="flex-1">{unavailableText}</span>
+          {children}
         </>
       );
     }
@@ -232,7 +252,7 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
                 "w-fit! hover:opacity-100! hover:bg-muted hover:text-muted-foreground":
                   !noVideo,
                 "flex-1 w-full z-10": noVideo,
-                "rounded-e-none": noVideo && !noDevicePicker,
+                "rounded-e-none": noVideo && !noDevicePicker && !isUnavailable,
                 "bg-active text-active-foreground": isCamEnabled,
               },
               classNames.button,
@@ -240,14 +260,14 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
             variant={variant}
             size={size}
             state={buttonState}
-            onClick={buttonProps?.isLoading ? undefined : onClick}
-            isIcon={!noVideo}
-            disabled={buttonProps?.isLoading}
+            onClick={buttonDisabled ? undefined : onClick}
+            isIcon={!noVideo && !isUnavailable}
+            disabled={buttonDisabled}
             {...buttonProps}
           >
             {getButtonContent()}
           </Button>
-          {!noDevicePicker && (
+          {!noDevicePicker && !isUnavailable && (
             <DeviceDropDownComponent
               availableDevices={availableCams}
               selectedDevice={selectedCam}
@@ -300,6 +320,27 @@ export const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
  * />
  * ```
  */
+/**
+ * Map a per-device DeviceErrorReason onto a short, user-facing message for
+ * the disabled camera button. Kept minimal per Plan A's "minimal
+ * affordance" decision.
+ */
+const camErrorText = (reason: DeviceErrorReason): string => {
+  switch (reason) {
+    case "blocked":
+      return "Camera blocked";
+    case "already-in-use":
+      return "Camera in use";
+    case "not-found":
+      return "No camera";
+    case "not-supported":
+      return "Video not supported";
+    case "unknown":
+    default:
+      return "Camera unavailable";
+  }
+};
+
 export const UserVideoControl: React.FC<UserVideoControlBaseProps> = ({
   buttonProps,
   ...props
@@ -307,9 +348,22 @@ export const UserVideoControl: React.FC<UserVideoControlBaseProps> = ({
   const { availableCams, selectedCam, updateCam } =
     usePipecatClientMediaDevices();
 
-  const transportState = usePipecatClientTransportState();
-  const loading =
-    transportState === "disconnected" || transportState === "initializing";
+  // Drive loading and error UI from the per-device MediaState surface
+  // (Plan A step 2). Decouples the button from TransportState, so the
+  // picker stays accessible across connect / disconnect cycles once cam
+  // permission has been granted.
+  //
+  // 'uninitialized' is intentionally NOT treated as loading. It maps to
+  // both pre-init (initDevices() not called yet) AND post-init when the
+  // transport didn't acquire the cam (e.g. enableCam was false, or
+  // daily-js skipping cam under startVideoOff: true). In those cases
+  // there's no work in flight, so showing a spinner indefinitely would
+  // be wrong. The button just renders as inactive — clicking it routes
+  // through PipecatClientCamToggle as usual.
+  const { cam } = useMediaState();
+  const isLoading = cam.state === "initializing";
+  const unavailableText =
+    cam.state === "error" ? camErrorText(cam.reason) : undefined;
 
   return (
     <PipecatClientCamToggle>
@@ -320,9 +374,10 @@ export const UserVideoControl: React.FC<UserVideoControlBaseProps> = ({
           availableCams={availableCams}
           selectedCam={selectedCam}
           updateCam={updateCam}
-          state={loading ? "default" : isCamEnabled ? "default" : "inactive"}
+          state={isLoading ? "default" : isCamEnabled ? "default" : "inactive"}
+          unavailableText={unavailableText}
           buttonProps={{
-            isLoading: loading,
+            isLoading,
             ...buttonProps,
           }}
           {...props}
