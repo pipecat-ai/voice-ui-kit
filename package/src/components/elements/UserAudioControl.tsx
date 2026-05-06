@@ -18,11 +18,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { VoiceVisualizer } from "@/visualizers";
+import { type DeviceErrorReason } from "@pipecat-ai/client-js";
 import {
   type OptionalMediaDeviceInfo,
   PipecatClientMicToggle,
+  useMediaState,
   usePipecatClientMediaDevices,
-  usePipecatClientTransportState,
 } from "@pipecat-ai/client-react";
 import {
   ChevronDownIcon,
@@ -114,6 +115,14 @@ interface ComponentProps extends Props {
   selectedSpeaker?: OptionalMediaDeviceInfo;
   /** Callback function called when a speaker device is selected */
   updateSpeaker?: (deviceId: string) => void;
+  /**
+   * When set, renders a disabled button with this message instead of the
+   * toggle and hides the picker. Used by the connected UserAudioControl to
+   * surface mic-error states (blocked, in-use, etc.) sourced from
+   * useMediaState(). Distinct from `noAudio`, which is a deliberate
+   * consumer opt-out.
+   */
+  unavailableText?: string;
 }
 
 const btnClasses = "flex-1 w-full z-10 justify-start";
@@ -164,13 +173,18 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
   inactiveText,
   children,
   onClick,
+  unavailableText,
 }) => {
   let buttonComp;
 
   const noDropdown = noDevicePicker || (noMicrophones && noSpeakers);
+  const isUnavailable = !!unavailableText;
 
-  /** NO AUDIO */
-  if (noAudio || buttonProps?.isLoading) {
+  /** NO AUDIO / LOADING / DEVICE UNAVAILABLE */
+  if (noAudio || buttonProps?.isLoading || isUnavailable) {
+    // unavailableText (mic blocked, in-use, etc.) takes precedence over
+    // the consumer's noAudioText so the actual cause is visible.
+    const disabledText = unavailableText ?? noAudioText;
     buttonComp = (
       <Button
         variant={variant}
@@ -186,7 +200,7 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
         {!buttonProps?.isLoading && (
           <>
             {!noIcon && <MicOffIcon />}
-            {noAudioText && <span className="flex-1">{noAudioText}</span>}
+            {disabledText && <span className="flex-1">{disabledText}</span>}
             {children}
           </>
         )}
@@ -343,6 +357,27 @@ export const UserAudioComponent: React.FC<ComponentProps> = ({
  * />
  * ```
  */
+/**
+ * Map a per-device DeviceErrorReason onto a short, user-facing message for
+ * the disabled microphone button. Kept minimal per Plan A's "minimal
+ * affordance" decision.
+ */
+const micErrorText = (reason: DeviceErrorReason): string => {
+  switch (reason) {
+    case "blocked":
+      return "Microphone blocked";
+    case "already-in-use":
+      return "Microphone in use";
+    case "not-found":
+      return "No microphone";
+    case "not-supported":
+      return "Audio not supported";
+    case "unknown":
+    default:
+      return "Microphone unavailable";
+  }
+};
+
 export const UserAudioControl: React.FC<Props> = ({
   buttonProps,
   ...props
@@ -356,9 +391,22 @@ export const UserAudioControl: React.FC<Props> = ({
     updateSpeaker,
   } = usePipecatClientMediaDevices();
 
-  const transportState = usePipecatClientTransportState();
-  const loading =
-    transportState === "disconnected" || transportState === "initializing";
+  // Drive loading and error UI from the per-device MediaState surface
+  // (Plan A step 2). Decouples the button from TransportState, so the
+  // picker stays accessible across connect / disconnect cycles once mic
+  // permission has been granted.
+  //
+  // 'uninitialized' is intentionally NOT treated as loading. It maps to
+  // both pre-init (initDevices() not called yet) AND post-init when the
+  // transport didn't acquire the mic (e.g. enableMic was false, or the
+  // transport opted out). In those cases there's no work in flight, so
+  // showing a spinner indefinitely would be wrong. The button just renders
+  // as inactive — clicking it routes through PipecatClientMicToggle as
+  // usual.
+  const { mic } = useMediaState();
+  const isLoading = mic.state === "initializing";
+  const unavailableText =
+    mic.state === "error" ? micErrorText(mic.reason) : undefined;
 
   return (
     <PipecatClientMicToggle>
@@ -373,8 +421,9 @@ export const UserAudioControl: React.FC<Props> = ({
           selectedSpeaker={selectedSpeaker}
           updateSpeaker={updateSpeaker}
           state={isMicEnabled ? "default" : "inactive"}
+          unavailableText={unavailableText}
           buttonProps={{
-            isLoading: loading,
+            isLoading,
             ...buttonProps,
           }}
           {...props}
