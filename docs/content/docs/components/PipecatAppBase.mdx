@@ -226,13 +226,19 @@ export default function Home() {
 
 ### 7. Using WebSocket Transport
 
-You can use the WebSocket transport for server-side connections. First, install the WebSocket transport package:
+The `websocket` transport is provided by an optional peer package that must be installed alongside the kit.
+
+<Callout type="warning">
+  The WebSocket transport package is a peer dependency. Install it before
+  setting `transportType="websocket"`, otherwise the transport will fail to
+  load at runtime.
+</Callout>
 
 ```bash
 npm install @pipecat-ai/websocket-transport
 ```
 
-Then use it in your component:
+Then point the component at a `startBot` endpoint that returns WebSocket connection details:
 
 ```tsx
 import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
@@ -241,8 +247,11 @@ export default function Home() {
   return (
     <PipecatAppBase
       transportType="websocket"
-      connectParams={{
-        url: "wss://your-websocket-server.com/ws",
+      startBotParams={{
+        endpoint: "/api/start",
+        requestData: {
+          transport: "websocket",
+        },
       }}
     >
       <YourCustomComponent />
@@ -251,19 +260,24 @@ export default function Home() {
 }
 ```
 
+Transport-specific construction options can be passed via `transportOptions`, which is typed as `WebSocketTransportConstructorOptions` when `transportType="websocket"`. See the [@pipecat-ai/websocket-transport](https://www.npmjs.com/package/@pipecat-ai/websocket-transport) package for the full option list.
+
 ### 8. Using onClient Callback
 
-You can use the `onClient` callback to subscribe to client events before connecting:
+`onClient` fires once per client instance, the moment the client is created and before any connect attempt. It's the right place to attach `client.on(...)` listeners or to run setup that needs the client handle from outside the provider tree (e.g. when consuming `ConsoleTemplate`, where there is no render-prop slot to call `usePipecatClient()` from).
+
+It fires again each time the client is recreated, for example when `transportType`, `transportOptions`, or `clientOptions` change. Treat each call as a fresh subscription point.
 
 ```tsx
 import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+import { type PipecatClient, RTVIEvent } from "@pipecat-ai/client-js";
 
 export default function Home() {
-  const handleClient = (client) => {
-    client.on("botStartedSpeaking", () => {
+  const handleClient = (client: PipecatClient) => {
+    client.on(RTVIEvent.BotStartedSpeaking, () => {
       console.log("Bot started speaking");
     });
-    client.on("userStartedSpeaking", () => {
+    client.on(RTVIEvent.UserStartedSpeaking, () => {
       console.log("User started speaking");
     });
   };
@@ -280,6 +294,29 @@ export default function Home() {
     </PipecatAppBase>
   );
 }
+```
+
+A common use case is bootstrapping a transport-specific handshake on connect. For example, sending Twilio's expected `connected` and `start` messages immediately after the WebSocket transport opens:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+import { type PipecatClient, RTVIEvent } from "@pipecat-ai/client-js";
+import { type WebSocketTransport } from "@pipecat-ai/websocket-transport";
+
+const handleClient = (client: PipecatClient) => {
+  client.on(RTVIEvent.Connected, () => {
+    const transport = client.transport as WebSocketTransport;
+    void transport.sendRawMessage({
+      event: "connected",
+      protocol: "Call",
+      version: "1.0.0",
+    });
+    void transport.sendRawMessage({
+      event: "start",
+      start: { streamSid: "mock", callSid: "mock" },
+    });
+  });
+};
 ```
 
 ### 9. Using startBotParams
