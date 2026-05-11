@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.10.0...v0.11.0) (2026-05-11)
+
+
+### Features
+
+* **elements:** drive UserAudio/VideoControl from MediaState ([aaf015a](https://github.com/pipecat-ai/voice-ui-kit/commit/aaf015a8f086f67a38989ab67b0fb3efa3123b02))
+* **elements:** drive UserAudioControl and UserVideoControl from MediaState ([c357795](https://github.com/pipecat-ai/voice-ui-kit/commit/c3577951e7df55435c8fdbc1b0db4cc7b9e10801))
+* **transport:** adding support for the websocket transport ([bcc0956](https://github.com/pipecat-ai/voice-ui-kit/commit/bcc0956b66a4ca60479481c5096618fd7e304075))
+
 ## [0.10.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.9.0...v0.10.0) (2026-04-30)
 
 
