@@ -50,6 +50,7 @@
     "@pipecat-ai/client-react": ">=1.4.0",
     "@pipecat-ai/daily-transport": ">=1.6.0",
     "@pipecat-ai/small-webrtc-transport": ">=1.9.0",
+    "@pipecat-ai/websocket-transport": ">=1.6.2",
     "react": ">=16.8.0 || >=17.0.0 || >=18.0.0",
     "react-dom": ">=16.8.0 || >=17.0.0 || >=18.0.0",
     "three": ">=0.140.0"
@@ -74,6 +75,10 @@
     "@pipecat-ai/small-webrtc-transport": {
       "optional": true,
       "version": "^1.9.0"
+    },
+    "@pipecat-ai/websocket-transport": {
+      "optional": true,
+      "version": "^1.6.2"
     },
     "three": {
       "optional": true
@@ -119,6 +124,7 @@
     "@pipecat-ai/client-react": "^1.4.0",
     "@pipecat-ai/daily-transport": "^1.6.0",
     "@pipecat-ai/small-webrtc-transport": "^1.9.0",
+    "@pipecat-ai/websocket-transport": "^1.6.2",
     "@tailwindcss/vite": "^4.1.13",
     "@types/node": "^22.18.8",
     "@types/react": "^19.1.16",

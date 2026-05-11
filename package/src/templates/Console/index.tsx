@@ -257,6 +257,7 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo((props) => {
     connectParams,
     noAudioOutput = false,
     noAutoInitDevices = false,
+    onClient,
     startBotParams,
     startBotResponseTransformer,
     theme,
@@ -268,6 +269,7 @@ export const ConsoleTemplate: React.FC<ConsoleTemplateProps> = memo((props) => {
     <PipecatAppBase
       connectParams={connectParams}
       initDevicesOnMount={!noAutoInitDevices}
+      onClient={onClient}
       startBotParams={startBotParams}
       startBotResponseTransformer={startBotResponseTransformer}
       transportType={transportType}

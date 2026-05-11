@@ -18,7 +18,8 @@ import type {
   SmallWebRTCTransport,
   SmallWebRTCTransportConstructorOptions,
 } from "@pipecat-ai/small-webrtc-transport";
-import React, { useCallback, useEffect, useState } from "react";
+import type { WebSocketTransportConstructorOptions } from "@pipecat-ai/websocket-transport";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Props for the PipecatAppBase component.
@@ -34,11 +35,12 @@ export interface PipecatBaseProps {
     response: TransportConnectionParams,
   ) => TransportConnectionParams | Promise<TransportConnectionParams>;
   /** Type of transport to use for the connection */
-  transportType: "smallwebrtc" | "daily";
+  transportType: "smallwebrtc" | "daily" | "websocket";
   /** Options for configuring the transport. */
   transportOptions?:
     | SmallWebRTCTransportConstructorOptions
-    | DailyTransportConstructorOptions;
+    | DailyTransportConstructorOptions
+    | WebSocketTransportConstructorOptions;
   /** Optional configuration options for the Pipecat client */
   clientOptions?: Partial<PipecatClientOptions>;
   /** Whether to disable the theme provider */
@@ -51,6 +53,8 @@ export interface PipecatBaseProps {
   initDevicesOnMount?: boolean;
   /** Disables audio output for the bot. Default: false */
   noAudioOutput?: boolean;
+  /** Callback fired when a new client instance is created. Useful for subscribing to client events before connecting. */
+  onClient?: (client: PipecatClient) => void;
 
   /**
    * Children can be either:
@@ -153,6 +157,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   initDevicesOnMount = false,
   noAudioOutput = false,
   noThemeProvider = false,
+  onClient,
   startBotParams,
   startBotResponseTransformer = defaultStartBotResponseTransformer,
   transportOptions,
@@ -160,6 +165,9 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   themeProps,
   children,
 }) => {
+  const onClientRef = useRef(onClient);
+  onClientRef.current = onClient;
+
   const [client, setClient] = useState<PipecatClient | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rawStartBotResponse, setRawStartBotResponse] = useState<
@@ -236,6 +244,7 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
         });
         currentClient = pcClient;
         setClient(pcClient);
+        onClientRef.current?.(pcClient);
 
         if (initDevicesOnMount) {
           await pcClient.initDevices();

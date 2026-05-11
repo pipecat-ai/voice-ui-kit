@@ -1,6 +1,6 @@
 import type { Transport } from "@pipecat-ai/client-js";
 
-export type TransportType = "daily" | "smallwebrtc";
+export type TransportType = "daily" | "smallwebrtc" | "websocket";
 
 // Use the actual types from the packages without importing them at build time
 export type DailyTransportOptions = ConstructorParameters<
@@ -9,10 +9,14 @@ export type DailyTransportOptions = ConstructorParameters<
 export type SmallWebRTCTransportOptions = ConstructorParameters<
   typeof import("@pipecat-ai/small-webrtc-transport").SmallWebRTCTransport
 >[0];
+export type WebSocketTransportOptions = ConstructorParameters<
+  typeof import("@pipecat-ai/websocket-transport").WebSocketTransport
+>[0];
 
 export interface TransportModule {
   DailyTransport: typeof import("@pipecat-ai/daily-transport").DailyTransport;
   SmallWebRTCTransport: typeof import("@pipecat-ai/small-webrtc-transport").SmallWebRTCTransport;
+  WebSocketTransport: typeof import("@pipecat-ai/websocket-transport").WebSocketTransport;
 }
 
 /**
@@ -32,18 +36,26 @@ export async function loadTransport(transportType: TransportType) {
         );
         return { SmallWebRTCTransport };
       }
+      case "websocket": {
+        const { WebSocketTransport } = await import(
+          "@pipecat-ai/websocket-transport"
+        );
+        return { WebSocketTransport };
+      }
       default:
         throw new Error(`Unsupported transport type: ${transportType}`);
     }
   } catch (loadError) {
     const errorMessage =
       loadError instanceof Error ? loadError.message : String(loadError);
+    const installHint =
+      transportType === "daily"
+        ? "npm install @pipecat-ai/daily-transport"
+        : transportType === "smallwebrtc"
+          ? "npm install @pipecat-ai/small-webrtc-transport"
+          : "npm install @pipecat-ai/websocket-transport";
     throw new Error(
-      `Failed to load transport "${transportType}". Make sure the package is installed: ${
-        transportType === "daily"
-          ? "npm install @pipecat-ai/daily-transport"
-          : "npm install @pipecat-ai/small-webrtc-transport"
-      }. Original error: ${errorMessage}`,
+      `Failed to load transport "${transportType}". Make sure the package is installed: ${installHint}. Original error: ${errorMessage}`,
     );
   }
 }
@@ -64,12 +76,22 @@ export async function createTransport(
   options?: SmallWebRTCTransportOptions,
 ): Promise<Transport>;
 export async function createTransport(
-  transportType: TransportType,
-  options?: DailyTransportOptions | SmallWebRTCTransportOptions,
+  transportType: "websocket",
+  options?: WebSocketTransportOptions,
 ): Promise<Transport>;
 export async function createTransport(
   transportType: TransportType,
-  options?: DailyTransportOptions | SmallWebRTCTransportOptions,
+  options?:
+    | DailyTransportOptions
+    | SmallWebRTCTransportOptions
+    | WebSocketTransportOptions,
+): Promise<Transport>;
+export async function createTransport(
+  transportType: TransportType,
+  options?:
+    | DailyTransportOptions
+    | SmallWebRTCTransportOptions
+    | WebSocketTransportOptions,
 ): Promise<Transport> {
   const transportModule = await loadTransport(transportType);
 
@@ -87,6 +109,13 @@ export async function createTransport(
         throw new Error("SmallWebRTCTransport not found in loaded module");
       }
       return new SmallWebRTCTransport(options as SmallWebRTCTransportOptions);
+    }
+    case "websocket": {
+      const { WebSocketTransport } = transportModule;
+      if (!WebSocketTransport) {
+        throw new Error("WebSocketTransport not found in loaded module");
+      }
+      return new WebSocketTransport(options as WebSocketTransportOptions);
     }
     default:
       throw new Error(`Unsupported transport type: ${transportType}`);
