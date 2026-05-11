@@ -4,6 +4,11 @@ description: Higher-order component that streamlines setup of a Pipecat Client i
 component: PipecatAppBase
 source: package/src/components/PipecatAppBase.tsx
 changelog:
+  - version: "v0.11.0"
+    date: "2026-05-11"
+    changes:
+      - "Added `websocket` transport type support"
+      - "Added `onClient` prop for subscribing to client events before connection"
   - version: "v0.10.0"
     date: "2026-04-30"
     changes:
@@ -219,7 +224,65 @@ export default function Home() {
 }
 ```
 
-### 7. Using startBotParams
+### 7. Using WebSocket Transport
+
+You can use the WebSocket transport for server-side connections. First, install the WebSocket transport package:
+
+```bash
+npm install @pipecat-ai/websocket-transport
+```
+
+Then use it in your component:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="websocket"
+      connectParams={{
+        url: "wss://your-websocket-server.com/ws",
+      }}
+    >
+      <YourCustomComponent />
+    </PipecatAppBase>
+  );
+}
+```
+
+### 8. Using onClient Callback
+
+You can use the `onClient` callback to subscribe to client events before connecting:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  const handleClient = (client) => {
+    client.on("botStartedSpeaking", () => {
+      console.log("Bot started speaking");
+    });
+    client.on("userStartedSpeaking", () => {
+      console.log("User started speaking");
+    });
+  };
+
+  return (
+    <PipecatAppBase
+      transportType="smallwebrtc"
+      connectParams={{
+        webrtcUrl: "/api/offer",
+      }}
+      onClient={handleClient}
+    >
+      <YourCustomComponent />
+    </PipecatAppBase>
+  );
+}
+```
+
+### 9. Using startBotParams
 
 You can use `startBotParams` instead of `connectParams` to start a bot session:
 
@@ -264,14 +327,14 @@ export default function Home() {
     },
     transportType: {
       description:
-        "The type of transport to use for the connection (smallwebrtc or daily)",
-      type: '"smallwebrtc" | "daily"',
+        "The type of transport to use for the connection (smallwebrtc, daily, or websocket)",
+      type: '"smallwebrtc" | "daily" | "websocket"',
       required: true,
     },
     transportOptions: {
       description:
-        "Optional configuration options for the transport (SmallWebRTC or Daily specific)",
-      type: "SmallWebRTCTransportConstructorOptions | DailyTransportConstructorOptions",
+        "Optional configuration options for the transport (SmallWebRTC, Daily, or WebSocket specific)",
+      type: "SmallWebRTCTransportConstructorOptions | DailyTransportConstructorOptions | WebSocketTransportConstructorOptions",
       required: false,
     },
     clientOptions: {
@@ -312,6 +375,12 @@ export default function Home() {
         "Whether to disable audio output for the bot. When true, no bot audio element is rendered.",
       type: "boolean",
       default: "false",
+      required: false,
+    },
+    onClient: {
+      description:
+        "Callback fired when a new client instance is created. Useful for subscribing to client events before connecting.",
+      type: "(client: PipecatClient) => void",
       required: false,
     },
     children: {
