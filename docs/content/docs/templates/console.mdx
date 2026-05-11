@@ -6,6 +6,10 @@ source:
   - package/src/templates/Console/index.tsx
   - package/src/templates/Console/SmallWebRTCCodecSetter.tsx
 changelog:
+  - version: "v0.11.0"
+    date: "2026-05-11"
+    changes:
+      - "Added `onClient` prop support - passes through to `PipecatAppBase`"
   - version: "v0.10.0"
     date: "2026-04-30"
     changes:
@@ -333,6 +337,12 @@ The ConsoleTemplate extends `PipecatBaseProps` and adds additional configuration
       required: false,
       default: "undefined",
     },
+    onClient: {
+      description: "Callback fired when a new client instance is created. Useful for subscribing to client events before connecting. Passes through to `PipecatAppBase`.",
+      type: "(client: PipecatClient) => void",
+      required: false,
+      default: "undefined",
+    },
   }}
 />
 
@@ -415,6 +425,23 @@ Subscribe to server messages:
 <ConsoleTemplate
   onServerMessage={(data) => {
     console.log("Server message:", data);
+  }}
+/>
+```
+
+### onClient
+
+Subscribe to client events before connecting:
+
+```tsx
+<ConsoleTemplate
+  onClient={(client) => {
+    client.on("botStartedSpeaking", () => {
+      console.log("Bot started speaking");
+    });
+    client.on("userStartedSpeaking", () => {
+      console.log("User started speaking");
+    });
   }}
 />
 ```

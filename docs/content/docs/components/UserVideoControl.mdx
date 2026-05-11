@@ -4,6 +4,12 @@ description: Camera control component with device selection and video preview
 component: UserVideoControl
 source: package/src/components/elements/UserVideoControl.tsx
 changelog:
+  - version: "v0.11.0"
+    date: "2026-05-06"
+    changes:
+      - "Now uses `useMediaState` instead of `usePipecatClientTransportState` for loading and error states."
+      - "Added `unavailableText` prop to `UserVideoComponent` for displaying device error states."
+      - "Device picker remains accessible across connect/disconnect cycles once camera permission is granted."
   - version: "v0.3.0"
     date: "2025-09-17"
     changes:
@@ -285,6 +291,12 @@ The `UserVideoComponent` is the headless variant that accepts all camera state a
       required: false,
       default: "undefined",
     },
+    unavailableText: {
+      description: "When set, renders a disabled button with this message instead of the toggle and hides the picker. Used for device error states (blocked, in-use, etc.). Distinct from `noVideo`, which is a deliberate consumer opt-out.",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
   }}
 />
 
@@ -295,7 +307,7 @@ The `UserVideoComponent` is the headless variant that accepts all camera state a
 
 The connected `UserVideoControl` component uses several hooks from the Pipecat Client React SDK:
 - `usePipecatClientMediaDevices` for device management
-- `usePipecatClientTransportState` for connection state
+- `useMediaState` for loading and error states
 - `PipecatClientCamToggle` for camera control
 
 This means it must be used within a `PipecatClientProvider` context to function properly.
@@ -305,7 +317,8 @@ The component will automatically:
 - Display the currently selected camera
 - Handle device selection changes
 - Manage camera enable/disable state
-- Show appropriate loading states during connection setup
+- Show appropriate loading and error states based on device availability
+- Keep the device picker accessible across connect/disconnect cycles once camera permission is granted
 - Update the Pipecat Client's camera configuration
 
 ## Visual States
@@ -314,8 +327,9 @@ The component displays different visual states based on the camera status:
 
 - **Inactive**: Shows camera off icon with inactive styling and placeholder text
 - **Active**: Shows camera on icon with active styling and video preview
-- **Loading**: Shows loading spinner during connection setup
-- **Disabled**: Shows disabled state when video is not available
+- **Loading**: Shows loading spinner during device initialization
+- **Unavailable**: Shows disabled state with specific error messages (e.g., "Camera blocked", "Camera in use", "No camera")
+- **Disabled**: Shows disabled state when video is deliberately disabled via `noVideo`
 
 ## Device Management
 
