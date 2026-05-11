@@ -109,6 +109,34 @@ export default function App() {
 }
 ```
 
+### With WebSocket Transport
+
+The `websocket` transport requires installing the optional peer package:
+
+```bash
+npm install @pipecat-ai/websocket-transport
+```
+
+```tsx
+import { ConsoleTemplate } from "@pipecat-ai/voice-ui-kit";
+
+export default function App() {
+  return (
+    <div className="h-screen">
+      <ConsoleTemplate
+        transportType="websocket"
+        startBotParams={{
+          endpoint: "/api/start",
+          requestData: {
+            transport: "websocket",
+          },
+        }}
+      />
+    </div>
+  );
+}
+```
+
 ### Custom Configuration
 
 ```tsx
@@ -431,15 +459,17 @@ Subscribe to server messages:
 
 ### onClient
 
-Subscribe to client events before connecting:
+Subscribe to client events before connecting. Fires once per client instance, on creation and before connect. See [`PipecatAppBase` › `onClient`](/docs/components/PipecatAppBase#using-onclient-callback) for full semantics.
 
 ```tsx
+import { type PipecatClient, RTVIEvent } from "@pipecat-ai/client-js";
+
 <ConsoleTemplate
-  onClient={(client) => {
-    client.on("botStartedSpeaking", () => {
+  onClient={(client: PipecatClient) => {
+    client.on(RTVIEvent.BotStartedSpeaking, () => {
       console.log("Bot started speaking");
     });
-    client.on("userStartedSpeaking", () => {
+    client.on(RTVIEvent.UserStartedSpeaking, () => {
       console.log("User started speaking");
     });
   }}
