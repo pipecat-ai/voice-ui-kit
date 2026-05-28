@@ -45,6 +45,11 @@ export const SessionInfo: React.FC<Props> = ({
     "small-webrtc-transport"
   ) {
     transportTypeName = "Small WebRTC";
+  } else if (
+    // @ts-expect-error - __proto__ not typed
+    client?.transport.__proto__.constructor.SERVICE_NAME === "moq-transport"
+  ) {
+    transportTypeName = "MoQ";
   }
 
   const data: React.ComponentProps<typeof DataList>["data"] = {};

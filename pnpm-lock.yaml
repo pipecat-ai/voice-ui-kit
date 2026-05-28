@@ -504,6 +504,9 @@ importers:
       '@pipecat-ai/daily-transport':
         specifier: ^1.6.0
         version: 1.6.0(@pipecat-ai/client-js@1.8.0)
+      '@pipecat-ai/moq-transport':
+        specifier: link:../../pipecat-client-web-transports/transports/moq-transport
+        version: link:../../pipecat-client-web-transports/transports/moq-transport
       '@pipecat-ai/small-webrtc-transport':
         specifier: ^1.9.0
         version: 1.9.0(@pipecat-ai/client-js@1.8.0)
