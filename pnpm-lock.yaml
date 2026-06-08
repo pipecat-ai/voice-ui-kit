@@ -163,25 +163,25 @@ importers:
   examples/01-console:
     dependencies:
       '@daily-co/daily-js':
-        specifier: ^0.85.0
+        specifier: '>=0.84.0'
         version: 0.85.0
       '@pipecat-ai/client-js':
-        specifier: ^1.8.0
+        specifier: '>=1.8.0'
         version: 1.8.0
       '@pipecat-ai/client-react':
-        specifier: ^1.4.0
+        specifier: '>=1.4.0'
         version: 1.4.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@pipecat-ai/client-js@1.8.0)(@types/react@19.1.11)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@pipecat-ai/daily-transport':
-        specifier: ^1.6.0
+        specifier: '>=1.6.0'
         version: 1.6.0(@pipecat-ai/client-js@1.8.0)
       '@pipecat-ai/small-webrtc-transport':
-        specifier: ^1.9.0
+        specifier: '>=1.9.0'
         version: 1.9.0(@pipecat-ai/client-js@1.8.0)
       '@pipecat-ai/voice-ui-kit':
         specifier: workspace:*
         version: link:../../package
       '@pipecat-ai/websocket-transport':
-        specifier: ^1.6.2
+        specifier: '>=1.6.2'
         version: 1.6.2(@pipecat-ai/client-js@1.8.0)
       next:
         specifier: 15.5.18
