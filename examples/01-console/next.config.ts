@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@pipecat-ai/client-js"],
   async rewrites() {
     return [
       {

@@ -17,6 +17,7 @@
     "@pipecat-ai/voice-ui-kit": "workspace:*",
     "@pipecat-ai/websocket-transport": "^1.6.2",
     "next": "15.5.18",
+    "uuid": "^14.0.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
