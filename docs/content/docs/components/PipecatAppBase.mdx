@@ -262,7 +262,63 @@ export default function Home() {
 
 Transport-specific construction options can be passed via `transportOptions`, which is typed as `WebSocketTransportConstructorOptions` when `transportType="websocket"`. See the [@pipecat-ai/websocket-transport](https://www.npmjs.com/package/@pipecat-ai/websocket-transport) package for the full option list.
 
-### 8. Using onClient Callback
+### 8. Using MoQ Transport
+
+The `moq` transport speaks [Media-over-QUIC](https://datatracker.ietf.org/group/moq/about/) to a Pipecat bot via a moq-lite relay, using WebTransport (with a WebSocket fallback). Like the WebSocket transport, it's provided by an optional peer package.
+
+<Callout type="warning">
+  The MoQ transport is **pre-alpha**. The package is published, but the API and
+  catalog format may change between releases. Pin a version and expect breakage
+  on upgrade.
+</Callout>
+
+<Callout type="warning">
+  The MoQ transport package is a peer dependency. Install it before setting
+  `transportType="moq"`, otherwise the transport will fail to load at runtime.
+</Callout>
+
+```bash
+npm install @pipecat-ai/moq-transport
+```
+
+Unlike the WebRTC/WebSocket transports, MoQ does not need a `/api/offer` or `startBot` endpoint — the browser dials the relay directly. Pass the relay URL via `transportOptions`:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="moq"
+      transportOptions={{
+        relayUrl: "https://relay.example.com:4080/",
+      }}
+    >
+      <YourCustomComponent />
+    </PipecatAppBase>
+  );
+}
+```
+
+For local development against a self-signed relay, pin the certificate via `serverCertificateHashes` (same shape as the native WebTransport option):
+
+```tsx
+<PipecatAppBase
+  transportType="moq"
+  transportOptions={{
+    relayUrl: "https://localhost:4080/",
+    serverCertificateHashes: [
+      { algorithm: "sha-256", value: certHashBytes },
+    ],
+  }}
+>
+  <YourCustomComponent />
+</PipecatAppBase>
+```
+
+`MoqTransportOptions` also accepts `namespace`, `clientId`, `botId`, `transcriptTrack`, and `audioLatencyMs` for tuning the broadcast paths and jitter buffer. See the [@pipecat-ai/moq-transport](https://www.npmjs.com/package/@pipecat-ai/moq-transport) package for the full option list.
+
+### 9. Using onClient Callback
 
 `onClient` fires once per client instance, the moment the client is created and before any connect attempt. It's the right place to attach `client.on(...)` listeners or to run setup that needs the client handle from outside the provider tree (e.g. when consuming `ConsoleTemplate`, where there is no render-prop slot to call `usePipecatClient()` from).
 
@@ -319,7 +375,7 @@ const handleClient = (client: PipecatClient) => {
 };
 ```
 
-### 9. Using startBotParams
+### 10. Using startBotParams
 
 You can use `startBotParams` instead of `connectParams` to start a bot session:
 
@@ -364,14 +420,14 @@ export default function Home() {
     },
     transportType: {
       description:
-        "The type of transport to use for the connection (smallwebrtc, daily, or websocket)",
-      type: '"smallwebrtc" | "daily" | "websocket"',
+        "The type of transport to use for the connection (smallwebrtc, daily, websocket, or moq)",
+      type: '"smallwebrtc" | "daily" | "websocket" | "moq"',
       required: true,
     },
     transportOptions: {
       description:
-        "Optional configuration options for the transport (SmallWebRTC, Daily, or WebSocket specific)",
-      type: "SmallWebRTCTransportConstructorOptions | DailyTransportConstructorOptions | WebSocketTransportConstructorOptions",
+        "Optional configuration options for the transport (SmallWebRTC, Daily, WebSocket, or MoQ specific)",
+      type: "SmallWebRTCTransportConstructorOptions | DailyTransportConstructorOptions | WebSocketTransportConstructorOptions | MoqTransportOptions",
       required: false,
     },
     clientOptions: {

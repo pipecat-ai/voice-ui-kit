@@ -137,6 +137,37 @@ export default function App() {
 }
 ```
 
+### With MoQ Transport
+
+The `moq` (Media-over-QUIC) transport requires installing the optional peer package:
+
+```bash
+npm install @pipecat-ai/moq-transport
+```
+
+<Callout type="warning">
+  The MoQ transport is pre-alpha. Pin a version and expect breakage on upgrade.
+</Callout>
+
+The browser dials a moq-lite relay directly, so connection details are passed via `transportOptions` rather than a `startBot` endpoint:
+
+```tsx
+import { ConsoleTemplate } from "@pipecat-ai/voice-ui-kit";
+
+export default function App() {
+  return (
+    <div className="h-screen">
+      <ConsoleTemplate
+        transportType="moq"
+        transportOptions={{
+          relayUrl: "https://relay.example.com:4080/",
+        }}
+      />
+    </div>
+  );
+}
+```
+
 ### Custom Configuration
 
 ```tsx
