@@ -61,9 +61,9 @@ export async function loadTransport(transportType: TransportType) {
         ? "npm install @pipecat-ai/daily-transport"
         : transportType === "smallwebrtc"
           ? "npm install @pipecat-ai/small-webrtc-transport"
-          : transportType === "moq"
-            ? "npm install @pipecat-ai/moq-transport"
-            : "npm install @pipecat-ai/websocket-transport";
+          : transportType === "websocket"
+            ? "npm install @pipecat-ai/websocket-transport"
+            : "npm install @pipecat-ai/moq-transport";
     throw new Error(
       `Failed to load transport "${transportType}". Make sure the package is installed: ${installHint}. Original error: ${errorMessage}`,
     );
