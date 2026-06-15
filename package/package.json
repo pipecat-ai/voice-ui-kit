@@ -128,7 +128,7 @@
     "@pipecat-ai/client-js": "^1.8.0",
     "@pipecat-ai/client-react": "^1.4.0",
     "@pipecat-ai/daily-transport": "^1.6.0",
-    "@pipecat-ai/moq-transport": "link:../../pipecat-client-web-transports/transports/moq-transport",
+    "@pipecat-ai/moq-transport": "^0.0.1",
     "@pipecat-ai/small-webrtc-transport": "^1.9.0",
     "@pipecat-ai/websocket-transport": "^1.6.2",
     "@tailwindcss/vite": "^4.1.13",
