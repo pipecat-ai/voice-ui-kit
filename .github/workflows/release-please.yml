@@ -144,6 +144,13 @@ jobs:
         uses: anthropics/claude-code-base-action@v0.0.63
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Pin an explicit model. Without this the action falls back to
+          # the CLI's built-in default, which was the retired
+          # `claude-sonnet-4-20250514` and made every run fail with a
+          # 404 not_found_error. `fallback_model` guards against the
+          # pinned model being unavailable on a future run.
+          model: "claude-sonnet-4-6"
+          fallback_model: "claude-sonnet-4-5"
           # NB: at v0.0.63 the action exposes discrete inputs rather than
           # the newer `claude_args` interface. Use `allowed_tools` /
           # `max_turns` directly — passing `claude_args` here is silently
