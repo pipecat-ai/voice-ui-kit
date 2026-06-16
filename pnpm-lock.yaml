@@ -34,6 +34,7 @@ overrides:
   vite@>=8.0.0 <=8.0.15: '>=8.0.16'
   js-yaml@<=4.1.1: '>=4.2.0'
   '@babel/core@<=7.29.0': '>=7.29.6'
+  fumadocs-mdx: 14.2.4
 
 importers:
 
@@ -110,8 +111,8 @@ importers:
         specifier: ^15.6.11
         version: 15.6.11(@types/react@19.1.11)(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       fumadocs-mdx:
-        specifier: ^14.2.2
-        version: 14.3.2(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.1.11)(fumadocs-core@15.6.11(@types/react@19.1.11)(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(vite@8.0.8(@types/node@24.0.15)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.20.5)(yaml@2.8.3))
+        specifier: 14.2.4
+        version: 14.2.4(@types/react@19.1.11)(fumadocs-core@15.6.11(@types/react@19.1.11)(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(vite@8.0.8(@types/node@24.0.15)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.20.5)(yaml@2.8.3))
       fumadocs-ui:
         specifier: ^15.6.11
         version: 15.6.11(@types/react-dom@19.1.8(@types/react@19.1.11))(@types/react@19.1.11)(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(tailwindcss@4.1.13)
@@ -3878,26 +3879,20 @@ packages:
       react-router:
         optional: true
 
-  fumadocs-mdx@14.3.2:
-    resolution: {integrity: sha512-73SoZkbUuqnD91G/0zBcaQdM1TMnYw5JJzKgkGvQTiZbtLQFuWTt8/uRqnzFMuNIUu/WY9Lo9d1iZ8G+jOVieA==}
+  fumadocs-mdx@14.2.4:
+    resolution: {integrity: sha512-YuDgzTopMuOOQmOhvOUfmXn2RryZY5Ev+9uwAzTBEYcLIpxIBxZl0/jHaLoYdlOMBM65AO6OBngA2SucC2hkIQ==}
     hasBin: true
     peerDependencies:
-      '@types/mdast': '*'
-      '@types/mdx': '*'
+      '@fumadocs/mdx-remote': ^1.4.0
       '@types/react': '*'
       fumadocs-core: ^15.0.0 || ^16.0.0
-      mdast-util-directive: '*'
       next: ^15.3.0 || ^16.0.0
-      react: ^19.2.0
+      react: '*'
       vite: '>=6.4.2'
     peerDependenciesMeta:
-      '@types/mdast':
-        optional: true
-      '@types/mdx':
+      '@fumadocs/mdx-remote':
         optional: true
       '@types/react':
-        optional: true
-      mdast-util-directive:
         optional: true
       next:
         optional: true
@@ -10567,7 +10562,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  fumadocs-mdx@14.3.2(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.1.11)(fumadocs-core@15.6.11(@types/react@19.1.11)(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(vite@8.0.8(@types/node@24.0.15)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.20.5)(yaml@2.8.3)):
+  fumadocs-mdx@14.2.4(@types/react@19.1.11)(fumadocs-core@15.6.11(@types/react@19.1.11)(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(vite@8.0.8(@types/node@24.0.15)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.20.5)(yaml@2.8.3)):
     dependencies:
       '@mdx-js/mdx': 3.1.1
       '@standard-schema/spec': 1.1.0
@@ -10576,10 +10571,10 @@ snapshots:
       estree-util-value-to-estree: 3.5.0
       fumadocs-core: 15.6.11(@types/react@19.1.11)(next@15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       js-yaml: 4.2.0
-      mdast-util-mdx: 3.0.0
       mdast-util-to-markdown: 2.1.2
       picocolors: 1.1.1
       picomatch: 4.0.4
+      remark-mdx: 3.1.1
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       unified: 11.0.5
@@ -10588,8 +10583,6 @@ snapshots:
       vfile: 6.0.3
       zod: 4.4.3
     optionalDependencies:
-      '@types/mdast': 4.0.4
-      '@types/mdx': 2.0.13
       '@types/react': 19.1.11
       next: 15.5.18(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react: 19.2.7
