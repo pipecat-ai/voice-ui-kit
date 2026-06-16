@@ -276,15 +276,21 @@ jobs:
           # Strip the throwaway context dir before committing.
           rm -rf .release-context
           git add docs/content/docs
-          # `changed` covers two cases: the agent edited files in this
-          # run, or a merge with main brought in new commits. Either way
-          # we have something worth pushing.
-          if git diff --cached --quiet && [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$DOCS_BRANCH" 2>/dev/null || git rev-parse origin/main)" ]; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+          # Commit any documentation edits the agent made this run.
           if ! git diff --cached --quiet; then
             git commit -m "docs: update for v$NEXT_VERSION"
+          fi
+          # A docs PR is only meaningful when the branch actually differs
+          # from main. When a release has no documentable source changes
+          # (e.g. a dependency/security-only patch) the agent makes no
+          # edits, and after "Prepare docs branch" merges main in, the
+          # branch becomes identical to main. Pushing it and opening a PR
+          # then fails with "No commits between main and <branch>". Gate
+          # on the real diff against main rather than on the branch tip
+          # having moved, so the no-op case exits cleanly without a PR.
+          if git diff --quiet origin/main -- docs/content/docs; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
           # Fast-forward push (the branch was either freshly created from
           # main, or extended on top of its own previous tip). No force
