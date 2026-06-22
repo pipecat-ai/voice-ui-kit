@@ -19,7 +19,7 @@ export interface AppProps {
 export const App = ({ handleConnect, handleDisconnect, error }: AppProps) => {
   if (error) {
     return (
-      <ErrorCard error={error} title="An error occured connecting to agent." />
+      <ErrorCard error={error} title="An error occurred connecting to agent." />
     );
   }
 
