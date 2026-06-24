@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.1](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.11.0...v0.11.1) (2026-06-24)
+
+
+### Bug Fixes
+
+* restore lockfile from main, apply only override changes ([dc63b23](https://github.com/pipecat-ai/voice-ui-kit/commit/dc63b23f1ce024ce4074de3cc41a4a872faf6cd3))
+* update vitest to &gt;=4.1.0 to address GHSA-5xrq-8626-4rwp ([fcfe0e2](https://github.com/pipecat-ai/voice-ui-kit/commit/fcfe0e2d1b94bf95734aab0dfcc48f016ce0233d))
+* update workspace vite versions to match lockfile ([9c03972](https://github.com/pipecat-ai/voice-ui-kit/commit/9c03972b229c3e299566ab53af62de102eb34d2b))
+
 ## [0.11.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.10.0...v0.11.0) (2026-05-11)
 
 
