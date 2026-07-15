@@ -2,7 +2,6 @@
 
 import { ClientStatus } from "@/components/elements/ClientStatus";
 import ConnectButton from "@/components/elements/ConnectButton";
-import { DTMFKeypad } from "@/components/elements/DTMFKeypad";
 import type { ConversationProps } from "@/components/elements/Conversation";
 import PipecatLogo from "@/components/elements/PipecatLogo";
 import { SessionInfo } from "@/components/elements/SessionInfo";
@@ -58,7 +57,6 @@ import {
   BotIcon,
   ChevronsLeftRightEllipsisIcon,
   CircleAlertIcon,
-  Grid3x3Icon,
   InfoIcon,
   MessagesSquareIcon,
   MicIcon,
@@ -67,6 +65,7 @@ import {
 } from "lucide-react";
 import { type ImperativePanelHandle } from "react-resizable-panels";
 import React, { memo, useEffect, useRef, useState } from "react";
+import { KeypadToggle } from "./KeypadToggle";
 import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
 import UserScreenControl from "../../components/elements/UserScreenControl";
 
@@ -381,7 +380,7 @@ const ConsoleUI = ({
   const noBotArea = noBotAudio && noBotVideo;
   const noConversationPanel = noConversation && noMetrics;
   const noDevices = noUserAudio && noUserVideo && noScreenControl;
-  const noInfoPanel = noStatusInfo && noDevices && noSessionInfo && noDTMF;
+  const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
   const connectionUrl = getConnectionUrl(
     startBotParams,
     connectParams,
@@ -425,6 +424,7 @@ const ConsoleUI = ({
           <strong className="hidden sm:block text-center">{titleText}</strong>
           <div className="flex items-center justify-end gap-2 sm:gap-3 xl:gap-6">
             <div className="flex items-center gap-1">
+              {!noDTMF && <KeypadToggle />}
               {!noThemeSwitch && <ThemeModeToggle />}
               <Button
                 className="hidden sm:flex"
@@ -582,18 +582,6 @@ const ConsoleUI = ({
                             </PopoverContent>
                           </Popover>
                         )}
-                        {!noDTMF && (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="ghost" isIcon>
-                                <Grid3x3Icon size={16} />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent side="left">
-                              <DTMFKeypad />
-                            </PopoverContent>
-                          </Popover>
-                        )}
                         {!noSessionInfo && (
                           <Popover>
                             <PopoverTrigger asChild>
@@ -617,7 +605,6 @@ const ConsoleUI = ({
                         noUserAudio={noUserAudio}
                         noUserVideo={noUserVideo}
                         noScreenControl={noScreenControl}
-                        noDTMF={noDTMF}
                         participantId={participantId}
                         sessionId={sessionId}
                       />
@@ -677,7 +664,6 @@ const ConsoleUI = ({
                 noUserAudio={noUserAudio}
                 noUserVideo={noUserVideo}
                 noScreenControl={noScreenControl}
-                noDTMF={noDTMF}
                 participantId={participantId}
                 sessionId={sessionId}
               />
