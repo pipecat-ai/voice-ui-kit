@@ -2,6 +2,7 @@
 
 import { ClientStatus } from "@/components/elements/ClientStatus";
 import ConnectButton from "@/components/elements/ConnectButton";
+import { DTMFKeypad } from "@/components/elements/DTMFKeypad";
 import type { ConversationProps } from "@/components/elements/Conversation";
 import PipecatLogo from "@/components/elements/PipecatLogo";
 import { SessionInfo } from "@/components/elements/SessionInfo";
@@ -57,6 +58,7 @@ import {
   BotIcon,
   ChevronsLeftRightEllipsisIcon,
   CircleAlertIcon,
+  Grid3x3Icon,
   InfoIcon,
   MessagesSquareIcon,
   MicIcon,
@@ -80,6 +82,8 @@ export interface ConsoleTemplateProps
   noUserVideo?: boolean;
   /** Disables user screen control entirely. Default: false */
   noScreenControl?: boolean;
+  /** Disables the DTMF keypad entirely. Default: false */
+  noDTMF?: boolean;
   /** Disables text input in the conversation. Default: false */
   noTextInput?: boolean;
   /** Disables audio output for the bot. Default: false */
@@ -312,6 +316,7 @@ const ConsoleUI = ({
   noUserAudio = false,
   noUserVideo = false,
   noScreenControl = false,
+  noDTMF = false,
   noTextInput = false,
   noBotAudio = false,
   noBotAudioControls = false,
@@ -376,7 +381,7 @@ const ConsoleUI = ({
   const noBotArea = noBotAudio && noBotVideo;
   const noConversationPanel = noConversation && noMetrics;
   const noDevices = noUserAudio && noUserVideo && noScreenControl;
-  const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
+  const noInfoPanel = noStatusInfo && noDevices && noSessionInfo && noDTMF;
   const connectionUrl = getConnectionUrl(
     startBotParams,
     connectParams,
@@ -577,6 +582,18 @@ const ConsoleUI = ({
                             </PopoverContent>
                           </Popover>
                         )}
+                        {!noDTMF && (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="ghost" isIcon>
+                                <Grid3x3Icon size={16} />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent side="left">
+                              <DTMFKeypad />
+                            </PopoverContent>
+                          </Popover>
+                        )}
                         {!noSessionInfo && (
                           <Popover>
                             <PopoverTrigger asChild>
@@ -600,6 +617,7 @@ const ConsoleUI = ({
                         noUserAudio={noUserAudio}
                         noUserVideo={noUserVideo}
                         noScreenControl={noScreenControl}
+                        noDTMF={noDTMF}
                         participantId={participantId}
                         sessionId={sessionId}
                       />
@@ -659,6 +677,7 @@ const ConsoleUI = ({
                 noUserAudio={noUserAudio}
                 noUserVideo={noUserVideo}
                 noScreenControl={noScreenControl}
+                noDTMF={noDTMF}
                 participantId={participantId}
                 sessionId={sessionId}
               />

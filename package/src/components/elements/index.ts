@@ -6,6 +6,7 @@ export * from "./ControlBar";
 export * from "./Conversation";
 export * from "./CopyText";
 export * from "./DataList";
+export * from "./DTMFKeypad";
 export * from "./DeviceDropDown";
 export * from "./DeviceSelect";
 export * from "./FunctionCallContent";

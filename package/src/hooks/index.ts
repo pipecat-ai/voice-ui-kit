@@ -11,6 +11,7 @@ export {
   /** @deprecated Use `usePipecatConversation` instead. This alias will be removed in a future major release. */
   usePipecatConversation as useConversation,
 } from "@pipecat-ai/client-react";
+export { useDTMF } from "@pipecat-ai/client-react";
 export { usePipecatEventStream } from "./usePipecatEventStream";
 export type {
   PipecatEventGroup,

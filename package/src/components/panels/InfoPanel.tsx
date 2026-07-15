@@ -1,4 +1,5 @@
 import { ClientStatus } from "@/components/elements/ClientStatus";
+import { DTMFKeypad } from "@/components/elements/DTMFKeypad";
 import { SessionInfo } from "@/components/elements/SessionInfo";
 import UserAudioControl from "@/components/elements/UserAudioControl";
 import UserScreenControl from "@/components/elements/UserScreenControl";
@@ -17,6 +18,7 @@ interface Props {
   noUserAudio?: boolean;
   noUserVideo?: boolean;
   noScreenControl?: boolean;
+  noDTMF?: boolean;
   participantId?: string;
   sessionId?: string;
 }
@@ -27,11 +29,12 @@ export const InfoPanel: React.FC<Props> = ({
   noUserAudio = false,
   noUserVideo = false,
   noScreenControl = false,
+  noDTMF = false,
   participantId,
   sessionId,
 }) => {
   const noDevices = noUserAudio && noUserVideo && noScreenControl;
-  const noInfoPanel = noStatusInfo && noDevices && noSessionInfo;
+  const noInfoPanel = noStatusInfo && noDevices && noSessionInfo && noDTMF;
 
   const { isCamEnabled } = usePipecatClientCamControl();
 
@@ -58,6 +61,16 @@ export const InfoPanel: React.FC<Props> = ({
             {!noUserAudio && <UserAudioControl />}
             {!noUserVideo && <UserVideoControl noVideo={!isCamEnabled} />}
             {!noScreenControl && <UserScreenControl />}
+          </PanelContent>
+        </>
+      )}
+      {!noDTMF && (
+        <>
+          <PanelHeader className="border-t border-t-border" variant="inline">
+            <PanelTitle>Keypad</PanelTitle>
+          </PanelHeader>
+          <PanelContent>
+            <DTMFKeypad />
           </PanelContent>
         </>
       )}
