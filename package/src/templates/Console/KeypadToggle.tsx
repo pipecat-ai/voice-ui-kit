@@ -1,6 +1,9 @@
 "use client";
 
-import { DTMFKeypad } from "@/components/elements/DTMFKeypad";
+import {
+  DTMFKeypad,
+  type DTMFKeypadMode,
+} from "@/components/elements/DTMFKeypad";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -26,7 +29,12 @@ import { PhoneIcon } from "lucide-react";
  * breakpoint mirrors how the Console switches between its desktop and mobile
  * layouts.
  */
-export const KeypadToggle = () => {
+export const KeypadToggle = ({
+  mode = "immediate",
+}: {
+  /** How the keypad dispatches presses. Default: "immediate" */
+  mode?: DTMFKeypadMode;
+}) => {
   const trigger = (
     <Button variant="ghost" isIcon aria-label="Open keypad">
       <PhoneIcon />
@@ -40,7 +48,7 @@ export const KeypadToggle = () => {
         <Popover>
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
           <PopoverContent align="end" side="bottom" className="w-auto">
-            <DTMFKeypad />
+            <DTMFKeypad mode={mode} />
           </PopoverContent>
         </Popover>
       </div>
@@ -57,7 +65,7 @@ export const KeypadToggle = () => {
               </DrawerDescription>
             </DrawerHeader>
             <div className="mx-auto w-full max-w-xs p-4 pt-0">
-              <DTMFKeypad />
+              <DTMFKeypad mode={mode} />
             </div>
           </DrawerContent>
         </Drawer>

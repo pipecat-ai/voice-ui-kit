@@ -84,24 +84,78 @@ Default.args = {
 Default.storyName = "Pure Component";
 
 /**
+ * Buffered mode. Presses accumulate in an editable field; pressing Send (or
+ * Enter) submits the whole sequence at once. Here we just log each submission.
+ */
+export const Buffered: Story<{
+  variant: ButtonVariant;
+  size: ButtonSize;
+  noSubLabels: boolean;
+}> = ({ variant, size, noSubLabels }) => {
+  const [sent, setSent] = useState<string[]>([]);
+
+  return (
+    <Card className="w-full max-w-xs">
+      <CardContent className="flex flex-col gap-4">
+        <DTMFKeypadComponent
+          mode="buffered"
+          variant={variant}
+          size={size}
+          noSubLabels={noSubLabels}
+          onSend={(sequence) => setSent((s) => [...s, sequence])}
+        />
+        {sent.length > 0 && (
+          <div className="font-mono text-xs opacity-70">
+            sent: {sent.join(", ")}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+Buffered.args = {
+  variant: "secondary",
+  size: "lg",
+  noSubLabels: false,
+};
+
+Buffered.storyName = "Buffered (Pure)";
+
+/**
  * Connected keypad. Requires a live Pipecat client; the keypad is disabled
  * until the transport is connected. Pressing a key calls `sendDTMF`.
  */
 export const Connected: Story<{
+  mode: "immediate" | "buffered";
   variant: ButtonVariant;
   size: ButtonSize;
   noSubLabels: boolean;
-}> = ({ variant, size, noSubLabels }) => (
+}> = ({ mode, variant, size, noSubLabels }) => (
   <Card className="w-full max-w-xs">
     <CardContent>
-      <DTMFKeypad variant={variant} size={size} noSubLabels={noSubLabels} />
+      <DTMFKeypad
+        mode={mode}
+        variant={variant}
+        size={size}
+        noSubLabels={noSubLabels}
+      />
     </CardContent>
   </Card>
 );
 
 Connected.args = {
+  mode: "immediate",
   variant: "secondary",
   size: "lg",
+};
+
+Connected.argTypes = {
+  mode: {
+    options: ["immediate", "buffered"],
+    control: { type: "radio" },
+    defaultValue: "immediate",
+  },
 };
 
 Connected.decorators = [
