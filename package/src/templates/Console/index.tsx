@@ -65,6 +65,8 @@ import {
 } from "lucide-react";
 import { type ImperativePanelHandle } from "react-resizable-panels";
 import React, { memo, useEffect, useRef, useState } from "react";
+import { type DTMFKeypadMode } from "@/components/elements/DTMFKeypad";
+import { KeypadToggle } from "./KeypadToggle";
 import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
 import UserScreenControl from "../../components/elements/UserScreenControl";
 
@@ -80,6 +82,16 @@ export interface ConsoleTemplateProps
   noUserVideo?: boolean;
   /** Disables user screen control entirely. Default: false */
   noScreenControl?: boolean;
+  /** Disables the DTMF keypad entirely. Default: false */
+  noDTMF?: boolean;
+  /**
+   * How the DTMF keypad dispatches presses.
+   * - "buffered": digits accumulate in an editable field and are sent together,
+   *   so a mistyped digit can be corrected before anything is sent (default)
+   * - "immediate": each key sends its tone right away, which suits navigating
+   *   a live IVR menu
+   */
+  keypadMode?: DTMFKeypadMode;
   /** Disables text input in the conversation. Default: false */
   noTextInput?: boolean;
   /** Disables audio output for the bot. Default: false */
@@ -312,6 +324,8 @@ const ConsoleUI = ({
   noUserAudio = false,
   noUserVideo = false,
   noScreenControl = false,
+  noDTMF = false,
+  keypadMode = "buffered",
   noTextInput = false,
   noBotAudio = false,
   noBotAudioControls = false,
@@ -420,6 +434,7 @@ const ConsoleUI = ({
           <strong className="hidden sm:block text-center">{titleText}</strong>
           <div className="flex items-center justify-end gap-2 sm:gap-3 xl:gap-6">
             <div className="flex items-center gap-1">
+              {!noDTMF && <KeypadToggle mode={keypadMode} />}
               {!noThemeSwitch && <ThemeModeToggle />}
               <Button
                 className="hidden sm:flex"
