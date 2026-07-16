@@ -136,7 +136,7 @@ Buffered.storyName = "Buffered (Pure)";
 /**
  * Connected keypad. Requires a live Pipecat client; the keypad is disabled
  * until the transport is connected. In buffered mode (default) the sequence is
- * sent on submit; in immediate mode each press sends its tone via `sendDTMF`.
+ * sent on submit; in immediate mode each press sends its tone via `sendTone`.
  */
 export const Connected: Story<{
   mode: "immediate" | "buffered";

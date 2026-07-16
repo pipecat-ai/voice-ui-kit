@@ -70,7 +70,7 @@ const TONE_RAMP = 0.01;
  * Returns a function that plays a key's DTMF tone locally as press feedback.
  *
  * This is a cosmetic sidetone only: the actual signalling happens over the
- * transport via `sendDTMF`. The tone is synthesized from the two frequencies
+ * transport via `sendTone`. The tone is synthesized from the two frequencies
  * that define the key rather than played from a bundled audio file.
  */
 const useDTMFTone = (enabled: boolean, volume: number) => {
@@ -397,7 +397,7 @@ export interface DTMFKeypadProps extends DTMFKeypadBaseProps {
   /** Called after tone(s) are successfully sent. */
   onToneSent?: (sequence: string) => void;
   /**
-   * Called if sending fails. `sendDTMF` throws when the transport isn't ready
+   * Called if sending fails. `sendTone` throws when the transport isn't ready
    * or the connected bot doesn't support DTMF (RTVI protocol < 2.0.0); the
    * error is caught and forwarded here instead of surfacing uncaught.
    */
@@ -407,7 +407,7 @@ export interface DTMFKeypadProps extends DTMFKeypadBaseProps {
 /**
  * Connected DTMFKeypad that integrates with the Pipecat Client SDK.
  *
- * In `"buffered"` mode (default) the entered sequence is sent as one `sendDTMF`
+ * In `"buffered"` mode (default) the entered sequence is sent as one `sendTone`
  * call on submit, so a mistyped digit can be corrected before anything is
  * transmitted; in `"immediate"` mode each key press sends that tone right away,
  * which suits navigating a live IVR menu. The keypad is disabled until the
