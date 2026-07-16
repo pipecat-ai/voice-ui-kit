@@ -4,7 +4,7 @@ import type { Story, StoryDefault } from "@ladle/react";
 import { PipecatClient } from "@pipecat-ai/client-js";
 import { PipecatClientProvider } from "@pipecat-ai/client-react";
 import { SmallWebRTCTransport } from "@pipecat-ai/small-webrtc-transport";
-import { useEffect, useState } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import { DeviceSelect, DeviceSelectComponent } from "./DeviceSelect";
 
 const mockDevices: MediaDeviceInfo[] = [
@@ -91,8 +91,15 @@ Connected.decorators = [
       return <div>Loading...</div>;
     }
 
+    // client-react@1.8.0 dts bug: cast as in PipecatAppBase.
     return (
-      <PipecatClientProvider client={client!}>
+      <PipecatClientProvider
+        client={
+          client! as unknown as ComponentProps<
+            typeof PipecatClientProvider
+          >["client"]
+        }
+      >
         <Component />
       </PipecatClientProvider>
     );

@@ -8,7 +8,7 @@ import {
 } from "@pipecat-ai/client-react";
 import { SmallWebRTCTransport } from "@pipecat-ai/small-webrtc-transport";
 import { SendIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import { TextInput, TextInputComponent } from "./TextInput";
 
 export default {
@@ -74,7 +74,14 @@ Pipecat.decorators = [
 
     return (
       <div>
-        <PipecatClientProvider client={client!}>
+        {/* client-react@1.8.0 dts bug: cast as in PipecatAppBase. */}
+        <PipecatClientProvider
+          client={
+            client! as unknown as ComponentProps<
+              typeof PipecatClientProvider
+            >["client"]
+          }
+        >
           <Component />
           <PipecatClientAudio />
         </PipecatClientProvider>
