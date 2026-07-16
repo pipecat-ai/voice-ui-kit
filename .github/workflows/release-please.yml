@@ -220,8 +220,22 @@ jobs:
                primitives, templates, visualizers). Follow the structure of
                existing pages: frontmatter (title, description, source,
                changelog), prose, `<TypeTable>` for props, `<LiveComponent>`
-               examples where it makes sense.
-            5. **Do not delete pages** for removed exports. Instead, add a
+               examples where it makes sense. Creating the file is not enough
+               on its own: register it in the folder's nav per step 5.
+            5. **Register every page in its folder's `meta.json`.** Folders
+               that have a `meta.json` list their pages in a `pages` array,
+               and a page missing from that array still builds but never
+               appears in the sidebar, so readers cannot reach it. Treat this
+               as an invariant to enforce, not just a step to perform on pages
+               you created: every entry in `pages` has a matching `.mdx` in
+               that folder, and every `.mdx` in that folder is listed in
+               `pages`. Check it for pages you did not create in this run too,
+               since the docs branch persists between runs and a page added by
+               an earlier run may still be missing its entry. Use the filename
+               without the `.mdx` extension, and insert it where the array's
+               existing order implies rather than appending it (`overview`
+               stays first where present).
+            6. **Do not delete pages** for removed exports. Instead, add a
                changelog entry noting the removal and add a banner at the top
                of the page explaining the removal. Flag these in your summary.
 
