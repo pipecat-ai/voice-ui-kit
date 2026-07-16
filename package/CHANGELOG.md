@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.12.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.11.0...v0.12.0) (2026-07-16)
+
+
+### Features
+
+* add DTMF keypad element with buffered and immediate modes ([b10a707](https://github.com/pipecat-ai/voice-ui-kit/commit/b10a70755f1143e522b14e8f992cccf2ad7003c4))
+* **console:** reveal DTMF keypad via a phone-icon toggle ([667628b](https://github.com/pipecat-ai/voice-ui-kit/commit/667628b8a3e148cec20a4bd0354577e6ad6e6977))
+* DTMF keypad support for the kit and Console template ([c547723](https://github.com/pipecat-ai/voice-ui-kit/commit/c54772341ffd4963894a63a2dfca16c257b34ce5))
+
+
+### Bug Fixes
+
+* restore lockfile from main, apply only override changes ([dc63b23](https://github.com/pipecat-ai/voice-ui-kit/commit/dc63b23f1ce024ce4074de3cc41a4a872faf6cd3))
+* **stories:** cast client for client-react 1.8.0 dts bug ([8f5cde2](https://github.com/pipecat-ai/voice-ui-kit/commit/8f5cde27d5378131764d8359eeb9e068770e6f84))
+* update vitest to &gt;=4.1.0 to address GHSA-5xrq-8626-4rwp ([fcfe0e2](https://github.com/pipecat-ai/voice-ui-kit/commit/fcfe0e2d1b94bf95734aab0dfcc48f016ce0233d))
+* update workspace vite versions to match lockfile ([9c03972](https://github.com/pipecat-ai/voice-ui-kit/commit/9c03972b229c3e299566ab53af62de102eb34d2b))
+
 ## [0.11.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.10.0...v0.11.0) (2026-05-11)
 
 
