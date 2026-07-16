@@ -137,7 +137,7 @@ The connected variant. Reads connection state via `usePipecatConnectionState` an
       default: "undefined",
     },
     onError: {
-      description: "Called if sending fails. `sendDTMF` throws when the transport is not ready or the connected bot does not support DTMF (RTVI protocol < 2.0.0); the error is caught and forwarded here instead of surfacing uncaught.",
+      description: "Called if sending fails. `sendTone` throws when the transport is not ready or the connected bot does not support DTMF (RTVI protocol < 2.0.0); the error is caught and forwarded here instead of surfacing uncaught.",
       type: "(error: unknown) => void",
       required: false,
       default: "undefined",
@@ -336,7 +336,7 @@ const [digits, setDigits] = React.useState("");
 
 `DTMFKeypad` uses:
 - `usePipecatConnectionState` to gate the keypad until the client is connected
-- `useDTMF` from [`@pipecat-ai/client-react`](https://github.com/pipecat-ai/pipecat-client-web) to call `sendDTMF` on the transport
+- `useDTMF` from [`@pipecat-ai/client-react`](https://github.com/pipecat-ai/pipecat-client-web), whose `sendTone` sends the digits over the transport
 
 It must be used within a `PipecatClientProvider` context.
 

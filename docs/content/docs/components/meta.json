@@ -6,6 +6,7 @@
         "ClientStatus",
         "ConnectButton",
         "Conversation",
+        "DTMFKeypad",
         "DeviceDropDown",
         "FunctionCallContent",
         "DeviceSelect",
