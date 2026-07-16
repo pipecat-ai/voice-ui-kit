@@ -7,6 +7,7 @@ export * from "./card";
 export * from "./collapsible";
 export * from "./container";
 export * from "./divider";
+export * from "./drawer";
 export * from "./dropdown-menu";
 export * from "./error";
 export * from "./input";

@@ -46,8 +46,8 @@
   ],
   "peerDependencies": {
     "@daily-co/daily-js": ">=0.84.0",
-    "@pipecat-ai/client-js": ">=1.8.0",
-    "@pipecat-ai/client-react": ">=1.4.0",
+    "@pipecat-ai/client-js": ">=1.13.0",
+    "@pipecat-ai/client-react": ">=1.8.0",
     "@pipecat-ai/daily-transport": ">=1.6.0",
     "@pipecat-ai/small-webrtc-transport": ">=1.9.0",
     "@pipecat-ai/websocket-transport": ">=1.6.2",
@@ -114,14 +114,15 @@
     "react-resizable-panels": "^3.0.6",
     "semver": "^7.6.3",
     "tailwind-merge": "^3.3.1",
+    "vaul": "^1.1.2",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@daily-co/daily-js": "^0.85.0",
     "@eslint/js": "^9.36.0",
     "@ladle/react": "^5.0.3",
-    "@pipecat-ai/client-js": "^1.8.0",
-    "@pipecat-ai/client-react": "^1.4.0",
+    "@pipecat-ai/client-js": "^1.13.0",
+    "@pipecat-ai/client-react": "^1.8.0",
     "@pipecat-ai/daily-transport": "^1.6.0",
     "@pipecat-ai/small-webrtc-transport": "^1.9.0",
     "@pipecat-ai/websocket-transport": "^1.6.2",

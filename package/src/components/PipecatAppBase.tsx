@@ -321,7 +321,18 @@ export const PipecatAppBase: React.FC<PipecatBaseProps> = ({
   const renderedChildren =
     typeof children === "function" ? children(passedProps) : children;
   const clientProvider = (
-    <PipecatClientProvider client={client!}>
+    // client-react@1.8.0 ships a duplicated `PipecatClient` class declaration
+    // in its bundled types instead of re-exporting the one from client-js, so
+    // the client-js instance we hold isn't nominally assignable to the
+    // provider's `client` prop. Cast to the prop's declared type; the two are
+    // structurally identical. Remove once client-react re-exports the type.
+    <PipecatClientProvider
+      client={
+        client! as unknown as React.ComponentProps<
+          typeof PipecatClientProvider
+        >["client"]
+      }
+    >
       <>
         {renderedChildren}
         {!noAudioOutput && <BotAudioOutput />}

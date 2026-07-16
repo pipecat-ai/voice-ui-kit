@@ -40,9 +40,11 @@ export const SessionInfo: React.FC<Props> = ({
   if (client && "dailyCallClient" in client.transport) {
     transportTypeName = `Daily (v${Daily.version()})`;
   } else if (
-    // @ts-expect-error - __proto__ not typed
-    client?.transport.__proto__.constructor.SERVICE_NAME ===
-    "small-webrtc-transport"
+    (
+      client?.transport as unknown as {
+        __proto__: { constructor: { SERVICE_NAME?: string } };
+      } | null
+    )?.__proto__.constructor.SERVICE_NAME === "small-webrtc-transport"
   ) {
     transportTypeName = "Small WebRTC";
   }
