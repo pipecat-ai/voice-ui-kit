@@ -4,8 +4,14 @@ description: Full-featured console interface template for Pipecat applications
 component: ConsoleTemplate
 source:
   - package/src/templates/Console/index.tsx
+  - package/src/templates/Console/KeypadToggle.tsx
   - package/src/templates/Console/SmallWebRTCCodecSetter.tsx
 changelog:
+  - version: "v0.12.0"
+    date: "2026-07-16"
+    changes:
+      - "Added `noDTMF` prop to hide the DTMF keypad toggle entirely."
+      - "Added `keypadMode` prop (`\"buffered\"` | `\"immediate\"`) to control how the keypad dispatches tones."
   - version: "v0.11.0"
     date: "2026-05-11"
     changes:
@@ -63,6 +69,7 @@ The Console template is a comprehensive UI template that combines multiple panel
 - **Conversation Display**: Tabbed interface with conversation and metrics
 - **Bot Media**: Audio visualization and video display panels
 - **Device Controls**: Audio, video, and screen sharing controls
+- **DTMF Keypad**: Phone-icon toggle that reveals a DTMF keypad (popover on desktop, bottom drawer on mobile)
 - **Event Logging**: Real-time RTVI event display with filtering
 - **Session Information**: Transport type, session ID, participant ID, and version
 - **Responsive Design**: Desktop resizable layout and mobile tabbed interface
@@ -202,6 +209,18 @@ The ConsoleTemplate extends `PipecatBaseProps` and adds additional configuration
       type: "boolean",
       required: false,
       default: "false",
+    },
+    noDTMF: {
+      description: "Disables the DTMF keypad toggle in the header entirely.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    keypadMode: {
+      description: 'How the DTMF keypad dispatches presses. `"buffered"`: digits accumulate in an editable field and are sent together on submit, so a mistyped digit can be corrected before anything is transmitted. `"immediate"`: each key sends its tone right away, suited for navigating a live IVR menu.',
+      type: '"buffered" | "immediate"',
+      required: false,
+      default: '"buffered"',
     },
     noTextInput: {
       description: "Disables text input in the conversation",
@@ -412,6 +431,7 @@ Control which panels are visible:
 - `noConversation` / `noMetrics`: Hide conversation/metrics tabs
 - `noSessionInfo` / `noStatusInfo`: Hide info panel sections
 - `noUserAudio` / `noUserVideo` / `noScreenControl`: Hide device controls
+- `noDTMF`: Hide the DTMF keypad toggle
 
 ## Codec Configuration (SmallWebRTC)
 

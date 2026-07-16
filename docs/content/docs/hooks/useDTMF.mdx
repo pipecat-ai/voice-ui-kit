@@ -1,0 +1,97 @@
+---
+title: useDTMF
+description: Hook for sending DTMF tones via the Pipecat client transport.
+source: package/src/hooks/index.ts
+changelog:
+  - version: "v0.12.0"
+    date: "2026-07-16"
+    changes:
+      - "Added. Re-exports `useDTMF` from `@pipecat-ai/client-react` for sending DTMF tones."
+---
+
+## Overview
+
+`useDTMF` provides a `sendTone` function that sends a DTMF tone or sequence via the connected Pipecat transport. The kit re-exports this hook from [`@pipecat-ai/client-react`](https://github.com/pipecat-ai/pipecat-client-web) for convenience.
+
+It must be used within a `PipecatClientProvider` context. Tones can only be sent when the transport is connected; calling `sendTone` while disconnected will throw.
+
+## Usage
+
+### Basic
+
+```tsx
+import { useDTMF } from "@pipecat-ai/voice-ui-kit";
+
+export function DialButton() {
+  const { sendTone } = useDTMF();
+
+  return (
+    <button onClick={() => sendTone("5")}>
+      Press 5
+    </button>
+  );
+}
+```
+
+### Sending a sequence
+
+```tsx
+import { useDTMF } from "@pipecat-ai/voice-ui-kit";
+
+export function ExtensionDialer() {
+  const { sendTone } = useDTMF();
+
+  const dial = () => {
+    try {
+      sendTone("1234#");
+    } catch (err) {
+      console.error("Failed to send DTMF:", err);
+    }
+  };
+
+  return <button onClick={dial}>Dial extension 1234</button>;
+}
+```
+
+### With error handling
+
+`sendTone` throws when the transport is not ready or the connected bot does not support DTMF (RTVI protocol version earlier than 2.0.0). Wrap calls in a try/catch or use the `onError` prop on `DTMFKeypad` which handles this automatically.
+
+```tsx
+import { useDTMF } from "@pipecat-ai/voice-ui-kit";
+
+export function SafeDialer({ sequence }: { sequence: string }) {
+  const { sendTone } = useDTMF();
+
+  const handleSend = () => {
+    try {
+      sendTone(sequence);
+    } catch (err) {
+      console.error("DTMF send failed:", err);
+    }
+  };
+
+  return <button onClick={handleSend}>Send {sequence}</button>;
+}
+```
+
+---
+
+## API
+
+### Return
+
+<TypeTable
+  className="text-sm"
+  type={{
+    sendTone: {
+      description: "Sends a DTMF tone or sequence via the transport. Accepts any string of valid DTMF characters (0-9, *, #). Throws if the transport is not connected or the bot does not support DTMF.",
+      type: "(sequence: string) => void",
+      required: true,
+    },
+  }}
+/>
+
+## See Also
+
+- [DTMFKeypad](/docs/components/DTMFKeypad) - Ready-made keypad component that uses this hook internally

@@ -1,0 +1,347 @@
+---
+title: DTMF Keypad
+description: Telephone-style 12-key keypad for sending DTMF tones over a Pipecat session
+component: DTMFKeypad
+source: package/src/components/elements/DTMFKeypad.tsx
+changelog:
+  - version: "v0.12.0"
+    date: "2026-07-16"
+    changes:
+      - "Added `DTMFKeypad` (connected) and `DTMFKeypadComponent` (headless) components."
+      - "Added `DTMFKeypadMode` type (`\"buffered\"` | `\"immediate\"`)."
+      - "Added `DTMFKeypadBaseProps`, `DTMFKeypadProps`, and `DTMFKeypadComponentProps` interfaces."
+---
+
+The DTMF Keypad renders a standard 12-key telephone keypad for sending DTMF tones during a Pipecat session. It ships in two variants: a headless `DTMFKeypadComponent` with no SDK dependency and a connected `DTMFKeypad` that wires directly to the client via `useDTMF`.
+
+Two dispatch modes are supported:
+
+- **`"buffered"`** (default): digits accumulate in an editable field and are sent as a single sequence when the user submits, so a mistyped digit can be corrected before anything is transmitted. Suited for dialing a full number or extension.
+- **`"immediate"`**: each key press sends that tone right away. Suited for navigating live IVR menus where each key is answered on its own.
+
+Local press feedback is synthesized from the standard DTMF frequency pairs using the Web Audio API, so no bundled audio assets are required. Feedback can be disabled with `noToneFeedback`.
+
+<LiveComponent language="tsx" withPipecat>
+{`
+  import { DTMFKeypad } from "@pipecat-ai/voice-ui-kit";
+
+  <DTMFKeypad />
+`}
+</LiveComponent>
+
+---
+
+## Component Variants
+
+### DTMFKeypad
+
+The connected variant. Reads connection state via `usePipecatConnectionState` and dispatches tones via `useDTMF` from [`@pipecat-ai/client-react`](https://github.com/pipecat-ai/pipecat-client-web). The keypad is automatically disabled while the client is not connected. Must be used within a `PipecatClientProvider` context.
+
+<TypeTable
+  className="text-sm"
+  type={{
+    mode: {
+      description: 'How presses are dispatched. `"buffered"`: digits accumulate and are sent together on submit. `"immediate"`: each key sends its tone right away.',
+      type: '"buffered" | "immediate"',
+      required: false,
+      default: '"buffered"',
+    },
+    variant: {
+      description: "Visual style variant for the keypad buttons.",
+      type: "ButtonVariant",
+      required: false,
+      default: '"secondary"',
+    },
+    size: {
+      description: "Size of the keypad buttons.",
+      type: "ButtonSize",
+      required: false,
+      default: '"lg"',
+    },
+    disabled: {
+      description: "Disables the entire keypad in addition to the automatic connection gate.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noSubLabels: {
+      description: "Hides the letters/symbols printed beneath each digit.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noToneFeedback: {
+      description: "Disables the audible tone played on each key press. The tone is local press feedback only and does not affect what is signalled to the server.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    toneVolume: {
+      description: "Peak volume of the key press tone, from 0 (silent) to 1 (full scale). Values outside that range are clamped. Kept low by default because the tone plays over a live call.",
+      type: "number",
+      required: false,
+      default: "0.15",
+    },
+    buttonProps: {
+      description: "Additional props to pass to every keypad button.",
+      type: "Partial<React.ComponentProps<typeof Button>>",
+      required: false,
+      default: "undefined",
+    },
+    placeholder: {
+      description: "Placeholder for the input field (buffered mode).",
+      type: "string",
+      required: false,
+      default: '"Enter digits"',
+    },
+    sendLabel: {
+      description: "Label for the send button (buffered mode).",
+      type: "string",
+      required: false,
+      default: '"Send"',
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component. Keys: `root`, `container`, `button`, `label`, `subLabel`, `inputRow`, `input`, `backspace`, `sendButton`.",
+      type: "object",
+      required: false,
+      default: "undefined",
+    },
+    value: {
+      description: "Controlled buffer value (buffered mode).",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    defaultValue: {
+      description: "Default buffer value when uncontrolled (buffered mode).",
+      type: "string",
+      required: false,
+      default: '""',
+    },
+    onValueChange: {
+      description: "Called whenever the buffer changes (buffered mode).",
+      type: "(value: string) => void",
+      required: false,
+      default: "undefined",
+    },
+    onPress: {
+      description: "Called with each key as it is pressed (fires in both modes).",
+      type: "(button: DTMFButton) => void",
+      required: false,
+      default: "undefined",
+    },
+    onToneSent: {
+      description: "Called after tone(s) are successfully sent.",
+      type: "(sequence: string) => void",
+      required: false,
+      default: "undefined",
+    },
+    onError: {
+      description: "Called if sending fails. `sendTone` throws when the transport is not ready or the connected bot does not support DTMF (RTVI protocol < 2.0.0); the error is caught and forwarded here instead of surfacing uncaught.",
+      type: "(error: unknown) => void",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+### DTMFKeypadComponent
+
+The headless variant. Holds no client state and can be used with any framework or state management solution. All dispatch callbacks are passed as props.
+
+<LiveComponent language="tsx" noInline>
+{`
+  import { DTMFKeypadComponent } from "@pipecat-ai/voice-ui-kit";
+
+  function Demo() {
+    const [sequence, setSequence] = React.useState("");
+
+    return (
+      <div className="flex flex-col gap-2 w-full max-w-xs">
+        <div className="font-mono text-sm min-h-6">{sequence || " "}</div>
+        <DTMFKeypadComponent
+          mode="immediate"
+          onPress={(key) => setSequence((s) => s + key)}
+        />
+      </div>
+    );
+  }
+
+  render(<Demo />);
+`}
+</LiveComponent>
+
+<TypeTable
+  className="text-sm"
+  type={{
+    mode: {
+      description: 'How presses are dispatched. `"buffered"`: digits accumulate and are sent together on submit. `"immediate"`: each key invokes `onPress` only.',
+      type: '"buffered" | "immediate"',
+      required: false,
+      default: '"buffered"',
+    },
+    variant: {
+      description: "Visual style variant for the keypad buttons.",
+      type: "ButtonVariant",
+      required: false,
+      default: '"secondary"',
+    },
+    size: {
+      description: "Size of the keypad buttons.",
+      type: "ButtonSize",
+      required: false,
+      default: '"lg"',
+    },
+    disabled: {
+      description: "Disables the entire keypad.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noSubLabels: {
+      description: "Hides the letters/symbols printed beneath each digit.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    noToneFeedback: {
+      description: "Disables the audible tone played on each key press.",
+      type: "boolean",
+      required: false,
+      default: "false",
+    },
+    toneVolume: {
+      description: "Peak volume of the key press tone, from 0 (silent) to 1 (full scale). Values outside that range are clamped.",
+      type: "number",
+      required: false,
+      default: "0.15",
+    },
+    buttonProps: {
+      description: "Additional props to pass to every keypad button.",
+      type: "Partial<React.ComponentProps<typeof Button>>",
+      required: false,
+      default: "undefined",
+    },
+    placeholder: {
+      description: "Placeholder for the input field (buffered mode).",
+      type: "string",
+      required: false,
+      default: '"Enter digits"',
+    },
+    sendLabel: {
+      description: "Label for the send button (buffered mode).",
+      type: "string",
+      required: false,
+      default: '"Send"',
+    },
+    classNames: {
+      description: "Custom CSS classes for different parts of the component. Keys: `root`, `container`, `button`, `label`, `subLabel`, `inputRow`, `input`, `backspace`, `sendButton`.",
+      type: "object",
+      required: false,
+      default: "undefined",
+    },
+    value: {
+      description: "Controlled buffer value (buffered mode).",
+      type: "string",
+      required: false,
+      default: "undefined",
+    },
+    defaultValue: {
+      description: "Default buffer value when uncontrolled (buffered mode).",
+      type: "string",
+      required: false,
+      default: '""',
+    },
+    onValueChange: {
+      description: "Called whenever the buffer changes (buffered mode).",
+      type: "(value: string) => void",
+      required: false,
+      default: "undefined",
+    },
+    onPress: {
+      description: "Called with each key as it is pressed (fires in both modes).",
+      type: "(button: DTMFButton) => void",
+      required: false,
+      default: "undefined",
+    },
+    onSend: {
+      description: "Called with the full sequence when submitted (buffered mode).",
+      type: "(sequence: string) => void",
+      required: false,
+      default: "undefined",
+    },
+  }}
+/>
+
+---
+
+## Usage
+
+### Buffered mode (default)
+
+Digits accumulate in an editable field. The user can backspace to correct mistakes before pressing Send.
+
+```tsx
+import { DTMFKeypad } from "@pipecat-ai/voice-ui-kit";
+
+<DTMFKeypad
+  onToneSent={(seq) => console.log("sent", seq)}
+  onError={(err) => console.error("send failed", err)}
+/>
+```
+
+### Immediate mode
+
+Each key sends its tone right away. Useful for navigating IVR menus.
+
+```tsx
+import { DTMFKeypad } from "@pipecat-ai/voice-ui-kit";
+
+<DTMFKeypad
+  mode="immediate"
+  onPress={(key) => console.log("pressed", key)}
+  onToneSent={(key) => console.log("sent", key)}
+/>
+```
+
+### Headless in buffered mode
+
+```tsx
+import { DTMFKeypadComponent } from "@pipecat-ai/voice-ui-kit";
+
+<DTMFKeypadComponent
+  onSend={(sequence) => {
+    // send sequence to your backend
+  }}
+/>
+```
+
+### Controlled buffer
+
+```tsx
+import { DTMFKeypad } from "@pipecat-ai/voice-ui-kit";
+
+const [digits, setDigits] = React.useState("");
+
+<DTMFKeypad
+  value={digits}
+  onValueChange={setDigits}
+  onToneSent={() => setDigits("")}
+/>
+```
+
+---
+
+## Integration
+
+`DTMFKeypad` uses:
+- `usePipecatConnectionState` to gate the keypad until the client is connected
+- `useDTMF` from [`@pipecat-ai/client-react`](https://github.com/pipecat-ai/pipecat-client-web), whose `sendTone` sends the digits over the transport
+
+It must be used within a `PipecatClientProvider` context.
+
+`DTMFKeypadComponent` has no SDK dependency and can be used standalone.
+
+## See Also
+
+- [Console Template](/docs/templates/console) - The Console template exposes `noDTMF` and `keypadMode` props to show or hide the keypad toggle in its header
