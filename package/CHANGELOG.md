@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.12.0...v0.13.0) (2026-07-20)
+
+
+### Features
+
+* add MoQ transport support ([ae8060a](https://github.com/pipecat-ai/voice-ui-kit/commit/ae8060a8aece211ce5cc52a06cd9ed6c981f2661))
+
 ## [0.12.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.11.0...v0.12.0) (2026-07-16)
 
 
