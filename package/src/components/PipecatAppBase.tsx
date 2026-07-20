@@ -5,7 +5,7 @@ import {
   ThemeProvider,
   type ThemeProviderProps,
 } from "@/components/ThemeProvider";
-import { createTransport } from "@/lib/transports";
+import { createTransport, type MoqTransportOptions } from "@/lib/transports";
 import {
   APIRequest,
   PipecatClient,
@@ -35,12 +35,13 @@ export interface PipecatBaseProps {
     response: TransportConnectionParams,
   ) => TransportConnectionParams | Promise<TransportConnectionParams>;
   /** Type of transport to use for the connection */
-  transportType: "smallwebrtc" | "daily" | "websocket";
+  transportType: "smallwebrtc" | "daily" | "websocket" | "moq";
   /** Options for configuring the transport. */
   transportOptions?:
     | SmallWebRTCTransportConstructorOptions
     | DailyTransportConstructorOptions
-    | WebSocketTransportConstructorOptions;
+    | WebSocketTransportConstructorOptions
+    | MoqTransportOptions;
   /** Optional configuration options for the Pipecat client */
   clientOptions?: Partial<PipecatClientOptions>;
   /** Whether to disable the theme provider */
@@ -65,8 +66,7 @@ export interface PipecatBaseProps {
    * @returns React.ReactNode
    */
   children:
-    | ((props: PipecatBaseChildProps) => React.ReactNode)
-    | React.ReactNode;
+    ((props: PipecatBaseChildProps) => React.ReactNode) | React.ReactNode;
 }
 
 /**
