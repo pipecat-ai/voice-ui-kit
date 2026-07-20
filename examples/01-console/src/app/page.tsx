@@ -7,12 +7,13 @@ import {
 } from "@pipecat-ai/voice-ui-kit";
 import React, { useState } from "react";
 
-type TransportType = "smallwebrtc" | "daily" | "websocket";
+type TransportType = "smallwebrtc" | "daily" | "websocket" | "moq";
 
 const TRANSPORT_OPTIONS: { value: TransportType; label: string }[] = [
   { value: "smallwebrtc", label: "SmallWebRTC" },
   { value: "daily", label: "Daily" },
   { value: "websocket", label: "WebSocket" },
+  { value: "moq", label: "MoQ" },
 ];
 
 type TransportProps = Pick<
@@ -55,6 +56,15 @@ function getTransportProps(
           endpoint: `${botHost}/start`,
           requestData: {
             transport: "websocket",
+          },
+        },
+      };
+    case "moq":
+      return {
+        startBotParams: {
+          endpoint: `${botHost}/start`,
+          requestData: {
+            transport: "moq",
           },
         },
       };
