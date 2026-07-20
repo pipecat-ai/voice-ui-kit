@@ -197,7 +197,8 @@ export const Metrics: React.FC<Props> = ({
       tooltip: {
         callbacks: {
           label: function (context) {
-            return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ms`;
+            const y = context.parsed.y;
+            return `${context.dataset.label}: ${y === null ? "N/A" : y.toFixed(2)} ms`;
           },
         },
       },

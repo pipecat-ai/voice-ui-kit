@@ -70,8 +70,10 @@ import { KeypadToggle } from "./KeypadToggle";
 import { SmallWebRTCCodecSetter } from "./SmallWebRTCCodecSetter";
 import UserScreenControl from "../../components/elements/UserScreenControl";
 
-export interface ConsoleTemplateProps
-  extends Omit<PipecatBaseProps, "children"> {
+export interface ConsoleTemplateProps extends Omit<
+  PipecatBaseProps,
+  "children"
+> {
   /** Disables RTVI related functionality. Default: false */
   noRTVI?: boolean;
   /** Specifies the RTVI version in use by the server. Default: null */
