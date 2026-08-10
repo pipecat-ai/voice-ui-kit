@@ -1,0 +1,31 @@
+---
+title: Session Info
+description: Session metadata rows — transport type, copyable ids, RTVI versions.
+---
+
+<SessionInfoPreview />
+
+## Installation
+
+<InstallTabs name="session-info" />
+
+## Usage
+
+```tsx
+import { SessionInfo } from "@/components/pipecat/session-info";
+
+<SessionInfo sessionId={sessionId} participantId={participantId} />;
+```
+
+Transport name and RTVI client/server versions are derived from the client automatically;
+ids are whatever you pass in, rendered with copy-to-clipboard buttons. Requires a
+`TooltipProvider` ancestor (shadcn's tooltip setup) for the copy buttons.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `sessionId` / `participantId` | `string` | Copyable id rows |
+| `noTransportType` / `noSessionId` / `noParticipantId` / `noRTVIVersion` | `boolean` | Hide rows |
+
+`CopyText` is exported standalone — truncated text with a copy button.

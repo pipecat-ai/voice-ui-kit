@@ -1,0 +1,57 @@
+---
+title: Audio Visualizer Radial
+description: Canvas radial audio visualizer — a ring of dots that light up and grow with the voice spectrum.
+---
+
+<AudioVisualizerRadialPreview />
+
+## Installation
+
+<InstallTabs name="audio-visualizer-radial" />
+
+## Usage
+
+```tsx
+import {
+  AudioVisualizerRadial,
+  AudioVisualizerRadialView,
+} from "@/components/pipecat/audio-visualizer-radial";
+
+// Connected: visualize a Pipecat participant's audio
+<AudioVisualizerRadial participantType="bot" radius={40} />
+
+// View: visualize any MediaStreamTrack
+<AudioVisualizerRadialView track={myTrack} barCount={32} />
+```
+
+Dots default to `currentColor`, so the visualizer inherits its parent's text color —
+drop it inside a button or set `text-active` on a wrapper to tint it.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `participantType` | `"local" \| "bot"` | Whose audio to visualize (connected) |
+| `track` | `MediaStreamTrack \| null` | Audio source (View); dim resting ring when null |
+| `barCount` / `barMaxLength` | `number` | Dots around the ring, and how far they grow outward while speaking |
+| `barWidth` | `number` | Dot thickness; defaults to filling half the circumference so dots and gaps stay balanced |
+| `radius` | `number` | Radius of the resting ring |
+| `barSpeed` | `number` | How fast bars chase the spectrum while speaking (0–1 per frame, default 0.5; 1 disables smoothing) |
+| `restingOpacity` | `number` | Opacity of unlit dots (default 0.1); lit dots render at 1 |
+| `barColor` | `string` | Any CSS color, `currentColor`, or a `--css-var` name |
+| `accentColor` | `string` | Color of the lit connecting/thinking dots; defaults to `barColor` |
+| `rotationSpeed` | `number` | Orbit speed multiplier for both overrides (default 1 = a lap every 2s) |
+| `isConnecting` | `boolean` | Override: two opposed lit dots glide around the ring (wins over `isThinking`) |
+| `isThinking` | `boolean` | Override: a comet orbits the ring — a bright head with a fading tail — while the ring slowly breathes |
+| `breathingSpeed` | `number` | Breaths per second for the thinking swell (default 0.2; ±10% of `radius`) |
+
+Bands are tuned for voice — 200 Hz–8 kHz on the mel scale, rolloff-compensated — and
+mirrored across the ring's vertical axis: both sides run low (top) to high (bottom), so
+the spectrum has no seam where it wraps.
+
+Silent and speaking need no props — the visualizer derives them from the track. The
+overrides opt into the other two lifecycle states, and every state change eases briefly
+instead of snapping. `VisualizerState` — the vocabulary shared by all kit visualizers
+(`"connecting" | "silent" | "speaking" | "thinking"`, from
+`components/pipecat/visualizer.ts`, installed with this item) — is exposed on the canvas
+as `data-state`.

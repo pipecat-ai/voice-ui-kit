@@ -1,0 +1,53 @@
+---
+title: Metrics
+description: Metrics dashboard block — a Performance/Usage tab navigator over per-processor latency charts and running usage totals.
+---
+
+<MetricsPreview />
+
+## Installation
+
+<InstallTabs name="metrics" />
+
+## Usage
+
+The connected `Metrics` populates from the shared
+[usePipecatMetrics](/docs/hooks/use-pipecat-metrics) store — one component,
+zero wiring, resets with each new session. A tab navigator switches between
+its two sections, and because both read the same store, no data is lost
+while a tab is hidden:
+
+```tsx
+import { Metrics } from "@/components/pipecat/metrics/metrics";
+
+<PipecatClientProvider client={client}>
+  <Metrics
+    defaultTab="performance"
+    performanceProps={{ categories: ["ttfb", "ttfa", "processing"] }}
+  />
+</PipecatClientProvider>;
+```
+
+- **Performance** — per-processor latency tiles and time-series charts for
+  `ttfb`, `ttfa`, and `processing`, in milliseconds (`ttfa` requires pipecat
+  server ≥ 1.7).
+- **Usage** — the session's running totals: LLM tokens (including cache-read
+  and reasoning counts when providers report them), TTS characters, and STT
+  audio seconds (server ≥ 1.7 with `enable_usage_metrics=True`), as tiles
+  plus growth charts.
+
+Both sections also export standalone — `MetricsPerformance` / `MetricsUsage`
+(store-wired) and their `*View` twins (props-driven) — so you can place one
+without the tabs. Everything composes the generic
+[Metric](/docs/components/metric) tile and a shared chart renderer on the
+stock shadcn `chart` component, using the theme's `--chart-1…5` palette. The
+block is chrome-free — wrap it in your own `Card` or panel.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `defaultTab` | `"performance" \| "usage"` | Initially selected tab (default `"performance"`). |
+| `performanceProps` | `MetricsPerformanceProps` | Forwarded to the performance section: `categories`, `noTiles`, `noCharts`, `ignoreProcessors`, `empty`. |
+| `usageProps` | `MetricsUsageProps` | Forwarded to the usage section: `categories`, `noTiles`, `noCharts`, `ignoreProcessors`, `empty`. |
+| `series` / `tokens` | `MetricSeries[]` / `TokenTotals` | `MetricsView` only — feed both sections directly. |

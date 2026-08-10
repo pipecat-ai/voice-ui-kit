@@ -1,0 +1,47 @@
+---
+title: Conversation
+description: Live scrolling transcript with roles, karaoke text, and function-call cards.
+---
+
+<ConversationPreview />
+
+## Installation
+
+<InstallTabs name="conversation" />
+
+Installs two files: `conversation.tsx` (scroll container + connected wrapper) and
+`conversation-message.tsx` (message row, role label, content renderer, function-call card,
+thinking indicator).
+
+## Usage
+
+```tsx
+import { Conversation } from "@/components/pipecat/conversation";
+import { TextInput } from "@/components/pipecat/text-input";
+
+<div className="flex h-96 flex-col rounded-xl border">
+  <Conversation assistantLabel="Agent" clientLabel="You" />
+  <div className="border-t p-3">
+    <TextInput />
+  </div>
+</div>;
+```
+
+Messages stream from Pipecat's built-in conversation store (`usePipecatConversation`).
+Bot text renders karaoke-style by default — spoken words in the foreground color, upcoming
+words muted. Auto-scroll follows the newest message unless the user scrolls away.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `textRenderMode` | `"karaoke" \| "captions" \| "instant"` | How bot speech text renders |
+| `assistantLabel` / `clientLabel` / `systemLabel` | `string` | Role labels |
+| `noFunctionCalls` | `boolean` | Hide function-call rows |
+| `functionCallRenderer` | `FunctionCallRenderer` | Replace function-call rendering per call |
+| `botOutputRenderers` | `Record<string, BotOutputRenderer>` | Custom renderers by aggregation type |
+| `reverseOrder` | `boolean` | Newest first; auto-scroll targets the top |
+| `empty` | `ReactNode` | View-only: custom empty state |
+
+Requires a bot with RTVI 1.1.0+ (BotOutput events); the connected component explains this
+in its empty state when unsupported.

@@ -1,0 +1,55 @@
+---
+title: Audio Visualizer Wave
+description: Shader aura audio visualizer — swirling ribbons of light that react to the session and voice.
+---
+
+<AudioVisualizerWavePreview />
+
+## Status
+
+This component is **not yet installable from the registry** — its shader is being
+evaluated under a separate license and will be replaced or licensed before release.
+The interface below is final.
+
+## Usage
+
+```tsx
+import {
+  AudioVisualizerWave,
+  AudioVisualizerWaveView,
+} from "@/components/pipecat/audio-visualizer-wave";
+
+// Connected: visualize a Pipecat participant's audio
+<AudioVisualizerWave participantType="bot" size={160} />
+
+// View: visualize any MediaStreamTrack
+<AudioVisualizerWaveView track={myTrack} color="--active-background" colorShift={0.3} />
+```
+
+The orb defaults to a vivid cyan — it's made of light, so bright colors work best; pass
+any CSS color, `currentColor`, or a `--css-var` name to retint it. It renders on the
+kit's Shadertoy-compatible WebGL runtime (`components/pipecat/shader-toy.tsx`, installed
+with this item), so the fragment shader pastes straight into Shadertoy for iteration.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `participantType` | `"local" \| "bot"` | Whose audio to visualize (connected) |
+| `track` | `MediaStreamTrack \| null` | Audio source (View); calm resting drift when null |
+| `size` | `number` | Visualizer size in px (square, default 224) |
+| `color` | `string` | Any CSS color, `currentColor`, or a `--css-var` name (default `#1FD5F9`) |
+| `colorShift` | `number` | Hue variation across the orb's lobes and rim (0–1, default 0.05) |
+| `speed` / `amplitude` / `glow` | `number` | Multipliers over each state's base pace, edge deformation, and brightness (default 1) |
+| `softness` | `number` | Edge blur/softness of the aura (default 0.2) |
+| `volume` | `number` | Override the volume computed from the track (0–1) |
+| `themeMode` | `"dark" \| "light"` | Background optimization; auto-detected from the root `dark` class |
+| `isConnecting` | `boolean` | Override: the orb springs up with a gentle shimmer (wins over `isThinking`) |
+| `isThinking` | `boolean` | Override: the orb pulses deeply while the bot works |
+
+Silent and speaking need no props — the visualizer derives them from the track, and
+speaking swells the orb with live volume. The overrides opt into the other two lifecycle
+states, and every state change animates instead of snapping. `VisualizerState` — the
+vocabulary shared by all kit visualizers (`"connecting" | "silent" | "speaking" |
+"thinking"`, from `components/pipecat/visualizer.ts`, installed with this item) — is
+exposed on the root element as `data-state`.

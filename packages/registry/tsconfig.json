@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@/components/pipecat/*": ["./src/components/pipecat/*"],
+      "@/lib/visualizer": ["./src/lib/visualizer.ts"],
+      "@/*": ["../../apps/storybook/src/*"]
+    }
+  },
+  "include": ["src"]
+}

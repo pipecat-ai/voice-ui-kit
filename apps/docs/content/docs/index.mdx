@@ -1,0 +1,45 @@
+---
+title: Introduction
+description: Voice AI components for Pipecat, distributed as a shadcn registry.
+icon: House
+---
+
+The Pipecat Voice UI Kit is a set of voice AI components — connect buttons, microphone and
+camera controls, device pickers, live transcripts, visualizers — for building
+[Pipecat](https://github.com/pipecat-ai/pipecat) client apps.
+
+Unlike a component library on npm, the kit is a **[shadcn registry](https://ui.shadcn.com/docs/registry)**:
+
+- Components are **copied into your project as source** with `npx shadcn add @pipecat/...` —
+  no package to version-match, no wrapper props to fight. The code is yours to edit.
+- They compose **stock shadcn/ui primitives** (Base UI flavor) that install automatically as
+  dependencies — the kit ships no primitives of its own.
+- Styling comes from **your theme**. Components use your existing shadcn tokens, plus two
+  small semantic groups (`active`/`inactive`, `agent`/`client`) that merge into your CSS on
+  install. See [Theming](/docs/theming).
+- The engine underneath is `@pipecat-ai/client-js` and `@pipecat-ai/client-react`, installed
+  from npm — the same relationship shadcn/ui has with Base UI.
+
+## Two layers per component
+
+Every component file exports a **connected** component that wires itself to the Pipecat
+client from context, and a props-driven **`*View`** for when you manage state yourself:
+
+```tsx
+// Connected: reads transport state from PipecatClientProvider
+<ConnectButton />
+
+// View: fully controlled, no provider needed
+<ConnectButtonView transportState="ready" onDisconnect={stop} />
+```
+
+## Next steps
+
+<Cards>
+  <Card title="Installation" href="/docs/installation">
+    Wire up the registry and add your first component.
+  </Card>
+  <Card title="Components" href="/docs/components/connect-button">
+    Browse the catalog with live previews.
+  </Card>
+</Cards>

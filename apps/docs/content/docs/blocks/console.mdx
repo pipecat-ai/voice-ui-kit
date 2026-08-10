@@ -1,0 +1,106 @@
+---
+title: Console
+description: A ready-made workbench for debugging and testing Pipecat agents — connect flow, media, transcripts, metrics, and live events in one drop-in block.
+---
+
+The console is a multipurpose template for debugging and testing Pipecat
+agents. Drop it into a route, point it at your bot, and you have a complete
+workbench without building any UI: the connect flow with device controls,
+bot audio and video, live conversation transcripts, per-service metrics,
+session info, and a raw RTVI event stream. Use it as your local debugging
+page during bot development, a shared test harness on staging, or the
+starting point for your own operator console.
+
+<ConsolePreview />
+
+## Installation
+
+<InstallTabs name="console" />
+
+Transport packages are **not** installed with the block — they load on
+demand. Install the one for your `transportType`:
+
+| Transport | Install |
+| --- | --- |
+| `smallwebrtc` (default) | `npm install @pipecat-ai/small-webrtc-transport` |
+| `daily` | `npm install @pipecat-ai/daily-transport` |
+| `websocket` | `npm install @pipecat-ai/websocket-transport` |
+| `moq` | `npm install @pipecat-ai/moq-transport` |
+
+A missing package doesn't crash the console — it surfaces in the error
+banner with the exact install command.
+
+## Usage
+
+The console is a drop-in: it builds its own client via
+[usePipecatApp](/docs/hooks/use-pipecat-app) and renders its own
+`PipecatClientProvider` — **do not nest it inside another provider**. Give
+it a sized container (it fills its parent):
+
+```tsx
+import { Console } from "@/components/pipecat/console/console";
+
+export default function DebugPage() {
+  return (
+    <div className="h-dvh">
+      <Console
+        connectParams={{ endpoint: "/api/start" }}
+        layoutPersistenceKey="my-console"
+      />
+    </div>
+  );
+}
+```
+
+What you get: a header with the connect flow (hover the button to see the
+resolved connection URL), resizable bot-media / conversation+metrics / info
+panes over a collapsible live events strip on desktop, and the same panels
+as bottom tabs on mobile — one tree, so every prop reaches both layouts.
+Connection errors show their real message in a dismissible banner.
+
+### Theming and the header slot
+
+The console owns no theme. It renders off semantic tokens, so it follows
+your app's light/dark class automatically; drop your own toggle (or any
+app-specific actions) into `headerSlot`:
+
+```tsx
+import { useTheme } from "next-themes";
+
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      aria-label="Toggle theme"
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+    >
+      <SunMoonIcon />
+    </Button>
+  );
+}
+
+<Console headerSlot={<ThemeToggle />} />;
+```
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `transportType` | `"smallwebrtc" \| "daily" \| "websocket" \| "moq"` | Transport backing the client (default `"smallwebrtc"`). |
+| `connectParams` / `startBotParams` / `startBotResponseTransformer` | — | Connect flow, forwarded to [usePipecatApp](/docs/hooks/use-pipecat-app). |
+| `connectOnMount` | `boolean` | Connect automatically (default `false`). |
+| `initDevicesOnMount` | `boolean` | Initialize devices on load (default `true`). |
+| `titleText` / `logo` / `noLogo` / `headerSlot` | — | Header content; `headerSlot` renders before the connect button. |
+| `noUserAudio` / `noUserVideo` / `noScreenControl` | `boolean` | Hide device controls. |
+| `noBotAudio` / `noBotAudioControls` / `noAudioOutput` | `boolean` | Bot audio pane / its volume control / playback entirely. |
+| `noBotVideo` | `boolean` | Bot video pane — default `true` (most voice bots have no video). |
+| `noConversation` / `noMetrics` / `noEvents` / `noStatusInfo` / `noSessionInfo` / `noTextInput` / `noDTMF` | `boolean` | Remove the matching region. |
+| `keypadMode` | `"buffered" \| "immediate"` | DTMF keypad dispatch (default `"buffered"`). |
+| `textRenderMode` / `noTextRenderModeSwitch` | — | Transcript render mode seed and its header select. |
+| `conversationProps` | `Partial<ConversationProps>` | Labels, renderers, and other transcript overrides. |
+| `audioCodec` / `videoCodec` | `string` | Codec preferences (smallwebrtc only). |
+| `collapseInfoPanel` / `collapseMediaPanel` / `collapseEventsPanel` | `boolean` | Initial collapse state per pane. |
+| `layoutPersistenceKey` | `string` | Persist pane sizes in localStorage under this key. |
+| `onConnectionStateChange` / `onServerMessage` / `onInjectMessage` / `onClient` | — | Wiring callbacks. |

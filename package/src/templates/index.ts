@@ -1,1 +1,0 @@
-export { ConsoleTemplate } from "./Console";

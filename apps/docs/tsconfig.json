@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "paths": {
+      "@/components/pipecat/console/*": [
+        "../../packages/registry/src/blocks/console/*"
+      ],
+      "@/components/pipecat/metrics/*": [
+        "../../packages/registry/src/blocks/metrics/*"
+      ],
+      "@/components/pipecat/*": ["../../packages/registry/src/components/*"],
+      "@/lib/visualizer": ["../../packages/registry/src/lib/visualizer.ts"],
+      "@/lib/transports": ["../../packages/registry/src/lib/transports.ts"],
+      "@/hooks/use-pipecat-app": [
+        "../../packages/registry/src/hooks/use-pipecat-app.ts"
+      ],
+      "@/hooks/use-pipecat-metrics": [
+        "../../packages/registry/src/hooks/use-pipecat-metrics.ts"
+      ],
+      "@/hooks/use-pipecat-event-stream": [
+        "../../packages/registry/src/hooks/use-pipecat-event-stream.ts"
+      ],
+      "@/*": ["./*"],
+      "collections/*": ["./.source/*"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

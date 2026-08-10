@@ -1,0 +1,69 @@
+---
+title: usePipecatMetrics
+description: Shared store of RTVI metrics — per-processor series with a rolling cap, running token totals, session-scoped reset.
+---
+
+## Installation
+
+<InstallTabs name="use-pipecat-metrics" />
+
+## Usage
+
+The hook family reads a module-level store fed by a single RTVI listener per
+client — any number of subscribers share it, data survives unmounts (a
+metrics tab that isn't visible keeps collecting), and late-mounted
+subscribers see the full session backlog. Everything resets when a new
+session connects.
+
+```tsx
+import {
+  usePipecatMetrics,
+  usePipecatMetricValue,
+  usePipecatTokenTotals,
+} from "@/hooks/use-pipecat-metrics";
+
+function LatencyReadout() {
+  // Everything: sorted series + token totals
+  const { series, tokens, hasTokens, reset } = usePipecatMetrics();
+
+  // One value, re-rendering only when it changes
+  const ttfb = usePipecatMetricValue("ttfb", "CartesiaTTSService#0");
+
+  // Token totals only
+  const { tokens: totals } = usePipecatTokenTotals();
+}
+```
+
+All hooks must be rendered inside a `PipecatClientProvider`. Values arrive in
+the RTVI payload's native units — `ttfb`/`processing` in seconds; multiply by
+1000 when feeding a display like the generic
+[Metric](/docs/components/metric) tile (the
+[Metrics block](/docs/blocks/metrics) does this for you).
+
+## Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `maxPoints` | `number` | Raises the per-series rolling cap (default 100). Shared by all subscribers — the largest requested value wins. |
+
+## Categories
+
+| Category | Unit | Notes |
+| --- | --- | --- |
+| `ttfb` | seconds | Time to first byte, per processor. |
+| `ttfa` | seconds | Time to first audio (pipecat server ≥ 1.7); the headline `ttfa` value is stored — the wire entry also carries its `ttfb`/`leading_silence` breakdown. |
+| `processing` | seconds | Processing time, per processor. |
+| `characters` | count | TTS characters processed. |
+| `stt_usage` | seconds | STT audio submitted (pipecat server ≥ 1.7, `enable_usage_metrics=True`). Arrives as incremental deltas; the store accumulates them, so `latest` is the session's running total. |
+
+## Returns
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `series` | `MetricSeries[]` | All series (`category`, `processor`, `latest`, capped `points`), stable-sorted. |
+| `tokens` | `TokenTotals` | Running `prompt`/`completion`/`total` sums, plus `cacheRead`/`reasoning` when providers report them. `total` is gross of the cache, so it isn't always prompt + completion. |
+| `hasTokens` | `boolean` | False until any token metrics arrive (zero totals can be real). |
+| `reset` | `() => void` | Clears the session's collected data. |
+
+The zustand store itself is exported as `usePipecatMetricsStore` for tests
+and advanced use.

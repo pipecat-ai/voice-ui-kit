@@ -1,0 +1,32 @@
+---
+title: User Screen Control
+description: Screen-share toggle with a preview tile while sharing.
+---
+
+<UserScreenControlPreview />
+
+## Installation
+
+<InstallTabs name="user-screen-control" />
+
+## Usage
+
+```tsx
+import { UserScreenControl } from "@/components/pipecat/user-screen-control";
+
+<UserScreenControl activeText="Stop sharing" inactiveText="Share screen" />;
+```
+
+Renders a plain button while idle and expands into a preview tile while sharing. The
+connected component disables itself until the transport is connected, since screen share
+can only start on a live session.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `noPreview` | `boolean` | Never show the tile, even while sharing |
+| `noIcon` | `boolean` | Hide the monitor icon |
+| `loadingText` | `ReactNode` | Text next to the spinner while loading (spinner only by default) |
+| `videoProps` | `PipecatClientVideo` props | Passed to the underlying video element |
+| `activeText` / `inactiveText` | `ReactNode` | Toggle labels |

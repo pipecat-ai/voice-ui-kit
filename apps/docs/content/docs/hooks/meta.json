@@ -1,0 +1,9 @@
+{
+  "title": "Hooks",
+  "defaultOpen": true,
+  "pages": [
+    "use-pipecat-app",
+    "use-pipecat-metrics",
+    "use-pipecat-event-stream"
+  ]
+}

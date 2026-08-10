@@ -1,0 +1,36 @@
+{
+  "name": "@voice-ui-kit/registry",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "shadcn build"
+  },
+  "dependencies": {
+    "@pipecat-ai/client-js": "^1.13.0",
+    "@pipecat-ai/client-react": "^1.8.1",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^1.27.0",
+    "motion": "^12.43.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-resizable-panels": "4.12.2",
+    "recharts": "3.8.0",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@pipecat-ai/daily-transport": "^1.6.8",
+    "@pipecat-ai/moq-transport": "^0.1.0",
+    "@pipecat-ai/small-webrtc-transport": "^1.10.6",
+    "@pipecat-ai/websocket-transport": "^1.7.1",
+    "@storybook/react-vite": "^10.5.5",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "shadcn": "^4.16.0",
+    "storybook": "^10.5.5",
+    "vitest": "^4.1.10"
+  }
+}

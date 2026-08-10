@@ -1,0 +1,6 @@
+node_modules/
+dist/
+storybook-static/
+public/r/
+pnpm-lock.yaml
+.turbo/

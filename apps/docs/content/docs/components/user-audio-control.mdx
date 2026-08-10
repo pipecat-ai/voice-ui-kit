@@ -1,0 +1,92 @@
+---
+title: User Audio Control
+description: Microphone mute toggle with live visualizer and a mic/speaker device picker.
+---
+
+<UserAudioControlPreview />
+
+## Installation
+
+<InstallTabs name="user-audio-control" />
+
+## Usage
+
+```tsx
+import { UserAudioControl } from "@/components/pipecat/user-audio-control";
+
+<UserAudioControl activeText="Microphone on" inactiveText="Muted" />;
+```
+
+Mic toggling, the live waveform, device lists, and per-device error states (blocked,
+in use, not found) are wired automatically from the Pipecat client.
+
+## Modes
+
+### Toggle (default)
+
+Click to mute and unmute:
+
+```tsx
+<UserAudioControl activeText="Microphone on" inactiveText="Muted" />
+```
+
+### Push to talk
+
+The mic stays muted unless held open — press and hold the button, or hold the
+global hotkey (`` ` `` by default), rendered as a key hint in place of the
+toggle labels. Releasing re-mutes after a short debounce, and a pulsing outline
+marks the mic as live. A switch in the device dropdown lets users flip modes at
+runtime.
+
+```tsx
+<UserAudioControl
+  defaultMode="push-to-talk"
+  pttKey="KeyT"        // any KeyboardEvent.code; null disables the hotkey
+  onPttOn={() => bing.play()}
+  onPttOff={() => bong.play()}
+/>
+```
+
+<Accordions>
+  <Accordion title="Push-to-talk behavior details">
+
+    - **Muted unless held** — entering the mode (even mid-call via the runtime
+      switch) mutes immediately; the mic only opens while held.
+    - **Debounced release** — re-pressing within `debounceMs` cancels the
+      pending re-mute, so rapid taps can't thrash the WebRTC track.
+      `onPttOn` / `onPttOff` fire once per hold on these same edges.
+    - **Absolute state** — the mic is driven through `client.enableMic()`
+      rather than toggling, so quick presses can't race.
+    - **Hotkey etiquette** — text fields always keep their keystrokes, and
+      activation keys (`"Space"`, `"Enter"`, arrows) also yield to focused
+      buttons, menus, and dialogs. The default `` ` `` has no native behavior
+      outside text fields, so it works wherever focus is.
+    - **No stuck mic** — window and button blur release any held press;
+      enabling the mode from the dropdown moves focus to the talk button so
+      the hotkey is immediately usable.
+
+  </Accordion>
+</Accordions>
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `mode` / `defaultMode` / `onModeChange` | `"toggle" \| "push-to-talk"` | Interaction mode — controlled, or initial + runtime switch |
+| `pttKey` | `string \| null` | Push-to-talk hotkey as a `KeyboardEvent.code` (default `"Backquote"`); `null` disables it |
+| `pttKeyLabel` | `string` | Text around the hotkey chip, `[key]` marking the chip (default `"press [key] to talk"`; `""` hides the hint) |
+| `debounceMs` | `number` | Quiet period before push-to-talk release re-mutes (default 200) |
+| `onPttOn` / `onPttOff` | `() => void` | Chime hooks — fired once per hold as push-to-talk engages / releases |
+| `pttActiveOutline` | `boolean` | Pulsing active-colored outline while the mic is held open (default `true`) |
+| `noModeSwitch` | `boolean` | Hide the mode switch in the device dropdown |
+| `activeText` / `inactiveText` | `ReactNode` | State labels (toggle mode only) |
+| `loadingText` | `ReactNode` | Text next to the spinner while devices initialize |
+| `noDevicePicker` | `boolean` | Hide the split-button dropdown |
+| `noMicrophones` / `noSpeakers` | `boolean` | Hide a section of the picker |
+| `noIcon` | `boolean` | Hide the mic icon |
+| `noVisualizer` | `boolean` | Hide the in-button waveform |
+| `visualizerProps` | `AudioVisualizerBarViewProps` | Tune the embedded visualizer |
+| `variant` / `size` | Button props | Styling passthrough; icon sizes (`icon`, `icon-sm`, …) render the toggle icon-only |
+
+`UserAudioControlView` accepts the mic state, device lists, and callbacks as props for
+custom state management.

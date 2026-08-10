@@ -1,0 +1,67 @@
+---
+title: Connect Button
+description: One button for the whole session lifecycle, driven by the Pipecat transport state.
+---
+
+<ConnectButtonPreview />
+
+## Installation
+
+<InstallTabs name="connect-button" />
+
+## Usage
+
+```tsx
+import { ConnectButton } from "@/components/pipecat/connect-button";
+
+// Bare: falls back to client.connect() / client.disconnect() —
+// enough when the transport is configured with its connection params.
+<ConnectButton />
+
+// App-owned session start
+<ConnectButton
+  onConnect={() => client.startBotAndConnect({ endpoint: "/api/start" })}
+/>
+```
+
+Every transport state has a default label, style, and action. Override only the
+states you care about with `stateProps` — each entry accepts `children`, `icon`,
+`variant`, `className`, `disabled`, and `onClick`:
+
+```tsx
+<ConnectButton
+  stateProps={{
+    ready: { children: "End call", icon: <PhoneOffIcon /> },
+    error: { children: "Try again", onClick: () => reconnectWithBackoff() },
+  }}
+/>
+```
+
+Resolution is derivative: per-state override → top-level prop → built-in
+default. Setting a `variant` (top-level or per-state) replaces the default
+token styling for that state, since the styling is designed around the
+default variant.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `stateProps` | `ConnectButtonStateMap` | Sparse per-`TransportState` overrides: `children`, `icon`, `variant`, `className`, `disabled`, `onClick` |
+| `onConnect` / `onDisconnect` | `() => void` | Replace the default `client.connect()` / `client.disconnect()` actions |
+| `children` | `ReactNode` | Label for every state (individual states can still override) |
+| `variant` / `size` | Button props | Passed to the underlying shadcn Button; `variant` applies to all states. Icon sizes (`icon`, `icon-sm`, …) render icon-only with per-state default glyphs |
+
+## States
+
+| `data-state` | Default |
+| --- | --- |
+| `disconnected`, `initialized` | **Connect** in the `active` token fill; click connects |
+| `initializing` | **Initializing…** with spinner, disabled |
+| `authenticating`, `authenticated`, `connecting` | **Connecting…** with spinner, disabled |
+| `connected`, `ready` | **Disconnect** in the `inactive` token tint; click disconnects |
+| `disconnecting` | **Disconnecting…** with spinner, disabled |
+| `error` | **Retry** as destructive; click connects again |
+
+The raw transport state is always exposed as `data-state`, so states can also
+be styled from CSS (`data-[state=ready]:…`). Use `ConnectButtonView` with a
+`transportState` prop when managing state yourself.

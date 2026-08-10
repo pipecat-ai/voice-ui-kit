@@ -1,0 +1,128 @@
+---
+title: usePipecatApp
+description: Client bootstrap hook — builds a PipecatClient for a chosen transport and owns the connect/disconnect lifecycle.
+---
+
+## Why
+
+Standing up a Pipecat client by hand means choosing and importing a
+transport, constructing the client, sequencing device init, and writing the
+connect flow — including the server-side bot-start handshake — with correct
+error handling and teardown. `usePipecatApp` is that boilerplate as one
+hook. It bootstraps:
+
+- **Transport loading** — dynamically imports the right
+  `@pipecat-ai/*-transport` package for your `transportType`, so only the
+  transport you use ships in your bundle; a missing package becomes a
+  friendly error naming the install command.
+- **Client construction** — `new PipecatClient(...)` with sensible defaults
+  (mic enabled, camera off), your `clientOptions` merged over them, and an
+  `onClient` callback fired before anything else so early event subscribers
+  miss nothing.
+- **The connect flow** — one `connect()` that picks the right strategy:
+  bot-start via `startBot()` (with response transformation and smallwebrtc
+  ICE-server wiring), one-shot `startBotAndConnect()` for endpoint params,
+  or a plain `connect()`.
+- **Lifecycle guards** — connection attempts are ignored outside
+  connectable states (no double connects), teardown disconnects exactly one
+  client even under React StrictMode's double-mounted effects.
+- **Real error state** — transport-load, device-init, and connect failures
+  all surface in `error` with their actual messages instead of dying in the
+  console.
+- **Stability** — nothing you pass needs memoizing; options are read when
+  used, so inline object literals don't churn the client.
+
+## Installation
+
+<InstallTabs name="use-pipecat-app" />
+
+Transport packages are **not** installed with this hook — they load on demand
+so your app only ships the one it uses. Install the package for your
+`transportType`:
+
+| Transport | Install |
+| --- | --- |
+| `smallwebrtc` (default) | `npm install @pipecat-ai/small-webrtc-transport` |
+| `daily` | `npm install @pipecat-ai/daily-transport` |
+| `websocket` | `npm install @pipecat-ai/websocket-transport` |
+| `moq` | `npm install @pipecat-ai/moq-transport` |
+
+A missing package doesn't crash the app: it surfaces in the hook's `error`
+with the exact install command.
+
+**Bundler note:** the transport loader uses literal dynamic imports. Vite
+tolerates the transports you haven't installed (their branches just fail at
+runtime with the install hint). Stricter bundlers (webpack/Turbopack) try to
+resolve them at build time — there, either install the transports you don't
+use or mark the unused `@pipecat-ai/*-transport` packages as external in
+your bundler config. The `moq` import is excluded from webpack/Turbopack
+entirely (its libav.js dependency doesn't bundle); use MoQ on Vite, or alias
+the package in your bundler config to opt in.
+
+## Usage
+
+The hook renders nothing — pass the client it returns to a
+`PipecatClientProvider` yourself, and every kit component works beneath it:
+
+```tsx
+"use client";
+
+import { PipecatClientProvider } from "@pipecat-ai/client-react";
+
+import { ConnectButton } from "@/components/pipecat/connect-button";
+import { usePipecatApp } from "@/hooks/use-pipecat-app";
+import { Spinner } from "@/components/ui/spinner";
+
+export function App() {
+  const { client, connect, disconnect, error } = usePipecatApp({
+    connectParams: { endpoint: "/api/start" },
+  });
+
+  if (!client) return <Spinner />;
+
+  return (
+    <PipecatClientProvider client={client}>
+      <ConnectButton onConnect={connect} onDisconnect={disconnect} />
+      {error && <p role="alert">{error}</p>}
+    </PipecatClientProvider>
+  );
+}
+```
+
+`connect()` picks its flow from the options: with `startBotParams` it calls
+`client.startBot()` first (optionally transforming the response, and wiring
+`iceConfig.iceServers` onto a smallwebrtc transport), an `endpoint`-shaped
+`connectParams` routes to `client.startBotAndConnect()`, and anything else
+goes straight to `client.connect()`.
+
+The client is created **once per `transportType`** — every other option is
+read when it's used, so nothing you pass needs memoizing and changing
+`connectParams` between attempts just works. The trade-off: `transportOptions`
+and `clientOptions` are read once at creation. To apply a change there,
+remount the calling component with a React `key`.
+
+## Key options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `transportType` | `"smallwebrtc" \| "daily" \| "websocket" \| "moq"` | Transport backing the client (default `"smallwebrtc"`). The only option that rebuilds the client. |
+| `transportOptions` | `TransportOptions` | Transport constructor options, read once at creation. |
+| `clientOptions` | `Partial<PipecatClientOptions>` | Merged into the client constructor (defaults: mic on, cam off). |
+| `connectParams` | `TransportConnectionParams \| APIRequest` | Connection params, or an `endpoint` object for start-and-connect. |
+| `startBotParams` | `APIRequest` | When set, `connect()` starts the bot first and connects with the response. |
+| `startBotResponseTransformer` | `(r) => r \| Promise<r>` | Transforms the startBot response before connecting. |
+| `connectOnMount` | `boolean` | Connect as soon as the client is ready (default `false`). |
+| `initDevicesOnMount` | `boolean` | Run `client.initDevices()` once the client exists (default `false`). |
+| `onClient` | `(client) => void` | Fired once per created client, before device init or connect. |
+
+## Returns
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `client` | `PipecatClient \| null` | Null until the transport loads and the client is built. |
+| `connect` | `() => Promise<void>` | Starts the session; no-op unless state is initialized, disconnected, or error. |
+| `disconnect` | `() => Promise<void>` | Ends the session. |
+| `error` | `string \| null` | Real failure message from transport load, device init, or connect. |
+| `clearError` | `() => void` | Manually dismiss `error` (retrying `connect()` also clears it). |
+| `rawStartBotResponse` | `unknown` | Latest `client.startBot()` response. |
+| `transformedStartBotResponse` | `unknown` | That response after the transformer ran. |

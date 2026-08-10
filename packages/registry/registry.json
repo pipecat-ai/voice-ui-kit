@@ -1,0 +1,628 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "pipecat",
+  "homepage": "https://voiceuikit.pipecat.ai",
+  "items": [
+    {
+      "name": "connect-button",
+      "type": "registry:component",
+      "title": "Connect Button",
+      "description": "One button for the whole session lifecycle, driven by the Pipecat transport state. Every state's label, icon, style, and action can be overridden sparsely.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/components/connect-button.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/connect-button.tsx"
+        }
+      ],
+      "cssVars": {
+        "theme": {
+          "color-active": "var(--active-background)",
+          "color-active-foreground": "var(--active-foreground)",
+          "color-inactive": "var(--inactive-background)",
+          "color-inactive-foreground": "var(--inactive-foreground)"
+        },
+        "light": {
+          "active-background": "oklch(0.696 0.17 162.48)",
+          "active-foreground": "oklch(0.979 0.021 166.113)",
+          "inactive-background": "oklch(0.702 0.189 22.23)",
+          "inactive-foreground": "oklch(0.971 0.013 17.38)"
+        },
+        "dark": {
+          "active-background": "oklch(0.702 0.158 160.44)",
+          "active-foreground": "oklch(0.979 0.021 166.11)",
+          "inactive-background": "oklch(0.702 0.189 22.23)",
+          "inactive-foreground": "oklch(0.971 0.013 17.38)"
+        }
+      },
+      "docs": "Render inside a PipecatClientProvider. Without onConnect/onDisconnect it calls client.connect()/client.disconnect(); use stateProps to override individual transport states.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "audio-visualizer-bar",
+      "type": "registry:component",
+      "title": "Audio Visualizer Bar",
+      "description": "Canvas-2D audio spectrum visualizer with mel-scale bands and the shared visualizer lifecycle states (connecting, silent, speaking, thinking). Headless view for any MediaStreamTrack, plus a Pipecat-connected wrapper.",
+      "dependencies": ["@pipecat-ai/client-js", "@pipecat-ai/client-react"],
+      "files": [
+        {
+          "path": "src/components/audio-visualizer-bar.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/audio-visualizer-bar.tsx"
+        },
+        {
+          "path": "src/lib/visualizer.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "docs": "Use AudioVisualizerBar inside a PipecatClientProvider, or AudioVisualizerBarView with any MediaStreamTrack. Silent/speaking derive from the track; isConnecting/isThinking opt into the other shared states. Bars default to currentColor.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "audio-visualizer-radial",
+      "type": "registry:component",
+      "title": "Audio Visualizer Radial",
+      "description": "Canvas-2D radial audio visualizer: a ring of spokes growing outward with mel-scale voice bands, sharing the kit visualizer lifecycle states (connecting, silent, speaking, thinking). Headless view for any MediaStreamTrack, plus a Pipecat-connected wrapper.",
+      "dependencies": ["@pipecat-ai/client-js", "@pipecat-ai/client-react"],
+      "files": [
+        {
+          "path": "src/components/audio-visualizer-radial.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/audio-visualizer-radial.tsx"
+        },
+        {
+          "path": "src/lib/visualizer.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "docs": "Use AudioVisualizerRadial inside a PipecatClientProvider, or AudioVisualizerRadialView with any MediaStreamTrack. Silent/speaking derive from the track; isConnecting/isThinking opt into the other shared states. Spokes default to currentColor.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "device-select",
+      "type": "registry:component",
+      "title": "Device Select",
+      "description": "Media device picker for microphones, speakers, or cameras — as a select or a dropdown menu around any trigger.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "registryDependencies": ["select", "dropdown-menu"],
+      "files": [
+        {
+          "path": "src/components/device-select.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/device-select.tsx"
+        }
+      ],
+      "docs": "DeviceSelect / DeviceDropdown pick their device list via kind: audioinput | audiooutput | videoinput. Render inside a PipecatClientProvider.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "user-audio-control",
+      "type": "registry:component",
+      "title": "User Audio Control",
+      "description": "Microphone control with toggle and push-to-talk modes, live audio visualizer, and a mic/speaker device picker in a split-button dropdown.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "button",
+        "button-group",
+        "dropdown-menu",
+        "kbd",
+        "switch",
+        "@pipecat/device-select",
+        "@pipecat/audio-visualizer-bar"
+      ],
+      "files": [
+        {
+          "path": "src/components/user-audio-control.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/user-audio-control.tsx"
+        }
+      ],
+      "cssVars": {
+        "theme": {
+          "animate-ptt-pulse": "ptt-pulse 1.5s ease-in-out infinite",
+          "color-active": "var(--active-background)",
+          "color-active-foreground": "var(--active-foreground)",
+          "color-inactive": "var(--inactive-background)",
+          "color-inactive-foreground": "var(--inactive-foreground)"
+        },
+        "light": {
+          "active-background": "oklch(0.696 0.17 162.48)",
+          "active-foreground": "oklch(0.979 0.021 166.113)",
+          "inactive-background": "oklch(0.702 0.189 22.23)",
+          "inactive-foreground": "oklch(0.971 0.013 17.38)"
+        },
+        "dark": {
+          "active-background": "oklch(0.702 0.158 160.44)",
+          "active-foreground": "oklch(0.979 0.021 166.11)",
+          "inactive-background": "oklch(0.702 0.189 22.23)",
+          "inactive-foreground": "oklch(0.971 0.013 17.38)"
+        }
+      },
+      "css": {
+        "@keyframes ptt-pulse": {
+          "50%": {
+            "outline-color": "color-mix(in oklab, var(--active-background) 30%, transparent)"
+          }
+        }
+      },
+      "docs": "Render inside a PipecatClientProvider. Mic mute state, device errors, and the picker are wired automatically.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "user-video-control",
+      "type": "registry:component",
+      "title": "User Video Control",
+      "description": "Camera toggle with preview tile and camera picker in a split-button dropdown.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "button",
+        "button-group",
+        "@pipecat/device-select"
+      ],
+      "files": [
+        {
+          "path": "src/components/user-video-control.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/user-video-control.tsx"
+        }
+      ],
+      "cssVars": {
+        "theme": {
+          "color-inactive": "var(--inactive-background)",
+          "color-inactive-foreground": "var(--inactive-foreground)"
+        },
+        "light": {
+          "inactive-background": "oklch(0.702 0.189 22.23)",
+          "inactive-foreground": "oklch(0.971 0.013 17.38)"
+        },
+        "dark": {
+          "inactive-background": "oklch(0.702 0.189 22.23)",
+          "inactive-foreground": "oklch(0.971 0.013 17.38)"
+        }
+      },
+      "docs": "Render inside a PipecatClientProvider. Use noVideo for a plain toggle without the preview tile.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "user-screen-control",
+      "type": "registry:component",
+      "title": "User Screen Control",
+      "description": "Screen-share toggle with a preview tile while sharing.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/components/user-screen-control.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/user-screen-control.tsx"
+        }
+      ],
+      "cssVars": {
+        "theme": {
+          "color-inactive": "var(--inactive-background)",
+          "color-inactive-foreground": "var(--inactive-foreground)"
+        },
+        "light": {
+          "inactive-background": "oklch(0.702 0.189 22.23)",
+          "inactive-foreground": "oklch(0.971 0.013 17.38)"
+        },
+        "dark": {
+          "inactive-background": "oklch(0.702 0.189 22.23)",
+          "inactive-foreground": "oklch(0.971 0.013 17.38)"
+        }
+      },
+      "docs": "Render inside a PipecatClientProvider. Disabled until the transport is connected.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "bot-audio",
+      "type": "registry:component",
+      "title": "Bot Audio",
+      "description": "Bot audio output element with a shared volume store, mute toggle, horizontal or vertical volume slider, and a popover volume control.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react",
+        "zustand"
+      ],
+      "registryDependencies": ["button", "popover", "slider"],
+      "files": [
+        {
+          "path": "src/components/bot-audio.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/bot-audio.tsx"
+        }
+      ],
+      "docs": "Mount BotAudioOutput once (in place of PipecatClientAudio), then use BotAudioControl or BotVolumeSlider anywhere. Render inside a PipecatClientProvider.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "conversation",
+      "type": "registry:component",
+      "title": "Conversation",
+      "description": "Live scrolling transcript of the user/agent conversation with role labels, karaoke text rendering, function-call cards, and connection-aware empty states.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "registryDependencies": ["collapsible"],
+      "files": [
+        {
+          "path": "src/components/conversation.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/conversation.tsx"
+        },
+        {
+          "path": "src/components/conversation-message.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/conversation-message.tsx"
+        }
+      ],
+      "cssVars": {
+        "theme": {
+          "color-agent": "var(--agent)",
+          "color-client": "var(--client)",
+          "color-active": "var(--active-background)",
+          "color-active-foreground": "var(--active-foreground)"
+        },
+        "light": {
+          "agent": "oklch(0.585 0.233 277.117)",
+          "client": "oklch(0.623 0.214 259.815)",
+          "active-background": "oklch(0.696 0.17 162.48)",
+          "active-foreground": "oklch(0.979 0.021 166.113)"
+        },
+        "dark": {
+          "agent": "oklch(0.585 0.233 277.117)",
+          "client": "oklch(0.623 0.214 259.815)",
+          "active-background": "oklch(0.702 0.158 160.44)",
+          "active-foreground": "oklch(0.979 0.021 166.11)"
+        }
+      },
+      "docs": "Render inside a PipecatClientProvider. Pair with @pipecat/text-input for a full chat surface.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "text-input",
+      "type": "registry:component",
+      "title": "Text Input",
+      "description": "Message composer with inline send button that injects the message into the conversation and sends it to the bot.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "registryDependencies": ["input-group"],
+      "files": [
+        {
+          "path": "src/components/text-input.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/text-input.tsx"
+        }
+      ],
+      "docs": "Render inside a PipecatClientProvider. Disabled until connected; Enter sends, Shift+Enter adds a newline in multiline mode.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "transcript-overlay",
+      "type": "registry:component",
+      "title": "Transcript Overlay",
+      "description": "Caption-style overlay for bot speech with word-by-word fade-in and turn-end fade-out.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "class-variance-authority",
+        "tw-animate-css"
+      ],
+      "files": [
+        {
+          "path": "src/components/transcript-overlay.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/transcript-overlay.tsx"
+        }
+      ],
+      "docs": "Render inside a PipecatClientProvider. Requires a bot with RTVI 1.1.0+ (BotOutput events). Ensure tw-animate-css is imported in your globals.css.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "client-status",
+      "type": "registry:component",
+      "title": "Client Status",
+      "description": "Client and agent connection status rows, live-updated from transport state and bot lifecycle events.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "files": [
+        {
+          "path": "src/components/client-status.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/client-status.tsx"
+        }
+      ],
+      "cssVars": {
+        "theme": {
+          "color-active": "var(--active-background)",
+          "color-active-foreground": "var(--active-foreground)"
+        },
+        "light": {
+          "active-background": "oklch(0.696 0.17 162.48)",
+          "active-foreground": "oklch(0.979 0.021 166.113)"
+        },
+        "dark": {
+          "active-background": "oklch(0.702 0.158 160.44)",
+          "active-foreground": "oklch(0.979 0.021 166.11)"
+        }
+      },
+      "docs": "Render inside a PipecatClientProvider.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "session-info",
+      "type": "registry:component",
+      "title": "Session Info",
+      "description": "Session metadata rows: transport type, copyable ids, RTVI client/server versions.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "registryDependencies": ["button", "tooltip"],
+      "files": [
+        {
+          "path": "src/components/session-info.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/session-info.tsx"
+        }
+      ],
+      "docs": "Render inside a PipecatClientProvider, with a TooltipProvider ancestor for the copy buttons.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "dtmf-keypad",
+      "type": "registry:component",
+      "title": "DTMF Keypad",
+      "description": "Telephone keypad that sends DTMF tones — buffered sequence entry or immediate per-key dialing, with synthesized press feedback.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react"
+      ],
+      "registryDependencies": ["button", "input"],
+      "files": [
+        {
+          "path": "src/components/dtmf-keypad.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/dtmf-keypad.tsx"
+        }
+      ],
+      "docs": "Render inside a PipecatClientProvider. Disabled until the transport is ready; requires a bot with DTMF support (RTVI 2.0.0+).",
+      "categories": ["voice"]
+    },
+    {
+      "name": "use-pipecat-app",
+      "type": "registry:hook",
+      "title": "usePipecatApp",
+      "description": "Client bootstrap hook: builds a PipecatClient for a chosen transport (loaded on demand), and owns the connect/disconnect lifecycle with startBot handling and real error state.",
+      "dependencies": ["@pipecat-ai/client-js", "@pipecat-ai/client-react"],
+      "files": [
+        {
+          "path": "src/hooks/use-pipecat-app.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/lib/transports.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "docs": "Call above your PipecatClientProvider and pass the returned client to it. Transports are loaded on demand: install the @pipecat-ai/*-transport package for your transportType (the error message names the exact command).",
+      "categories": ["voice"]
+    },
+    {
+      "name": "use-pipecat-metrics",
+      "type": "registry:hook",
+      "title": "usePipecatMetrics",
+      "description": "Shared store of RTVI metrics: per-processor ttfb/ttfa/processing/characters/stt_usage series with a rolling cap, running token totals (incl. cache-read and reasoning), and session-scoped reset.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "zustand"
+      ],
+      "files": [
+        {
+          "path": "src/hooks/use-pipecat-metrics.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "docs": "Render inside a PipecatClientProvider. Any number of subscribers share one listener per client; data survives unmounts and resets when a new session connects.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "use-pipecat-event-stream",
+      "type": "registry:hook",
+      "title": "usePipecatEventStream",
+      "description": "Shared RTVI event log: rAF-batched capture with a rolling cap, pause, clear-on-reconnect, and per-subscriber filtering and grouping.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "zustand"
+      ],
+      "files": [
+        {
+          "path": "src/hooks/use-pipecat-event-stream.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "docs": "Render inside a PipecatClientProvider. Capture is shared — late-mounted subscribers see the backlog; filters, grouping, and onEvent are computed per subscriber.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "metric",
+      "type": "registry:component",
+      "title": "Metric",
+      "description": "Single-datapoint metric tile — label, big tabular value, optional unit — fully generic and props-driven, chart-free by design.",
+      "files": [
+        {
+          "path": "src/components/metric.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/metric.tsx"
+        }
+      ],
+      "docs": "Metric is presentational: hand it any number via props. Pair with @pipecat/use-pipecat-metrics (usePipecatMetricValue) for live Pipecat values, or use the metrics block for the wired dashboard.",
+      "categories": ["voice"]
+    },
+    {
+      "name": "metrics",
+      "type": "registry:block",
+      "title": "Metrics",
+      "description": "Metrics dashboard block with a Performance/Usage tab navigator: per-processor latency tiles and charts, plus running token/character/audio usage totals, on the stock shadcn chart (recharts).",
+      "dependencies": ["@pipecat-ai/client-js", "@pipecat-ai/client-react"],
+      "registryDependencies": [
+        "chart",
+        "tabs",
+        "@pipecat/metric",
+        "@pipecat/use-pipecat-metrics"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/metrics/metrics.tsx",
+          "type": "registry:block",
+          "target": "components/pipecat/metrics/metrics.tsx"
+        },
+        {
+          "path": "src/blocks/metrics/performance.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/metrics/performance.tsx"
+        },
+        {
+          "path": "src/blocks/metrics/usage.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/metrics/usage.tsx"
+        },
+        {
+          "path": "src/blocks/metrics/chart.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/metrics/chart.tsx"
+        }
+      ],
+      "docs": "Metrics reads the shared use-pipecat-metrics store inside a PipecatClientProvider; MetricsView takes fixtures. MetricsPerformance and MetricsUsage also export standalone. Chrome-free — wrap in your own card or panel.",
+      "categories": ["voice", "blocks"]
+    },
+    {
+      "name": "console",
+      "type": "registry:block",
+      "title": "Console",
+      "description": "Full debugging console: header with connect flow, resizable bot-media / conversation+metrics / info panes over a live events strip, and a single-tree mobile tab layout.",
+      "dependencies": [
+        "@pipecat-ai/client-js",
+        "@pipecat-ai/client-react",
+        "lucide-react",
+        "react-resizable-panels"
+      ],
+      "registryDependencies": [
+        "alert",
+        "button",
+        "card",
+        "drawer",
+        "input",
+        "popover",
+        "resizable",
+        "select",
+        "spinner",
+        "tabs",
+        "tooltip",
+        "@pipecat/use-pipecat-app",
+        "@pipecat/use-pipecat-event-stream",
+        "@pipecat/metrics",
+        "@pipecat/connect-button",
+        "@pipecat/conversation",
+        "@pipecat/text-input",
+        "@pipecat/client-status",
+        "@pipecat/session-info",
+        "@pipecat/user-audio-control",
+        "@pipecat/user-video-control",
+        "@pipecat/user-screen-control",
+        "@pipecat/bot-audio",
+        "@pipecat/audio-visualizer-bar",
+        "@pipecat/dtmf-keypad"
+      ],
+      "files": [
+        {
+          "path": "src/blocks/console/console.tsx",
+          "type": "registry:block",
+          "target": "components/pipecat/console/console.tsx"
+        },
+        {
+          "path": "src/blocks/console/panel.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/console/panel.tsx"
+        },
+        {
+          "path": "src/blocks/console/info-panel.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/console/info-panel.tsx"
+        },
+        {
+          "path": "src/blocks/console/conversation-panel.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/console/conversation-panel.tsx"
+        },
+        {
+          "path": "src/blocks/console/events-panel.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/console/events-panel.tsx"
+        },
+        {
+          "path": "src/blocks/console/bot-audio-panel.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/console/bot-audio-panel.tsx"
+        },
+        {
+          "path": "src/blocks/console/bot-video-panel.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/console/bot-video-panel.tsx"
+        },
+        {
+          "path": "src/blocks/console/keypad-toggle.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/console/keypad-toggle.tsx"
+        },
+        {
+          "path": "src/blocks/console/codec-setter.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/console/codec-setter.tsx"
+        },
+        {
+          "path": "src/blocks/console/logo.tsx",
+          "type": "registry:component",
+          "target": "components/pipecat/console/logo.tsx"
+        }
+      ],
+      "docs": "The console builds its own client via use-pipecat-app and renders its own PipecatClientProvider — do not nest it inside another provider. Install the @pipecat-ai/*-transport package for your transportType.",
+      "categories": ["voice", "blocks"]
+    }
+  ]
+}

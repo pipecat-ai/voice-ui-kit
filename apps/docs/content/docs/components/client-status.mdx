@@ -1,0 +1,30 @@
+---
+title: Client Status
+description: Client and agent connection status rows, live-updated from transport and bot events.
+---
+
+<ClientStatusPreview />
+
+## Installation
+
+<InstallTabs name="client-status" />
+
+## Usage
+
+```tsx
+import { ClientStatus } from "@/components/pipecat/client-status";
+
+<ClientStatus />;
+```
+
+Shows two rows: the client's transport state and the agent's lifecycle state (derived from
+`BotConnected` / `BotReady` / `BotDisconnected` events). Connected states render in the
+`active` token color, errors in `destructive`, transitional states pulse.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `noClientState` / `noAgentState` | `boolean` | Hide a row |
+
+`ClientStatusValue` is exported standalone for rendering a single status value anywhere.

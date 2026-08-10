@@ -1,0 +1,60 @@
+---
+title: Metric
+description: Single-datapoint metric tile — label, big tabular value, optional unit — fully generic and props-driven.
+---
+
+<MetricPreview />
+
+## Installation
+
+<InstallTabs name="metric" />
+
+## Usage
+
+`Metric` is deliberately open: it renders whatever number you hand it and
+never reads Pipecat state itself, so it works for latency, token counts,
+cost, FPS — anything realtime. Formatting is steered entirely by props and
+memoized per value:
+
+```tsx
+import { Metric } from "@/components/pipecat/metric";
+
+<Metric label="Round trip" value={182.4} unit="ms" />
+<Metric label="Total cost" value={0.0382} format={(v) => `$${v.toFixed(4)}`} />
+<Metric label="TTFB · tts" value={null} unit="ms" />  {/* renders the – empty state */}
+```
+
+To make a tile live with Pipecat data, pair it with a value hook from
+[usePipecatMetrics](/docs/hooks/use-pipecat-metrics):
+
+```tsx
+import { usePipecatMetricValue } from "@/hooks/use-pipecat-metrics";
+
+function TTFBTile() {
+  const ttfb = usePipecatMetricValue("ttfb", "CartesiaTTSService#0");
+  return (
+    <Metric
+      label="TTFB · tts"
+      value={ttfb === null ? null : ttfb * 1000}
+      unit="ms"
+    />
+  );
+}
+```
+
+The Pipecat-opinionated composition — token totals, per-processor latency
+tiles, time-series charts — lives in the [Metrics block](/docs/blocks/metrics),
+which feeds this component via props.
+
+A tile exposes `data-state="live" | "empty"` and `data-slot="metric"` /
+`metric-label` / `metric-value` for styling.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `label` | `ReactNode` | Tile label. |
+| `value` | `number \| null` | Datapoint; null/undefined/non-finite renders the empty state. |
+| `unit` | `string` | Unit suffix rendered after the value. |
+| `format` | `(value: number) => string` | Value formatter (default: locale string, ≤1 decimal). Memoized per value. |
+| `empty` | `ReactNode` | Rendered when there is no value (default `–`). |

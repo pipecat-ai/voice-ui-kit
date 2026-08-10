@@ -1,0 +1,37 @@
+---
+title: User Video Control
+description: Camera toggle with preview tile and a camera picker in a split-button dropdown.
+---
+
+<UserVideoControlPreview />
+
+## Installation
+
+<InstallTabs name="user-video-control" />
+
+## Usage
+
+```tsx
+import { UserVideoControl } from "@/components/pipecat/user-video-control";
+
+// Preview tile with overlaid controls
+<UserVideoControl />
+
+// Plain toggle button, no tile
+<UserVideoControl noVideo activeText="Camera on" inactiveText="Camera off" />
+```
+
+The tile renders `PipecatClientVideo` for the local participant; the toggle lights up with
+the `active` token while the camera is on. Camera device errors render as a disabled state
+with a reason.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `noVideo` | `boolean` | Render only the toggle, without the preview tile |
+| `noDevicePicker` | `boolean` | Hide the camera dropdown |
+| `noIcon` | `boolean` | Hide the camera icon |
+| `loadingText` | `ReactNode` | Text next to the spinner while devices initialize (spinner only by default) |
+| `videoProps` | `PipecatClientVideo` props | Passed to the underlying video element |
+| `activeText` / `inactiveText` | `ReactNode` | Toggle labels |

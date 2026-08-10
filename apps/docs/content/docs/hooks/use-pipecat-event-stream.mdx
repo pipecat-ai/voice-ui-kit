@@ -1,0 +1,71 @@
+---
+title: usePipecatEventStream
+description: Shared RTVI event log — rAF-batched capture with a rolling cap, pause, clear-on-reconnect, and per-subscriber filtering.
+---
+
+## Installation
+
+<InstallTabs name="use-pipecat-event-stream" />
+
+## Usage
+
+Capture is **shared**: one listener set per client feeds a module-level log,
+batched on animation frames so event bursts cost one render per frame. Any
+number of subscribers read it — an events panel mounted mid-session sees the
+whole backlog — while filtering, grouping, and `onEvent` are computed per
+subscriber:
+
+```tsx
+import { usePipecatEventStream } from "@/hooks/use-pipecat-event-stream";
+
+function EventsLog() {
+  const { events, paused, setPaused, clear } = usePipecatEventStream({
+    ignoreEvents: ["botTranscript"],
+  });
+
+  return (
+    <div>
+      <button onClick={() => setPaused(!paused)}>
+        {paused ? "Resume" : "Pause"}
+      </button>
+      <button onClick={clear}>Clear</button>
+      <ol>
+        {events.map((e) => (
+          <li key={e.id}>
+            <time>{e.timestamp.toLocaleTimeString()}</time> {e.type}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+```
+
+Must be rendered inside a `PipecatClientProvider`. The log clears
+automatically when a new session starts (`disconnected → initializing`), and
+`LocalAudioLevel` is never captured (it fires continuously). `clear()` also
+drops the not-yet-flushed batch, so pre-clear events never resurface.
+
+## Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `maxEvents` | `number` | Raises the shared log cap (default 500). Largest requested value wins. |
+| `includeEvents` | `string[]` | Only these types pass this subscriber's filter (wins over `ignoreEvents`). |
+| `ignoreEvents` | `string[]` | Types hidden from this subscriber. |
+| `groupConsecutive` | `boolean` | Also derive `groups`, merging consecutive same-key events. |
+| `groupKey` | `(event) => string` | Grouping key (default: event type). |
+| `onEvent` | `(event) => void` | Fired once per new filter-passing event; backlog present at mount is skipped. |
+
+## Returns
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `events` | `readonly PipecatEventLog[]` | This subscriber's filtered view, oldest first (`id`, `type`, `data`, `timestamp`). |
+| `groups` | `readonly PipecatEventGroup[]` | Consecutive-run groups (empty unless `groupConsecutive`). |
+| `paused` | `boolean` | Shared pause state — while true, capture drops new events for everyone. |
+| `setPaused` | `(paused: boolean) => void` | Toggle capture. Listeners stay attached. |
+| `clear` | `() => void` | Clears the shared log for every subscriber. |
+
+The zustand store itself is exported as `usePipecatEventStreamStore` for
+tests and advanced use.

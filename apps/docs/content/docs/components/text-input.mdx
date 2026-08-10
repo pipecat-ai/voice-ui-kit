@@ -1,0 +1,42 @@
+---
+title: Text Input
+description: Message composer that injects the message into the conversation and sends it to the bot.
+---
+
+<TextInputPreview />
+
+## Installation
+
+<InstallTabs name="text-input" />
+
+## Usage
+
+```tsx
+import { TextInput } from "@/components/pipecat/text-input";
+
+<TextInput />
+<TextInput multiline placeholder="Ask anything…" />
+```
+
+Built on the shadcn `input-group` primitive with an inline send button. Enter sends —
+ignored mid-IME-composition — and Shift+Enter adds a newline in multiline mode. Messages
+are trimmed; a failed send keeps the draft and logs the error, and focus returns to the
+field after each send. The connected component injects the user message into the
+conversation store, calls `client.sendText()`, and disables itself while disconnected.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `multiline` | `boolean` | Textarea mode |
+| `sendTextOptions` | `SendTextOptions` (from `@pipecat-ai/client-js`) | Forwarded to `client.sendText()` |
+| `noInject` | `boolean` | Skip adding the message to the local conversation |
+| `disconnectedPlaceholder` | `string` | Placeholder while disconnected |
+| `onSent` | `(message: string) => void` | Called after a successful send |
+| `buttonContent` | `ReactNode` | Replaces the send icon (text labels get a text-friendly button size) |
+| `buttonPosition` | `"left" \| "right"` | Side the send button sits on in multiline mode (default right) |
+| `buttonProps` | `InputGroupButton` props | Overrides merged onto the send button (variant, size, …) |
+| `aria-label` | `string` | Accessible name for the input (default "Message") |
+
+Use `TextInputView` with an `onSend` handler when managing the send yourself — it accepts
+sync or async handlers and shows a spinner while awaiting.

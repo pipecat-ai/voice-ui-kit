@@ -1,0 +1,50 @@
+---
+title: Device Select
+description: Media device picker for microphones, speakers, or cameras.
+---
+
+<DeviceSelectPreview />
+
+## Installation
+
+<InstallTabs name="device-select" />
+
+## Usage
+
+One item, two UIs, three device kinds:
+
+```tsx
+import {
+  DeviceDropdown,
+  DeviceDropdownContent,
+  DeviceDropdownTrigger,
+  DeviceSelect,
+} from "@/components/pipecat/device-select";
+import { Button } from "@/components/ui/button";
+
+// Select-based pickers
+<DeviceSelect kind="audioinput" />
+<DeviceSelect kind="audiooutput" />
+
+// Dropdown menu composed shadcn-style around any trigger
+<DeviceDropdown kind="videoinput">
+  <DeviceDropdownTrigger render={<Button variant="outline">Camera</Button>} />
+  <DeviceDropdownContent />
+</DeviceDropdown>
+```
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `kind` | `"audioinput" \| "audiooutput" \| "videoinput"` | Which device list to control |
+| `placeholder` | `string` | Select placeholder (kind-aware default) |
+| `guide` | `ReactNode` | Leading icon/label inside the select trigger |
+| `isLoading` / `loadingText` | `boolean` / `ReactNode` | Loading state; derived from the client in connected mode |
+| `unavailableText` | `ReactNode` | Blocked/error message; derived in connected mode, overridable |
+| `menuLabel` | `ReactNode \| null` | Dropdown heading (on `DeviceDropdownContent`); `null` hides it |
+
+States follow the kit convention: `isLoading` → `unavailableText` → interactive. The file
+also exports `usePipecatDevices(kind)` and `usePipecatDeviceState(kind)` — device lists and
+loading/error state for one kind — plus `formatDeviceLabel`, all reused by the media
+controls.

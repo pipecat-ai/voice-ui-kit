@@ -1,0 +1,19 @@
+{
+  "title": "Components",
+  "defaultOpen": true,
+  "pages": [
+    "bot-audio",
+    "client-status",
+    "connect-button",
+    "conversation",
+    "device-select",
+    "dtmf-keypad",
+    "metric",
+    "session-info",
+    "text-input",
+    "transcript-overlay",
+    "user-audio-control",
+    "user-screen-control",
+    "user-video-control"
+  ]
+}

@@ -1,0 +1,32 @@
+---
+title: Transcript Overlay
+description: Caption-style overlay for bot speech with word-by-word fade-in.
+---
+
+<TranscriptOverlayPreview />
+
+## Installation
+
+<InstallTabs name="transcript-overlay" />
+
+## Usage
+
+```tsx
+import { TranscriptOverlay } from "@/components/pipecat/transcript-overlay";
+
+<div className="absolute inset-x-0 bottom-8">
+  <TranscriptOverlay />
+</div>;
+```
+
+Words accumulate as the bot speaks (driven by word-level BotOutput events) and the whole
+caption fades out when the turn ends. Renders nothing until the client is ready and speech
+arrives. Requires a bot with RTVI 1.1.0+.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `size` | `"sm" \| "default" \| "lg"` | Caption size |
+| `fadeInDuration` / `fadeOutDuration` | `number` | Animation timing (ms) |
+| `words` / `turnEnd` | | View-only: drive the caption yourself |

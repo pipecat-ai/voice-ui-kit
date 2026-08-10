@@ -1,0 +1,9 @@
+{
+  "title": "Visualizers",
+  "defaultOpen": true,
+  "pages": [
+    "audio-visualizer-bar",
+    "audio-visualizer-radial",
+    "audio-visualizer-wave"
+  ]
+}

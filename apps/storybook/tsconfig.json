@@ -1,0 +1,37 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@/components/pipecat/console/*": [
+        "../../packages/registry/src/blocks/console/*"
+      ],
+      "@/components/pipecat/metrics/*": [
+        "../../packages/registry/src/blocks/metrics/*"
+      ],
+      "@/components/pipecat/*": ["../../packages/registry/src/components/*"],
+      "@/lib/visualizer": ["../../packages/registry/src/lib/visualizer.ts"],
+      "@/lib/transports": ["../../packages/registry/src/lib/transports.ts"],
+      "@/hooks/use-pipecat-app": [
+        "../../packages/registry/src/hooks/use-pipecat-app.ts"
+      ],
+      "@/hooks/use-pipecat-metrics": [
+        "../../packages/registry/src/hooks/use-pipecat-metrics.ts"
+      ],
+      "@/hooks/use-pipecat-event-stream": [
+        "../../packages/registry/src/hooks/use-pipecat-event-stream.ts"
+      ],
+      "@/*": ["./src/*"]
+    },
+    "types": ["vite/client"]
+  },
+  "include": [
+    "src",
+    "vite.config.ts",
+    "vite.alias.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts",
+    ".storybook",
+    "../../packages/registry/src",
+    "../../packages/registry/tests"
+  ]
+}

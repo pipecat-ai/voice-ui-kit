@@ -1,0 +1,48 @@
+---
+title: Theming
+description: How the components pick up your theme, and the semantic tokens they add.
+icon: Palette
+---
+
+Components style themselves with your existing shadcn theme — `primary`, `muted`,
+`destructive`, radii, and so on — so they match your app out of the box in light and dark
+mode.
+
+## Kit tokens
+
+Two small semantic groups are added to your global CSS by the registry (via `cssVars`) the
+first time a component that needs them is installed:
+
+| Token | Used for | Default |
+| --- | --- | --- |
+| `--active-background` / `--active-foreground` | Media "on" states: connect button, camera/screen active | Green |
+| `--inactive-background` / `--inactive-foreground` | Media "off" states: muted microphone | Red |
+| `--agent` | Agent/assistant role color in conversations | Violet |
+| `--client` | User/client role color in conversations | Blue |
+
+Each pair follows the shadcn surface convention — the `-background` token fills the
+element, the `-foreground` token colors content on top of it. They're plain CSS variables
+in `:root` / `.dark` — restyle them like any other shadcn token:
+
+```css title="globals.css"
+:root {
+  --active-background: oklch(0.696 0.17 162.48);
+  --active-foreground: oklch(0.979 0.021 166.113);
+  --inactive-background: oklch(0.702 0.189 22.23);
+  --inactive-foreground: oklch(0.971 0.013 17.38);
+  --agent: var(--primary);
+  --client: var(--muted-foreground);
+}
+```
+
+Tailwind utilities map onto the pairs the same way `bg-primary` maps onto `--primary`:
+`bg-active` and `text-active` read `--active-background`, while `text-active-foreground`
+reads `--active-foreground` (and likewise for `inactive`). Components use them as
+`bg-active text-active-foreground` or `data-[state=inactive]:bg-inactive`, so overrides in
+your CSS apply everywhere immediately.
+
+## Editing components
+
+Because components are copied source, the ultimate theming tool is the file itself — change
+variants, swap icons, restructure markup. Re-adding an item with
+`npx shadcn add @pipecat/<name> --overwrite` replaces your edits with the latest version.

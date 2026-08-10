@@ -1,0 +1,36 @@
+---
+title: DTMF Keypad
+description: Telephone keypad that sends DTMF tones over the session.
+---
+
+<DTMFKeypadPreview />
+
+## Installation
+
+<InstallTabs name="dtmf-keypad" />
+
+## Usage
+
+```tsx
+import { DTMFKeypad } from "@/components/pipecat/dtmf-keypad";
+
+// Buffered (default): edit the sequence, then send it in one call
+<DTMFKeypad onToneSent={(seq) => console.log(seq)} />
+
+// Immediate: every key press sends right away (live IVR menus)
+<DTMFKeypad mode="immediate" />
+```
+
+Key presses play a synthesized dual-tone as local feedback (no audio assets). The connected
+keypad is disabled until the transport is ready and requires a bot with DTMF support
+(RTVI 2.0.0+); send failures surface via `onError`.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `mode` | `"buffered" \| "immediate"` | Dispatch behavior |
+| `noToneFeedback` / `toneVolume` | | Press-feedback tone |
+| `noSubLabels` | `boolean` | Hide the ABC/DEF letters |
+| `value` / `defaultValue` / `onValueChange` | | Controlled/uncontrolled buffer |
+| `onToneSent` / `onError` | | Send lifecycle callbacks |

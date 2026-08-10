@@ -1,0 +1,50 @@
+---
+title: Bot Audio
+description: Bot audio output with a shared volume store, mute toggle, slider, and popover control.
+---
+
+<BotAudioPreview />
+
+## Installation
+
+<InstallTabs name="bot-audio" />
+
+## Usage
+
+Mount `BotAudioOutput` once in place of `PipecatClientAudio` — it plays the bot's audio
+track and binds its volume to a shared store. Then drop controls anywhere:
+
+```tsx
+import {
+  BotAudioOutput,
+  BotAudioControl,
+  BotVolumeSlider,
+  useBotAudio,
+} from "@/components/pipecat/bot-audio";
+
+<PipecatClientProvider client={client}>
+  <BotAudioOutput />
+  <BotAudioControl label="Bot volume" />    {/* popover button */}
+  <BotVolumeSlider />                       {/* inline slider */}
+  <BotVolumeSlider orientation="vertical" />
+</PipecatClientProvider>;
+```
+
+All controls stay in sync through the `useBotAudio` zustand store (`volume`, `setVolume`) —
+no prop drilling. The popover control disables itself while disconnected. Speaker routing
+follows the selected output device via `setSinkId`.
+
+The slider is a mute toggle, the track, and a percent readout; the mute button drops the
+volume to 0 and restores the last audible level when clicked again. The popover shows the
+same slider without its label.
+
+## Key props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `volume` / `onVolumeChange` | `number` / `(v: number) => void` | Controlled volume on the views; the connected exports wire the store |
+| `label` | `string` | Label text; doubles as the slider's accessible name |
+| `noLabel` / `noPercent` / `noMuteButton` | `boolean` | Hide the label, percent readout, or mute toggle |
+| `orientation` + Slider props | Base UI `Slider` | Everything else on `BotVolumeSliderView` passes through to the slider primitive (`orientation`, `disabled`, `step`, …) |
+| `sliderProps` | `Partial<BotVolumeSliderViewProps>` | On the popover control: overrides merged onto the embedded slider |
+| `variant` / `size` | Button props | Popover trigger styling; icon sizes (`icon`, `icon-sm`, …) hide the label |

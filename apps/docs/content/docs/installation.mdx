@@ -1,0 +1,63 @@
+---
+title: Installation
+description: Add the @pipecat registry to your shadcn project and install components.
+icon: Download
+---
+
+## Prerequisites
+
+A [shadcn/ui project](https://ui.shadcn.com/docs/installation) on Tailwind v4. The kit is
+authored for the **Base UI** flavor (`base-*` styles — the default since shadcn CLI 4.x).
+
+## 1. Register the namespace
+
+Add the `@pipecat` registry to your `components.json`:
+
+```json title="components.json"
+{
+  "registries": {
+    "@pipecat": "https://voiceuikit.pipecat.ai/r/{name}.json"
+  }
+}
+```
+
+Every item is served as static JSON from this site — for example
+[/r/connect-button.json](/r/connect-button.json).
+
+## 2. Add components
+
+<CommandTabs command="npx shadcn@latest add @pipecat/user-audio-control @pipecat/conversation" />
+
+The CLI copies the component source into `components/pipecat/`, installs the shadcn
+primitives it composes (button, dropdown-menu, …), installs npm dependencies
+(`@pipecat-ai/client-js`, `@pipecat-ai/client-react`), and merges any theme tokens into your
+global CSS. Cross-component dependencies resolve automatically — adding
+`user-audio-control` also brings in `device-select` and `audio-visualizer-bar`.
+
+## 3. Provide a Pipecat client
+
+Connected components read the client from context. Wrap your app in a
+`PipecatClientProvider` ([Pipecat React docs](https://docs.pipecat.ai/client/react/introduction)):
+
+```tsx title="app/providers.tsx"
+"use client";
+
+import { PipecatClient } from "@pipecat-ai/client-js";
+import { PipecatClientProvider } from "@pipecat-ai/client-react";
+import { SmallWebRTCTransport } from "@pipecat-ai/small-webrtc-transport";
+import { useState } from "react";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const [client] = useState(
+    () =>
+      new PipecatClient({
+        transport: new SmallWebRTCTransport(),
+        enableMic: true,
+      }),
+  );
+
+  return <PipecatClientProvider client={client}>{children}</PipecatClientProvider>;
+}
+```
+
+Every component in the kit works under a bare provider — no other kit-specific setup.

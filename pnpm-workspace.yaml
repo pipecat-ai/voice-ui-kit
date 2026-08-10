@@ -1,4 +1,9 @@
 packages:
-  - package/
-  - docs/
-  - examples/*
+  - apps/*
+  - packages/*
+allowBuilds:
+  esbuild: true
+  sharp: true
+minimumReleaseAgeExclude:
+  - "@types/node@26.1.2"
+  - shadcn@4.16.0
