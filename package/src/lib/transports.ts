@@ -1,6 +1,11 @@
 import type { Transport } from "@pipecat-ai/client-js";
 
-export type TransportType = "daily" | "smallwebrtc" | "websocket" | "moq";
+export type TransportType =
+  | "daily"
+  | "smallwebrtc"
+  | "websocket"
+  | "livekit"
+  | "moq";
 
 // Use the actual types from the packages without importing them at build time
 export type DailyTransportOptions = ConstructorParameters<
@@ -12,6 +17,9 @@ export type SmallWebRTCTransportOptions = ConstructorParameters<
 export type WebSocketTransportOptions = ConstructorParameters<
   typeof import("@pipecat-ai/websocket-transport").WebSocketTransport
 >[0];
+export type LiveKitTransportOptions = ConstructorParameters<
+  typeof import("@pipecat-ai/livekit-transport").LiveKitTransport
+>[0];
 export type MoqTransportOptions = ConstructorParameters<
   typeof import("@pipecat-ai/moq-transport").MoqTransport
 >[0];
@@ -20,6 +28,7 @@ export interface TransportModule {
   DailyTransport: typeof import("@pipecat-ai/daily-transport").DailyTransport;
   SmallWebRTCTransport: typeof import("@pipecat-ai/small-webrtc-transport").SmallWebRTCTransport;
   WebSocketTransport: typeof import("@pipecat-ai/websocket-transport").WebSocketTransport;
+  LiveKitTransport: typeof import("@pipecat-ai/livekit-transport").LiveKitTransport;
   MoqTransport: typeof import("@pipecat-ai/moq-transport").MoqTransport;
 }
 
@@ -46,6 +55,12 @@ export async function loadTransport(transportType: TransportType) {
         );
         return { WebSocketTransport };
       }
+      case "livekit": {
+        const { LiveKitTransport } = await import(
+          "@pipecat-ai/livekit-transport"
+        );
+        return { LiveKitTransport };
+      }
       case "moq": {
         const { MoqTransport } = await import("@pipecat-ai/moq-transport");
         return { MoqTransport };
@@ -63,7 +78,9 @@ export async function loadTransport(transportType: TransportType) {
           ? "npm install @pipecat-ai/small-webrtc-transport"
           : transportType === "websocket"
             ? "npm install @pipecat-ai/websocket-transport"
-            : "npm install @pipecat-ai/moq-transport";
+            : transportType === "livekit"
+              ? "npm install @pipecat-ai/livekit-transport"
+              : "npm install @pipecat-ai/moq-transport";
     throw new Error(
       `Failed to load transport "${transportType}". Make sure the package is installed: ${installHint}. Original error: ${errorMessage}`,
     );
@@ -73,7 +90,7 @@ export async function loadTransport(transportType: TransportType) {
 /**
  * Creates a transport instance based on the transport type.
  *
- * @param transportType - The type of transport to create ("daily", "smallwebrtc", "websocket", or "moq")
+ * @param transportType - The type of transport to create ("daily", "smallwebrtc", "websocket", "livekit",or "moq")
  * @param options - Transport-specific options
  *
  */
@@ -90,6 +107,10 @@ export async function createTransport(
   options?: WebSocketTransportOptions,
 ): Promise<Transport>;
 export async function createTransport(
+  transportType: "livekit",
+  options?: LiveKitTransportOptions,
+): Promise<Transport>;
+export async function createTransport(
   transportType: "moq",
   options?: MoqTransportOptions,
 ): Promise<Transport>;
@@ -99,6 +120,7 @@ export async function createTransport(
     | DailyTransportOptions
     | SmallWebRTCTransportOptions
     | WebSocketTransportOptions
+    | LiveKitTransportOptions
     | MoqTransportOptions,
 ): Promise<Transport>;
 export async function createTransport(
@@ -107,6 +129,7 @@ export async function createTransport(
     | DailyTransportOptions
     | SmallWebRTCTransportOptions
     | WebSocketTransportOptions
+    | LiveKitTransportOptions
     | MoqTransportOptions,
 ): Promise<Transport> {
   const transportModule = await loadTransport(transportType);
@@ -132,6 +155,13 @@ export async function createTransport(
         throw new Error("WebSocketTransport not found in loaded module");
       }
       return new WebSocketTransport(options as WebSocketTransportOptions);
+    }
+    case "livekit": {
+      const { LiveKitTransport } = transportModule;
+      if (!LiveKitTransport) {
+        throw new Error("LiveKitTransport not found in loaded module");
+      }
+      return new LiveKitTransport(options as LiveKitTransportOptions);
     }
     case "moq": {
       const { MoqTransport } = transportModule;

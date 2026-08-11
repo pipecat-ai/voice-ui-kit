@@ -14,6 +14,7 @@ import {
 } from "@pipecat-ai/client-js";
 import { PipecatClientProvider } from "@pipecat-ai/client-react";
 import type { DailyTransportConstructorOptions } from "@pipecat-ai/daily-transport";
+import type { LiveKitTransportConstructorOptions } from "@pipecat-ai/livekit-transport";
 import type {
   SmallWebRTCTransport,
   SmallWebRTCTransportConstructorOptions,
@@ -35,12 +36,13 @@ export interface PipecatBaseProps {
     response: TransportConnectionParams,
   ) => TransportConnectionParams | Promise<TransportConnectionParams>;
   /** Type of transport to use for the connection */
-  transportType: "smallwebrtc" | "daily" | "websocket" | "moq";
+  transportType: "smallwebrtc" | "daily" | "websocket" | "livekit" | "moq";
   /** Options for configuring the transport. */
   transportOptions?:
     | SmallWebRTCTransportConstructorOptions
     | DailyTransportConstructorOptions
     | WebSocketTransportConstructorOptions
+    | LiveKitTransportConstructorOptions
     | MoqTransportOptions;
   /** Optional configuration options for the Pipecat client */
   clientOptions?: Partial<PipecatClientOptions>;
@@ -66,7 +68,8 @@ export interface PipecatBaseProps {
    * @returns React.ReactNode
    */
   children:
-    ((props: PipecatBaseChildProps) => React.ReactNode) | React.ReactNode;
+    | ((props: PipecatBaseChildProps) => React.ReactNode)
+    | React.ReactNode;
 }
 
 /**
