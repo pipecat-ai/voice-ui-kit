@@ -17,7 +17,7 @@
     "@pipecat-ai/voice-ui-kit": "workspace:*",
     "@pipecat-ai/websocket-transport": ">=1.6.2",
     "@pipecat-ai/moq-transport": "^0.1.0",
-    "next": "15.5.18",
+    "next": "15.5.23",
     "uuid": "^14.0.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
@@ -28,7 +28,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.5.15",
+    "eslint-config-next": "15.5.23",
     "typescript": "^5"
   }
 }
