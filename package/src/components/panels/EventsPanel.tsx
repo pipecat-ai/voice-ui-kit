@@ -32,6 +32,8 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const isScrolledToBottom = useRef(true);
+  /** Last logged spoken status, keyed by bot output segment. */
+  const botOutputStatuses = useRef(new Map<string, string>());
 
   const addEvent = useCallback((data: EventData) => {
     if (scrollRef.current) {
@@ -108,9 +110,29 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
 
   useRTVIClientEvent(RTVIEvent.BotOutput, (data: BotOutputData) => {
     if (data.aggregated_by === "word") return;
+
+    // Servers on RTVI 2.0.0+ re-emit a segment's bot-output on every spoken
+    // progress update (roughly once per TTS word), so log a segment only when
+    // its spoken status actually changes instead of once per update. Those
+    // repeats always carry a segment_id; without one there is nothing safe to
+    // dedupe against, since two separate responses can share the same text.
+    const status = data.spoken_status ?? (data.spoken ? "completed" : "new");
+    if (data.segment_id !== undefined) {
+      const key = String(data.segment_id);
+      if (botOutputStatuses.current.get(key) === status) return;
+      botOutputStatuses.current.set(key, status);
+    }
+
+    const willBeSpoken = data.will_be_spoken ?? data.spoken;
+    const details = [
+      data.aggregated_by ?? "unknown",
+      data.segment_id !== undefined ? `#${data.segment_id}` : null,
+      willBeSpoken === false ? "not spoken" : `spoken: ${status}`,
+    ].filter(Boolean);
+
     addEvent({
       event: RTVIEvent.BotOutput,
-      message: `Bot output (${data.aggregated_by}, spoken: ${data.spoken}): ${data.text}`,
+      message: `Bot output (${details.join(", ")}): ${data.text}`,
       time: new Date().toLocaleTimeString(),
     });
   });
@@ -123,6 +145,7 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
     });
   });
   useRTVIClientEvent(RTVIEvent.Disconnected, () => {
+    botOutputStatuses.current.clear();
     addEvent({
       event: RTVIEvent.Disconnected,
       message: "Client disconnected",
