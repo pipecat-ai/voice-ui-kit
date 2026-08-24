@@ -69,6 +69,15 @@
       "js-yaml@<=4.3.0": ">=4.3.1",
       "@babel/core@<=7.29.0": ">=7.29.6",
       "fumadocs-mdx": "14.2.4"
+    },
+    "patchedDependencies": {
+      "image-size@2.0.2": "patches/image-size@2.0.2.patch"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2025-71330",
+        "CVE-2025-71329"
+      ]
     }
   }
 }
