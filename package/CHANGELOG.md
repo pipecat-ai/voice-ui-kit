@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.1](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.13.0...v0.13.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* dedupe bot output events in the events panel ([e8e0b3c](https://github.com/pipecat-ai/voice-ui-kit/commit/e8e0b3c9e2a1f09e1655da3a497b082a91efe2e9))
+* dedupe bot output events in the events panel, pin pnpm version ([525612d](https://github.com/pipecat-ai/voice-ui-kit/commit/525612d1a2a4a8aa41494411c8d8ea44f5c60150))
+* reset bot output dedupe state on connect ([8ae188d](https://github.com/pipecat-ai/voice-ui-kit/commit/8ae188dd901920a02f50320739d724e15664eeb8))
+
 ## [0.13.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.12.0...v0.13.0) (2026-07-20)
 
 
