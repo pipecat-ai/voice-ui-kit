@@ -33,7 +33,7 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isScrolledToBottom = useRef(true);
   /** Last logged spoken status, keyed by bot output segment. */
-  const botOutputStatuses = useRef(new Map<string, string>());
+  const [botOutputStatuses] = useState(() => new Map<string, string>());
 
   const addEvent = useCallback((data: EventData) => {
     if (scrollRef.current) {
@@ -119,8 +119,8 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
     const status = data.spoken_status ?? (data.spoken ? "completed" : "new");
     if (data.segment_id !== undefined) {
       const key = String(data.segment_id);
-      if (botOutputStatuses.current.get(key) === status) return;
-      botOutputStatuses.current.set(key, status);
+      if (botOutputStatuses.get(key) === status) return;
+      botOutputStatuses.set(key, status);
     }
 
     const willBeSpoken = data.will_be_spoken ?? data.spoken;
@@ -138,6 +138,7 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
   });
 
   useRTVIClientEvent(RTVIEvent.Connected, () => {
+    botOutputStatuses.clear();
     addEvent({
       event: RTVIEvent.Connected,
       message: "Client connected",
@@ -145,7 +146,7 @@ export const EventsPanel: React.FC<Props> = ({ collapsed = false }) => {
     });
   });
   useRTVIClientEvent(RTVIEvent.Disconnected, () => {
-    botOutputStatuses.current.clear();
+    botOutputStatuses.clear();
     addEvent({
       event: RTVIEvent.Disconnected,
       message: "Client disconnected",
