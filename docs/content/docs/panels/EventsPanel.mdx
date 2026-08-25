@@ -3,6 +3,13 @@ title: Events Panel
 description: Panel component for displaying RTVI events and logs
 component: EventsPanel
 source: package/src/components/panels/EventsPanel.tsx
+changelog:
+  - version: "v0.13.1"
+    date: "2026-08-25"
+    changes:
+      - "`BotOutput` events are now deduplicated per segment: repeated emissions for the same segment and spoken status are suppressed."
+      - "Dedupe state is reset when the client connects or disconnects."
+      - "`BotOutput` log messages now include the segment ID (when available) and spoken status details."
 ---
 
 The EventsPanel component displays a real-time log of RTVI events from the Pipecat Client SDK. It shows connection events, bot events, track events, and more, with filtering capabilities.
@@ -61,7 +68,7 @@ The panel captures and displays the following event types:
 - **BotReady**: Bot is ready with version and metadata
 - **BotStartedSpeaking**: Bot begins speaking
 - **BotStoppedSpeaking**: Bot stops speaking
-- **BotOutput**: BotOutput events (word-level events are filtered out)
+- **BotOutput**: Bot output events. Word-level events are filtered out. On servers using RTVI 2.0.0+, each segment is logged only when its spoken status changes (deduplication), and messages include the segment ID and spoken status details.
 - **Connected**: Client connects to session
 - **Disconnected**: Client disconnects from session
 - **Error**: Error events with error messages
@@ -103,4 +110,3 @@ The EventsPanel component uses:
 - `Panel` component for consistent styling
 
 It must be used within a `PipecatClientProvider` context to function properly.
-
