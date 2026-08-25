@@ -1,3 +1,11 @@
+# Package manager settings live in the `pnpm` field of package.json: 30
+# security `overrides`, the `image-size` patch under `patchedDependencies`, and
+# `auditConfig`. pnpm 11 no longer reads that field at all — it ignores every
+# one of them with a single warning line and regenerates the lockfile without
+# them. `packageManager: pnpm@10.14.0` in package.json is what currently keeps
+# that from happening. Whenever this repo moves to pnpm 11, those three blocks
+# have to move into this file in the same change.
+
 packages:
   - package/
   - docs/
