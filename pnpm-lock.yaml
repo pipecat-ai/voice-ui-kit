@@ -516,23 +516,26 @@ importers:
         specifier: ^5.0.3
         version: 5.0.3(@types/node@22.18.8)(@types/react@19.1.16)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(tsx@4.20.5)(typescript@5.8.3)(yaml@2.8.3)
       '@pipecat-ai/client-js':
-        specifier: ^1.13.0
-        version: 1.13.0
+        specifier: link:../../client/client-js
+        version: link:../../client/client-js
       '@pipecat-ai/client-react':
-        specifier: ^1.8.0
-        version: 1.8.0(@babel/core@7.29.7)(@babel/template@7.29.7)(@pipecat-ai/client-js@1.13.0)(@types/react@19.1.16)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: link:../../client/client-react
+        version: link:../../client/client-react
       '@pipecat-ai/daily-transport':
-        specifier: ^1.6.0
-        version: 1.6.0(@pipecat-ai/client-js@1.13.0)
+        specifier: link:../../transports/transports/daily
+        version: link:../../transports/transports/daily
+      '@pipecat-ai/livekit-transport':
+        specifier: link:../../transports/transports/livekit-transport
+        version: link:../../transports/transports/livekit-transport
       '@pipecat-ai/moq-transport':
-        specifier: ^0.1.0
-        version: 0.1.0(@pipecat-ai/client-js@1.13.0)(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
+        specifier: link:../../transports/transports/moq-transport
+        version: link:../../transports/transports/moq-transport
       '@pipecat-ai/small-webrtc-transport':
-        specifier: ^1.9.0
-        version: 1.9.0(@pipecat-ai/client-js@1.13.0)
+        specifier: link:../../transports/transports/small-webrtc-transport
+        version: link:../../transports/transports/small-webrtc-transport
       '@pipecat-ai/websocket-transport':
-        specifier: ^1.6.2
-        version: 1.6.2(@pipecat-ai/client-js@1.13.0)
+        specifier: link:../../transports/transports/websocket-transport
+        version: link:../../transports/transports/websocket-transport
       '@tailwindcss/vite':
         specifier: ^4.1.13
         version: 4.1.13(vite@7.3.5(@types/node@22.18.8)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.20.5)(yaml@2.8.3))
@@ -7425,38 +7428,11 @@ snapshots:
       - react
       - solid-js
 
-  '@moq/hang@0.2.16(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)':
-    dependencies:
-      '@kixelated/libavjs-webcodecs-polyfill': 0.5.5
-      '@libav.js/variant-opus-af': 6.9.8
-      '@moq/json': 0.2.2(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/loc': 0.1.2(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/net': 0.1.9(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/signals': 0.1.10(@types/react@19.1.16)(react@19.2.1)
-      '@svta/cml-iso-bmff': 1.0.2(@svta/cml-utils@1.5.0)
-      zod: 4.4.3
-    transitivePeerDependencies:
-      - '@svta/cml-utils'
-      - '@types/react'
-      - react
-      - solid-js
-
   '@moq/json@0.1.2(@types/react@19.1.11)(react@19.2.1)(zod@4.4.3)':
     dependencies:
       '@moq/flate': 0.1.1
       '@moq/net': 0.1.9(@types/react@19.1.11)(react@19.2.1)(zod@4.4.3)
       '@moq/signals': 0.1.10(@types/react@19.1.11)(react@19.2.1)
-      zod: 4.4.3
-    transitivePeerDependencies:
-      - '@types/react'
-      - react
-      - solid-js
-
-  '@moq/json@0.1.2(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)':
-    dependencies:
-      '@moq/flate': 0.1.1
-      '@moq/net': 0.1.9(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/signals': 0.1.10(@types/react@19.1.16)(react@19.2.1)
       zod: 4.4.3
     transitivePeerDependencies:
       - '@types/react'
@@ -7474,29 +7450,9 @@ snapshots:
       - react
       - solid-js
 
-  '@moq/json@0.2.2(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)':
-    dependencies:
-      '@moq/flate': 0.1.1
-      '@moq/net': 0.1.9(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/signals': 0.1.10(@types/react@19.1.16)(react@19.2.1)
-      zod: 4.4.3
-    transitivePeerDependencies:
-      - '@types/react'
-      - react
-      - solid-js
-
   '@moq/loc@0.1.2(@types/react@19.1.11)(react@19.2.1)(zod@4.4.3)':
     dependencies:
       '@moq/net': 0.1.9(@types/react@19.1.11)(react@19.2.1)(zod@4.4.3)
-    transitivePeerDependencies:
-      - '@types/react'
-      - react
-      - solid-js
-      - zod
-
-  '@moq/loc@0.1.2(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)':
-    dependencies:
-      '@moq/net': 0.1.9(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
     transitivePeerDependencies:
       - '@types/react'
       - react
@@ -7512,30 +7468,10 @@ snapshots:
       - react
       - solid-js
 
-  '@moq/msf@0.1.4(@types/react@19.1.16)(react@19.2.1)':
-    dependencies:
-      '@moq/net': 0.1.9(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      zod: 4.4.3
-    transitivePeerDependencies:
-      - '@types/react'
-      - react
-      - solid-js
-
   '@moq/net@0.1.9(@types/react@19.1.11)(react@19.2.1)(zod@4.4.3)':
     dependencies:
       '@moq/qmux': 0.1.3
       '@moq/signals': 0.1.10(@types/react@19.1.11)(react@19.2.1)
-      async-mutex: 0.5.0
-      zod: 4.4.3
-    transitivePeerDependencies:
-      - '@types/react'
-      - react
-      - solid-js
-
-  '@moq/net@0.1.9(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)':
-    dependencies:
-      '@moq/qmux': 0.1.3
-      '@moq/signals': 0.1.10(@types/react@19.1.16)(react@19.2.1)
       async-mutex: 0.5.0
       zod: 4.4.3
     transitivePeerDependencies:
@@ -7556,19 +7492,6 @@ snapshots:
       - solid-js
       - zod
 
-  '@moq/publish@0.2.17(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)':
-    dependencies:
-      '@moq/hang': 0.2.16(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)
-      '@moq/json': 0.1.2(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/net': 0.1.9(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/signals': 0.1.10(@types/react@19.1.16)(react@19.2.1)
-    transitivePeerDependencies:
-      - '@svta/cml-utils'
-      - '@types/react'
-      - react
-      - solid-js
-      - zod
-
   '@moq/qmux@0.1.3':
     dependencies:
       '@moq/web-socket-stream': 0.1.0
@@ -7578,11 +7501,6 @@ snapshots:
       '@types/react': 19.1.11
       react: 19.2.1
 
-  '@moq/signals@0.1.10(@types/react@19.1.16)(react@19.2.1)':
-    optionalDependencies:
-      '@types/react': 19.1.16
-      react: 19.2.1
-
   '@moq/watch@0.2.19(@svta/cml-utils@1.5.0)(@types/react@19.1.11)(react@19.2.1)(zod@4.4.3)':
     dependencies:
       '@moq/hang': 0.2.16(@svta/cml-utils@1.5.0)(@types/react@19.1.11)(react@19.2.1)
@@ -7590,20 +7508,6 @@ snapshots:
       '@moq/msf': 0.1.4(@types/react@19.1.11)(react@19.2.1)
       '@moq/net': 0.1.9(@types/react@19.1.11)(react@19.2.1)(zod@4.4.3)
       '@moq/signals': 0.1.10(@types/react@19.1.11)(react@19.2.1)
-    transitivePeerDependencies:
-      - '@svta/cml-utils'
-      - '@types/react'
-      - react
-      - solid-js
-      - zod
-
-  '@moq/watch@0.2.19(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)':
-    dependencies:
-      '@moq/hang': 0.2.16(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)
-      '@moq/json': 0.1.2(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/msf': 0.1.4(@types/react@19.1.16)(react@19.2.1)
-      '@moq/net': 0.1.9(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/signals': 0.1.10(@types/react@19.1.16)(react@19.2.1)
     transitivePeerDependencies:
       - '@svta/cml-utils'
       - '@types/react'
@@ -7737,22 +7641,6 @@ snapshots:
       '@moq/publish': 0.2.17(@svta/cml-utils@1.5.0)(@types/react@19.1.11)(react@19.2.1)(zod@4.4.3)
       '@moq/signals': 0.1.10(@types/react@19.1.11)(react@19.2.1)
       '@moq/watch': 0.2.19(@svta/cml-utils@1.5.0)(@types/react@19.1.11)(react@19.2.1)(zod@4.4.3)
-      '@pipecat-ai/client-js': 1.13.0
-    transitivePeerDependencies:
-      - '@svta/cml-utils'
-      - '@types/react'
-      - react
-      - solid-js
-      - zod
-
-  '@pipecat-ai/moq-transport@0.1.0(@pipecat-ai/client-js@1.13.0)(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)':
-    dependencies:
-      '@moq/hang': 0.2.16(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)
-      '@moq/json': 0.1.2(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/net': 0.1.9(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/publish': 0.2.17(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
-      '@moq/signals': 0.1.10(@types/react@19.1.16)(react@19.2.1)
-      '@moq/watch': 0.2.19(@svta/cml-utils@1.5.0)(@types/react@19.1.16)(react@19.2.1)(zod@4.4.3)
       '@pipecat-ai/client-js': 1.13.0
     transitivePeerDependencies:
       - '@svta/cml-utils'

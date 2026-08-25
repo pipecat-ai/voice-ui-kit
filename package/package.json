@@ -49,6 +49,7 @@
     "@pipecat-ai/client-js": ">=1.13.0",
     "@pipecat-ai/client-react": ">=1.8.0",
     "@pipecat-ai/daily-transport": ">=1.6.0",
+    "@pipecat-ai/livekit-transport": ">=1.0.0",
     "@pipecat-ai/moq-transport": "^0.1.0",
     "@pipecat-ai/small-webrtc-transport": ">=1.9.0",
     "@pipecat-ai/websocket-transport": ">=1.6.2",
@@ -72,6 +73,10 @@
     "@pipecat-ai/daily-transport": {
       "optional": true,
       "version": "^1.6.0"
+    },
+    "@pipecat-ai/livekit-transport": {
+      "optional": true,
+      "version": "^1.0.0"
     },
     "@pipecat-ai/moq-transport": {
       "optional": true,
@@ -126,12 +131,13 @@
     "@daily-co/daily-js": "^0.85.0",
     "@eslint/js": "^9.36.0",
     "@ladle/react": "^5.0.3",
-    "@pipecat-ai/client-js": "^1.13.0",
-    "@pipecat-ai/client-react": "^1.8.0",
-    "@pipecat-ai/daily-transport": "^1.6.0",
-    "@pipecat-ai/moq-transport": "^0.1.0",
-    "@pipecat-ai/small-webrtc-transport": "^1.9.0",
-    "@pipecat-ai/websocket-transport": "^1.6.2",
+    "@pipecat-ai/client-js": "link:../../client/client-js",
+    "@pipecat-ai/client-react": "link:../../client/client-react",
+    "@pipecat-ai/daily-transport": "link:../../transports/transports/daily",
+    "@pipecat-ai/livekit-transport": "link:../../transports/transports/livekit-transport",
+    "@pipecat-ai/moq-transport": "link:../../transports/transports/moq-transport",
+    "@pipecat-ai/small-webrtc-transport": "link:../../transports/transports/small-webrtc-transport",
+    "@pipecat-ai/websocket-transport": "link:../../transports/transports/websocket-transport",
     "@tailwindcss/vite": "^4.1.13",
     "@types/node": "^22.18.8",
     "@types/react": "^19.1.16",

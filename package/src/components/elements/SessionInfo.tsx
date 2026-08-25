@@ -47,6 +47,8 @@ export const SessionInfo: React.FC<Props> = ({
     transportTypeName = `Daily (v${Daily.version()})`;
   } else if (transportServiceName === "small-webrtc-transport") {
     transportTypeName = "Small WebRTC";
+  } else if (transportServiceName === "livekit-transport") {
+    transportTypeName = "LiveKit";
   } else if (transportServiceName === "moq-transport") {
     transportTypeName = "MoQ";
   }
