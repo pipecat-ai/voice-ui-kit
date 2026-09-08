@@ -1,10 +1,6 @@
 import { cn } from "@/lib/utils";
 import React, { useCallback, useEffect, useRef } from "react";
-import {
-  type CanvasWaveformOptions,
-  CircularWaveformCanvas,
-  WaveformState,
-} from "./canvas";
+import { CircularWaveformCanvas, WaveformState } from "./canvas";
 
 export interface CircularWaveformProps {
   size?: number;
@@ -69,54 +65,6 @@ export const CircularWaveform: React.FC<CircularWaveformProps> = ({
     return newState;
   }, [isThinking, audioTrack]);
 
-  const initializeWaveform = useCallback(() => {
-    if (!canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const { width: canvasWidth, height: canvasHeight } = getSize();
-
-    const options: CanvasWaveformOptions = {
-      width: canvasWidth,
-      height: canvasHeight,
-      state: WaveformState.IDLE,
-      color1,
-      color2,
-      backgroundColor,
-      sensitivity,
-      rotationEnabled,
-      numBars,
-      barWidth,
-      debug,
-    };
-
-    // Create the waveform canvas
-    const waveform = new CircularWaveformCanvas(canvas, options);
-
-    // Store reference
-    waveformRef.current = waveform;
-
-    // Start visualization after a short delay
-    setTimeout(() => {
-      // Start the visualization
-      waveform.startVisualization();
-
-      // Apply the correct state based on props
-      const currentState = determineState();
-      waveform.setState(currentState);
-    }, 100);
-  }, [
-    getSize,
-    color1,
-    color2,
-    backgroundColor,
-    sensitivity,
-    rotationEnabled,
-    numBars,
-    barWidth,
-    debug,
-    determineState,
-  ]);
-
   // Connect audio track if provided
   const connectAudioTrack = useCallback(() => {
     if (!waveformRef.current || !audioTrack) return;
@@ -146,10 +94,55 @@ export const CircularWaveform: React.FC<CircularWaveformProps> = ({
     };
   }, [getSize]);
 
-  // Initialize canvas on component mount
+  // Initialize the waveform instance once on mount — its lifecycle equals the
+  // canvas element's lifecycle. Every prop change (state, colors, options, …)
+  // is applied imperatively on the existing instance via the setState /
+  // updateOptions / updateCanvasSize effects below. Recreating the instance
+  // here would leak the previous one (RAF loop + AudioContext) and drop the
+  // connected audio track, since the connect effect only runs on track changes.
+  /* eslint-disable react-hooks/exhaustive-deps -- intentionally snapshots initial props; later changes flow through the effects below */
   useEffect(() => {
-    initializeWaveform();
-  }, [initializeWaveform]);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const { width, height } = getSize();
+
+    const waveform = new CircularWaveformCanvas(canvas, {
+      width,
+      height,
+      state: WaveformState.IDLE,
+      color1,
+      color2,
+      backgroundColor,
+      sensitivity,
+      rotationEnabled,
+      numBars,
+      barWidth,
+      debug,
+    });
+
+    waveformRef.current = waveform;
+    waveform.startVisualization();
+    // Initial state sync; later changes are applied by the effect below.
+    waveform.setState(determineState());
+
+    return () => {
+      // Release the ref before disposing so a re-run of this effect (e.g.
+      // React StrictMode double-mount) never talks to a dead instance.
+      waveformRef.current = null;
+      waveform.dispose();
+    };
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+  // Keep the canvas size in sync when the `size` prop changes without an
+  // actual container resize (ResizeObserver only fires on DOM size changes).
+  useEffect(() => {
+    if (!waveformRef.current) return;
+
+    const { width, height } = getSize();
+    waveformRef.current.updateCanvasSize(width, height);
+  }, [getSize]);
 
   // Connect audio track if provided
   useEffect(() => {
@@ -190,15 +183,6 @@ export const CircularWaveform: React.FC<CircularWaveformProps> = ({
     barWidth,
     debug,
   ]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (waveformRef.current) {
-        waveformRef.current.dispose();
-      }
-    };
-  }, []);
 
   return (
     <div

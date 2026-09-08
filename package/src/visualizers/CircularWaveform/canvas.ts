@@ -1482,6 +1482,13 @@ export class CircularWaveformCanvas {
     this.options = { ...this.options, ...options };
     this.config = this.generateConfig();
 
+    // Rebuild frequency bars when their count changes (numBars is structural;
+    // the bars are otherwise only created in the constructor).
+    if (this.freqBars.length !== this.config.numBars) {
+      this.freqBars = this.createFrequencyBars(this.config.numBars);
+      this.peakValues = new Float32Array(this.config.numBars);
+    }
+
     // Update audio processing if sensitivity changed
     if (
       this.isPlaying &&
