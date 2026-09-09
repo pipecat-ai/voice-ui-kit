@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
     // Get the JSON response
     const data = await response.json();
 
-    // Return the complete JSON response
-    return NextResponse.json({
-        room_url: data.dailyRoom,
-        token: data.dailyToken,
-    });
+    // Return the complete JSON response as-is; each transport's
+    // connection params have a different shape (e.g. Daily uses
+    // room_url/token, WebSocket uses wsUrl, LiveKit uses url/token),
+    // and the bot server already returns the shape matching the
+    // requested transport.
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Error in offer API route:', error);
     return NextResponse.json(
