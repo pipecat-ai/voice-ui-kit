@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.13.1...v0.14.0) (2026-09-09)
+
+
+### Features
+
+* add support for the new LiveKit Transport ([eecd1b9](https://github.com/pipecat-ai/voice-ui-kit/commit/eecd1b9529fbd74eeb668a2bc0da3f59326d224a))
+
 ## [0.13.1](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.13.0...v0.13.1) (2026-08-25)
 
 
