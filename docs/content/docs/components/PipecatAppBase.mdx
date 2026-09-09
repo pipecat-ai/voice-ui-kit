@@ -267,7 +267,59 @@ export default function Home() {
 
 Transport-specific construction options can be passed via `transportOptions`, which is typed as `WebSocketTransportConstructorOptions` when `transportType="websocket"`. See the [@pipecat-ai/websocket-transport](https://www.npmjs.com/package/@pipecat-ai/websocket-transport) package for the full option list.
 
-### 8. Using MoQ Transport
+### 8. Using LiveKit Transport
+
+The `livekit` transport connects to a Pipecat bot through [LiveKit](https://livekit.io)'s WebRTC infrastructure. Like the WebSocket and MoQ transports, it's provided by an optional peer package.
+
+<Callout type="warning">
+  The LiveKit transport package is a peer dependency. Install it before
+  setting `transportType="livekit"`, otherwise the transport will fail to load
+  at runtime.
+</Callout>
+
+```bash
+npm install @pipecat-ai/livekit-transport
+```
+
+Point the component at a `startBot` endpoint that returns a LiveKit room URL and access token:
+
+```tsx
+import { PipecatAppBase } from "@pipecat-ai/voice-ui-kit";
+
+export default function Home() {
+  return (
+    <PipecatAppBase
+      transportType="livekit"
+      startBotParams={{
+        endpoint: "/api/start",
+        requestData: {
+          transport: "livekit",
+        },
+      }}
+    >
+      <YourCustomComponent />
+    </PipecatAppBase>
+  );
+}
+```
+
+Alternatively, if you already have a room URL and token (for example from your own auth flow), pass them via `connectParams`:
+
+```tsx
+<PipecatAppBase
+  transportType="livekit"
+  connectParams={{
+    url: "wss://your-livekit-server.com",
+    token: "your-livekit-access-token",
+  }}
+>
+  <YourCustomComponent />
+</PipecatAppBase>
+```
+
+Transport-specific construction options can be passed via `transportOptions`, which is typed as `LiveKitTransportConstructorOptions` (LiveKit's [`RoomOptions`](https://docs.livekit.io/reference/client-sdk-js/interfaces/RoomOptions.html)) when `transportType="livekit"`. See the [@pipecat-ai/livekit-transport](https://www.npmjs.com/package/@pipecat-ai/livekit-transport) package for details, including [`RoomConnectOptions`](https://docs.livekit.io/reference/client-sdk-js/interfaces/RoomConnectOptions.html) accepted via `roomConnectionOptions` on `connectParams`.
+
+### 9. Using MoQ Transport
 
 The `moq` transport speaks [Media-over-QUIC](https://datatracker.ietf.org/group/moq/about/) to a Pipecat bot via a moq-lite relay, using WebTransport (with a WebSocket fallback). Like the WebSocket transport, it's provided by an optional peer package.
 
@@ -339,7 +391,7 @@ For local development against a self-signed relay, pin the certificate via `serv
 
 `MoqTransportOptions` also accepts `namespace`, `clientId`, `botId`, `transcriptTrack`, and `audioLatencyMs` for tuning the broadcast paths and jitter buffer. See the [@pipecat-ai/moq-transport](https://www.npmjs.com/package/@pipecat-ai/moq-transport) package for the full option list.
 
-### 9. Using onClient Callback
+### 10. Using onClient Callback
 
 `onClient` fires once per client instance, the moment the client is created and before any connect attempt. It's the right place to attach `client.on(...)` listeners or to run setup that needs the client handle from outside the provider tree (e.g. when consuming `ConsoleTemplate`, where there is no render-prop slot to call `usePipecatClient()` from).
 
@@ -396,7 +448,7 @@ const handleClient = (client: PipecatClient) => {
 };
 ```
 
-### 10. Using startBotParams
+### 11. Using startBotParams
 
 You can use `startBotParams` instead of `connectParams` to start a bot session:
 
@@ -441,14 +493,14 @@ export default function Home() {
     },
     transportType: {
       description:
-        "The type of transport to use for the connection (smallwebrtc, daily, websocket, or moq)",
-      type: '"smallwebrtc" | "daily" | "websocket" | "moq"',
+        "The type of transport to use for the connection (smallwebrtc, daily, websocket, livekit, or moq)",
+      type: '"smallwebrtc" | "daily" | "websocket" | "livekit" | "moq"',
       required: true,
     },
     transportOptions: {
       description:
         "Optional configuration options for the transport (SmallWebRTC, Daily, WebSocket, LiveKit, or MoQ specific)",
-      type: "SmallWebRTCTransportConstructorOptions | DailyTransportConstructorOptions | WebSocketTransportConstructorOptions | LiveKitTransportConstructorOptions |MoqTransportOptions",
+      type: "SmallWebRTCTransportConstructorOptions | DailyTransportConstructorOptions | WebSocketTransportConstructorOptions | LiveKitTransportConstructorOptions | MoqTransportOptions",
       required: false,
     },
     clientOptions: {

@@ -148,6 +148,46 @@ export default function App() {
 }
 ```
 
+### With LiveKit Transport
+
+The `livekit` transport requires installing the optional peer package:
+
+```bash
+npm install @pipecat-ai/livekit-transport
+```
+
+```tsx
+import { ConsoleTemplate } from "@pipecat-ai/voice-ui-kit";
+
+export default function App() {
+  return (
+    <div className="h-screen">
+      <ConsoleTemplate
+        transportType="livekit"
+        startBotParams={{
+          endpoint: "/api/start",
+          requestData: {
+            transport: "livekit",
+          },
+        }}
+      />
+    </div>
+  );
+}
+```
+
+Alternatively, if you already have a room URL and token, pass them via `connectParams`:
+
+```tsx
+<ConsoleTemplate
+  transportType="livekit"
+  connectParams={{
+    url: "wss://your-livekit-server.com",
+    token: "your-livekit-access-token",
+  }}
+/>
+```
+
 ### With MoQ Transport
 
 The `moq` (Media-over-QUIC) transport requires installing the optional peer package:
