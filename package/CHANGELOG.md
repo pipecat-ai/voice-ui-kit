@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.14.0...v0.14.1) (2026-09-28)
+
+
+### Bug Fixes
+
+* address dependency vulnerabilities ([#171](https://github.com/pipecat-ai/voice-ui-kit/issues/171)) ([c699b9e](https://github.com/pipecat-ai/voice-ui-kit/commit/c699b9e6ba0d1bd7275933ee68ebf7de9530022b))
+
 ## [0.14.0](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.13.1...v0.14.0) (2026-09-09)
 
 
