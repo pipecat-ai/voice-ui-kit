@@ -41,6 +41,7 @@
   "pnpm": {
     "overrides": {
       "flatted": ">=3.4.2",
+      "image-size": ">=2.0.4",
       "glob@>=10": ">=10.5.0",
       "koa": ">=2.16.4",
       "minimatch": ">=10.2.3",
@@ -71,15 +72,6 @@
       "@babel/core@<=7.29.0": ">=7.29.6",
       "fumadocs-mdx": "14.2.4",
       "decode-uri-component@<=0.4.2": ">=0.5.0"
-    },
-    "patchedDependencies": {
-      "image-size@2.0.2": "patches/image-size@2.0.2.patch"
-    },
-    "auditConfig": {
-      "ignoreCves": [
-        "CVE-2025-71330",
-        "CVE-2025-71329"
-      ]
     }
   }
 }
