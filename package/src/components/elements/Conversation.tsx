@@ -1,3 +1,4 @@
+import { nestFunctionCalls } from "@/lib/functionCalls";
 import { cn } from "@/lib/utils";
 import type { TextRenderMode } from "@/types/conversation";
 import {
@@ -212,11 +213,16 @@ export const Conversation: React.FC<ConversationProps> = memo(
     });
     const { botOutputSupported } = useConversationContext();
 
-    const messages = useMemo(
+    // Function calls that ran as part of another rendered call are grouped
+    // under it, so only their parent appears in the top-level list.
+    const { messages, nested: nestedFunctionCalls } = useMemo(
       () =>
         noFunctionCalls
-          ? allMessages.filter((m) => m.role !== "function_call")
-          : allMessages,
+          ? {
+              messages: allMessages.filter((m) => m.role !== "function_call"),
+              nested: undefined,
+            }
+          : nestFunctionCalls(allMessages),
       [allMessages, noFunctionCalls],
     );
 
@@ -314,6 +320,13 @@ export const Conversation: React.FC<ConversationProps> = memo(
                     systemLabel={systemLabel}
                     functionCallLabel={functionCallLabel}
                     functionCallRenderer={functionCallRenderer}
+                    nestedFunctionCalls={
+                      message.functionCall?.tool_call_id
+                        ? nestedFunctionCalls?.get(
+                            message.functionCall.tool_call_id,
+                          )
+                        : undefined
+                    }
                     classNames={messageClassNames}
                     botOutputRenderers={botOutputRenderers}
                     aggregationMetadata={aggregationMetadata}

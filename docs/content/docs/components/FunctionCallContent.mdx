@@ -18,7 +18,7 @@ changelog:
 
 The FunctionCallContent component renders LLM function call entries in the conversation. It displays the function name and status, with arguments and results collapsed by default using a collapsible UI.
 
-Function calls appear as separate entries in the conversation timeline when the LLM invokes a tool. The component handles three lifecycle states: started, in progress, and completed.
+Function calls appear as separate entries in the conversation timeline when the LLM invokes a tool. The component handles three lifecycle states: started, in progress, and completed. Calls that ran as part of another call are shown nested under it (see [Nested Calls](#nested-calls)).
 
 <LiveComponent language="tsx">
 {`
@@ -58,6 +58,12 @@ Function calls appear as separate entries in the conversation timeline when the 
       required: false,
       default: "undefined",
     },
+    nestedCalls: {
+      description: "Function calls that ran as part of this one, rendered indented below it. The Conversation component builds this from parent_tool_call_id with nestFunctionCalls.",
+      type: "NestedFunctionCall[]",
+      required: false,
+      default: "[]",
+    },
     classNames: {
       description: "Custom CSS classes for the component",
       type: "{ container?: string }",
@@ -80,11 +86,58 @@ The component shows different icons based on the function call status:
 
 When the function call has arguments or a result, clicking the entry expands the details. Details are collapsed by default. If there are no arguments or result data, the trigger is not interactive.
 
+## Nested Calls
+
+A tool's work can involve function calls of its own, made by another model on its behalf: for example, a backend that a `delegate` tool hands work to makes calls while the `delegate` call is in progress. Each such call carries the `tool_call_id` of the call it ran as part of in `parent_tool_call_id`.
+
+The `Conversation` component groups these with `nestFunctionCalls`: a call whose parent is in the conversation is rendered indented under the parent's row, with its own status icon, name and collapsible details, and the parent shows how many calls ran under it (`(delegate) · 2 nested calls`). Nesting can be more than one level deep. A call whose parent is not in the conversation (the app may hide it from the client) is rendered at the top level, exactly like a call without a parent.
+
+When rendering `FunctionCallContent` directly, pass the nested calls as `nestedCalls`:
+
+<LiveComponent language="tsx">
+{`
+  import { FunctionCallContent } from "@pipecat-ai/voice-ui-kit";
+
+  <FunctionCallContent
+    functionCall={{
+      function_name: "delegate",
+      tool_call_id: "call_1",
+      args: { task: "Book a table for two" },
+      status: "in_progress",
+    }}
+    nestedCalls={[
+      {
+        functionCall: {
+          function_name: "find_restaurants",
+          tool_call_id: "call_2",
+          parent_tool_call_id: "call_1",
+          args: { cuisine: "italian" },
+          result: ["Trattoria Roma"],
+          status: "completed",
+        },
+        children: [],
+      },
+      {
+        functionCall: {
+          function_name: "book_table",
+          tool_call_id: "call_3",
+          parent_tool_call_id: "call_1",
+          args: { restaurant: "Trattoria Roma", guests: 2 },
+          status: "started",
+        },
+        children: [],
+      },
+    ]}
+  />
+`}
+</LiveComponent>
+
 ## FunctionCallData Type
 
 The `FunctionCallData` interface contains:
 - `function_name`: Optional name of the function being called
 - `tool_call_id`: Optional unique identifier for the tool call
+- `parent_tool_call_id`: Optional `tool_call_id` of the call this one ran as part of (see [Nested Calls](#nested-calls))
 - `args`: Optional arguments passed to the function
 - `result`: Optional result (populated when complete)
 - `cancelled`: Optional boolean indicating the call was cancelled

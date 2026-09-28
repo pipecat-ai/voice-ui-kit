@@ -1,4 +1,5 @@
 import { memo } from "react";
+import type { NestedFunctionCall } from "@/lib/functionCalls";
 import { cn } from "@/lib/utils";
 import type {
   AggregationMetadata,
@@ -42,6 +43,12 @@ interface Props {
    * When provided, replaces the default function call rendering.
    */
   functionCallRenderer?: FunctionCallRenderer;
+  /**
+   * Function calls that ran as part of this message's function call,
+   * rendered indented below it. Only used when `message.role` is
+   * `"function_call"`.
+   */
+  nestedFunctionCalls?: NestedFunctionCall[];
   /**
    * Custom CSS classes for the component
    */
@@ -95,6 +102,7 @@ export const MessageContainer = memo(
     systemLabel,
     functionCallLabel,
     functionCallRenderer,
+    nestedFunctionCalls,
     classNames = {},
     message,
     botOutputRenderers,
@@ -108,6 +116,7 @@ export const MessageContainer = memo(
             functionCall={message.functionCall}
             functionCallLabel={functionCallLabel}
             functionCallRenderer={functionCallRenderer}
+            nestedCalls={nestedFunctionCalls}
           />
           <div
             className={cn(

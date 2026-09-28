@@ -10,6 +10,7 @@ export * from "@/components/ui";
 
 // Hooks & Utilities
 export * from "@/hooks";
+export * from "@/lib/functionCalls";
 export { cn } from "@/lib/utils";
 
 // Visualizers
