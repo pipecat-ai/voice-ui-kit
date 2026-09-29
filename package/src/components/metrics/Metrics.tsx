@@ -19,6 +19,8 @@ import { Line } from "react-chartjs-2";
 
 import { cn } from "@/lib/utils";
 
+import { addTokenUsage, type TokenMetrics } from "./tokenUsage";
+
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -42,12 +44,6 @@ interface MetricData {
 
 interface MetricsState {
   [processorName: string]: MetricData[];
-}
-
-interface TokenMetrics {
-  completion_tokens: number;
-  prompt_tokens: number;
-  total_tokens: number;
 }
 
 interface Props {
@@ -130,16 +126,13 @@ export const Metrics: React.FC<Props> = ({
     if (tokens && Array.isArray(tokens) && tokens.length > 0) {
       const tokenData = tokens[0];
 
-      setTokenMetrics((prev) => ({
-        completion_tokens:
-          prev.completion_tokens +
-          (noCompletionTokens ? 0 : tokenData.completion_tokens || 0),
-        prompt_tokens:
-          prev.prompt_tokens +
-          (noPromptTokens ? 0 : tokenData.prompt_tokens || 0),
-        total_tokens:
-          prev.total_tokens + (noTotalTokens ? 0 : tokenData.total_tokens || 0),
-      }));
+      setTokenMetrics((prev) =>
+        addTokenUsage(prev, tokenData, {
+          noCompletionTokens,
+          noPromptTokens,
+          noTotalTokens,
+        }),
+      );
     }
   });
 
