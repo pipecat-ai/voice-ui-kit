@@ -1,3 +1,4 @@
+import type { NestedFunctionCall } from "@/lib/functionCalls";
 import { cn } from "@/lib/utils";
 import type {
   FunctionCallData,
@@ -22,6 +23,11 @@ interface FunctionCallContentProps {
   functionCallLabel?: string;
   /** Custom renderer for function call messages. When provided, replaces the default rendering. */
   functionCallRenderer?: FunctionCallRenderer;
+  /**
+   * Function calls that ran as part of this one, rendered indented below it.
+   * See `nestFunctionCalls` for how they are grouped.
+   */
+  nestedCalls?: NestedFunctionCall[];
   classNames?: {
     container?: string;
   };
@@ -47,12 +53,34 @@ export const FunctionCallContent: React.FC<FunctionCallContentProps> = ({
   functionCall,
   functionCallLabel = "Function call",
   functionCallRenderer,
+  nestedCalls = [],
   classNames = {},
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Nested calls stay visible regardless of whether the parent's details are
+  // expanded, so a child that is still running shows its spinner.
+  const nested = nestedCalls.length > 0 && (
+    <div className="ml-3.5 pl-3 border-l-2 border-muted flex flex-col gap-1">
+      {nestedCalls.map((child, index) => (
+        <FunctionCallContent
+          key={child.functionCall.tool_call_id ?? index}
+          functionCall={child.functionCall}
+          functionCallLabel={functionCallLabel}
+          functionCallRenderer={functionCallRenderer}
+          nestedCalls={child.children}
+        />
+      ))}
+    </div>
+  );
+
   if (functionCallRenderer) {
-    return <>{functionCallRenderer(functionCall)}</>;
+    return (
+      <>
+        {functionCallRenderer(functionCall)}
+        {nested}
+      </>
+    );
   }
 
   const hasDetails =
@@ -89,6 +117,12 @@ export const FunctionCallContent: React.FC<FunctionCallContentProps> = ({
             {functionCall.function_name && (
               <span className="text-muted-foreground">
                 ({functionCall.function_name})
+              </span>
+            )}
+            {nestedCalls.length > 0 && (
+              <span className="text-muted-foreground">
+                · {nestedCalls.length} nested{" "}
+                {nestedCalls.length === 1 ? "call" : "calls"}
               </span>
             )}
           </button>
@@ -130,6 +164,8 @@ export const FunctionCallContent: React.FC<FunctionCallContentProps> = ({
             </div>
           </CollapsibleContent>
         )}
+
+        {nested}
       </div>
     </Collapsible>
   );
