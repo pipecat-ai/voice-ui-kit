@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.14.1...v0.14.2) (2026-10-26)
+
+
+### Bug Fixes
+
+* resolve next, vite, vitest, zod, and fast-uri audit vulnerabilities ([#178](https://github.com/pipecat-ai/voice-ui-kit/issues/178)) ([d6d73c8](https://github.com/pipecat-ai/voice-ui-kit/commit/d6d73c8feab3e2935841ff054f470c76aa022137))
+
 ## [0.14.1](https://github.com/pipecat-ai/voice-ui-kit/compare/v0.14.0...v0.14.1) (2026-09-28)
 
 
